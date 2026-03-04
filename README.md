@@ -18,6 +18,7 @@ This research presents a systematic approach to learning and implementing ROS2 (
 ### Table of Contents
 
 1. [Introduction](docs/01_introduction.md)
+2. [Fundamental Concepts](docs/02_fundamental_concepts.md)
 
 ---
 
