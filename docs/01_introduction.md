@@ -39,8 +39,8 @@ The simulation environment utilizes Gazebo Classic rather than Ignition Gazebo, 
 
 This document is organized into eight chapters following a logical progression:
 
-- **Chapter 2** details the installation procedure and environment configuration.
-- **Chapter 3** establishes fundamental ROS2 concepts including nodes, topics, services, and actions.
+- **Chapter 2** establishes fundamental ROS2 concepts including nodes, topics, services, and actions.
+- **Chapter 3** details the installation procedure and environment configuration.
 - **Chapter 4** examines the development and debugging toolchain.
 - **Chapter 5** presents simulation methodologies and world configuration.
 - **Chapter 6** addresses the transition from simulation to physical hardware.
