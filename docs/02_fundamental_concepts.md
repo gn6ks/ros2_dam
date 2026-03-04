@@ -175,3 +175,71 @@ The ROS2 CLI (*Command Line Interface*) provides specific tools for service insp
 | `ros2 service list` | Enumerates all active services in the ROS graph. |
 | `ros2 service type /name` | Identifies the interface type associated with a service. |
 | `ros2 interface show pkg/Srv` | Breaks down the internal structure (fields) of the `.srv` definition. |
+
+## 2.7 Actions
+
+**Actions** implement long-running remote procedure calls in ROS2, providing feedback capabilities and support for cancellation or preemption. They are designed for tasks that extend over time and require monitoring or intervention.
+
+### 2.7.1 Architecture
+
+Actions involve two complementary entities:
+
+- **Action Server:** Accepts goal requests, executes the procedure, sends periodic feedback, handles cancellation/preemption requests, and returns the final result. Only one server should exist per action name.
+- **Action Client:** Sends goal requests to the server, receives feedback during execution, and can cancel or preempt the goal if needed. Multiple clients may target the same action name.
+
+> **Technical Note:** Actions are intended for long-running procedures due to connection setup overhead. For short operations, use **Services** instead.
+
+### 2.7.2 Action Definition (.action)
+
+Action interfaces are defined in `.action` files with three sections separated by `---`:
+
+```yaml
+# Goal (request)
+int32 order
+---
+# Result (response)
+int32[] sequence
+---
+# Feedback (intermediate updates)
+int32[] sequence
+```
+
+### 2.7.3 Communication Flow
+
+```yaml
+Client → Goal → Server
+Client ← Feedback ← Server (periodic)
+Client ← Result ← Server (on completion)
+Client → Cancel Request → Server (optional)
+```
+
+### 2.7.4 Use Cases
+
+| Application | Example |
+| --- | --- |
+| **Navigation** | Travel to waypoint with progress updates |
+| **Manipulation** | Execute pick-and-place trajectory |
+| **Exploration** | Autonomous mapping with cancellation option |
+| **State Machines** | High-level task orchestration |
+
+### 2.7.5 Comparison: Services vs Actions
+
+| Feature | Service | Action |
+| --- | --- | --- |
+| Duration | Short operations | Long-running tasks |
+| Feedback | None | Periodic updates |
+| Cancellation | Not supported | Supported |
+| Overhead | Low | Higher |
+
+### 2.7.6 Introspection
+
+```bash
+ros2 action list                     # List available actions
+ros2 action type /name               # Show action type
+ros2 action info /name               # Show action status
+ros2 action send_goal /name pkg/Action "{order: 5}"  # Send goal
+```
+
+### 2.7.7 Summary
+
+Actions provide the appropriate communication paradigm for long-running, preemptable tasks requiring intermediate feedback. The three-part message structure (goal, result, feedback) enables robust task monitoring and control, distinguishing Actions from the simpler request-response pattern of Services.
