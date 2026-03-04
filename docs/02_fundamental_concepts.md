@@ -94,7 +94,7 @@ ROS2 defines several communication paradigms, each suited to different interacti
 
 ### 2.5.1 Topics (Publish-Subscribe)
 
-**Topics** implement the publish-subscribe pattern, enabling asynchronous, one-to-many communication. This is the most common communication mechanism in ROS2.
+**Topics** implement the publish-subscribe pattern, enabling asynchronous, one-to-many (1-N) communication. This is the most common communication mechanism in ROS2.
 
 #### Characteristics
 
@@ -103,8 +103,75 @@ ROS2 defines several communication paradigms, each suited to different interacti
 - **Streaming**: Topics are optimized for continuous data streams such as sensor readings or control commands.
 - **Best-Effort or Reliable**: Quality of Service (QoS) policies determine delivery guarantees.
 
+#### Data Recording Capabilities
+
+The publish-subscribe architecture enables transparent data recording without modifying existing nodes. External tools can leverage this capability by dynamically creating subscribers to specified topics at runtime. A primary example of this functionality in ROS2 is the `ros2 bag record` utility.
+
+**Key Characteristics:**
+
+- **Non-Intrusive Operation**: Recording tools such as `ros2 bag record` create subscribers that operate independently, without interrupting the flow of data to other parts of the system.
+- **Transparent Integration**: Existing publishers and subscribers continue functioning normally; the recording tool is simply another anonymous subscriber within the ROS graph.
+- **Selective Data Capture**: Users can choose specific topics for recording or capture the entire ROS graph depending on analysis requirements.
+- **Timestamp Preservation**: Messages are stored with their original timestamps, enabling accurate playback, post-processing, and analysis.
+
+This design exemplifies the power of the publish-subscribe pattern: new functionality, such as data logging via `ros2 bag record`, can be added to the system without modifying existing components or disrupting ongoing operations. The decoupled nature of topic-based communication ensures that system extensibility does not compromise stability or performance.
+
 #### Use Cases in Simulation
 
 - Sensor data publication (camera images, LiDAR scans, IMU readings)
 - Command streaming (velocity commands, joint trajectories)
 - State broadcasting (odometry, transform information)
+
+## 2.6 Services
+
+**Services** implement a synchronous *request-response* communication model within the ROS2 ecosystem. This mechanism enables nodes to execute discrete operations and await a result before continuing their execution flow.
+
+### 2.6.1 System Architecture
+
+The interaction is based on a binary relationship between two primary entities:
+
+- **Server:** Advertises a service, listens for incoming requests, executes computation logic, and returns a response.
+- **Client:** Locates services on the network, sends a request, and blocks execution until receiving the server's return.
+
+> **Technical Note:** Unlike *Topics*, *Services* are not continuous data streams, but rather unique, finalized transactions that require reception confirmation.
+
+### 2.6.2 Interface Definition (.srv)
+
+Service interfaces are structured in `.srv` files, where request and response fields are separated by a triple dash delimiter:
+
+```yaml
+# .srv file structure (example: AddTwoInts.srv)
+uint32 a
+uint32 b
+---
+uint32 sum
+```
+
+### 2.6.3 Execution Flow and Console
+
+The operational process follows a logical sequence managed by the DDS middleware, from service discovery to client thread resumption. For manual validation from the terminal, the following syntax is used:
+
+```bash
+# Example: Service call from command line
+ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 2, b: 3}"
+```
+
+### 2.6.4 Application Analysis and Constraints
+
+| Category | Description |
+| --- | --- |
+| **Use Cases** | Simulation control (spawn/reset), configuration changes, punctual status queries (sensors, maps). |
+| **Limitations** | Client execution thread blocking, lack of intermediate feedback, inability to cancel. |
+| **Recommendation** | For long-duration tasks or those requiring preemption, **Actions** (Section 2.7) must be used. |
+
+---
+
+### 2.6.5 Introspection Tools
+
+The ROS2 CLI (*Command Line Interface*) provides specific tools for service inspection at runtime:
+
+| Command | Function |
+| --- | --- |
+| `ros2 service list` | Enumerates all active services in the ROS graph. |
+| `ros2 service type /name` | Identifies the interface type associated with a service. |
+| `ros2 interface show pkg/Srv` | Breaks down the internal structure (fields) of the `.srv` definition. |
