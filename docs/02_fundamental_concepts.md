@@ -243,3 +243,62 @@ ros2 action send_goal /name pkg/Action "{order: 5}"  # Send goal
 ### 2.7.7 Summary
 
 Actions provide the appropriate communication paradigm for long-running, preemptable tasks requiring intermediate feedback. The three-part message structure (goal, result, feedback) enables robust task monitoring and control, distinguishing Actions from the simpler request-response pattern of Services.
+
+## 2.8 Parameters
+
+**Parameters** provide a runtime configuration mechanism for ROS2 nodes, allowing values to be modified without recompilation. They function as a dynamic configuration system accessible through introspection tools and are typically used for tunable values such as gains, thresholds, and hardware settings.
+
+### 2.8.1 Parameter Characteristics
+
+| Characteristic | Description |
+| --- | --- |
+| **Typed Values** | Support strings, integers, floats, booleans, and arrays |
+| **Dynamic Reconfiguration** | Can be modified while the node is running |
+| **Persistence** | Can be saved to YAML files for reproducibility |
+| **Namespacing** | Organized hierarchically using node namespaces |
+
+### 2.8.2 Parameter Commands
+
+The ROS2 CLI provides the following commands for parameter management:
+
+| Command | Function | Example |
+| --- | --- | --- |
+| `ros2 param list` | List all parameters for a node | `ros2 param list /turtlebot3_node` |
+| `ros2 param get` | Retrieve a parameter value | `ros2 param get /node param_name` |
+| `ros2 param set` | Modify a parameter value | `ros2 param set /node param_name value` |
+| `ros2 param delete` | Remove a parameter | `ros2 param delete /node param_name` |
+| `ros2 param describe` | Show parameter metadata (type, constraints) | `ros2 param describe /node param_name` |
+| `ros2 param dump` | Export all parameters to YAML file | `ros2 param dump /node > config.yaml` |
+| `ros2 param load` | Import parameters from YAML file | `ros2 param load /node config.yaml` |
+
+### 2.8.3 Practical Examples
+
+```bash
+# List all parameters for a specific node
+ros2 param list /turtlebot3_node
+
+# Get a specific parameter value
+ros2 param get /turtlebot3_node odom_frame_id
+
+# Set a parameter value (runtime)
+ros2 param set /turtlebot3_node odom_frame_id "odom"
+
+# Delete a parameter
+ros2 param delete /turtlebot3_node temp_param
+
+# Describe parameter metadata
+ros2 param describe /turtlebot3_node odom_frame_id
+
+# Dump all parameters to YAML file
+ros2 param dump /turtlebot3_node > turtlebot_params.yaml
+
+# Load parameters from YAML file
+ros2 param load /turtlebot3_node turtlebot_params.yaml
+```
+
+### 2.8.4 Use Cases
+
+- **Sensor Configuration:** Resolution, frame rate, calibration values
+- **Controller Tuning:** PID gains, maximum velocities, acceleration limits
+- **Algorithm Parameters:** Costmap resolution, planner timeouts, threshold values
+- **Hardware Settings:** Port names, baud rates, device IDs
