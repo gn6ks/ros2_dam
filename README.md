@@ -19,7 +19,8 @@ This research presents a systematic approach to learning and implementing ROS2 (
 
 1. [Introduction](docs/01_introduction.md)
 2. [Fundamental Concepts](docs/02_fundamental_concepts.md)
-
+3. [Installation and Environment Setup](docs/03_installation.md)
+4. [Your First Simulation](docs/04_first_simulation.md)
 ---
 
 ### Technical Specifications
