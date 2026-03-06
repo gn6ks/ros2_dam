@@ -89,6 +89,7 @@ ros2 run turtlesim turtlesim_node
   <figcaption>Figure 4.3.3.1: Turtlesim Node figure simulation enviorenment</figcaption>
 </figure>
 
+
 | If you see... | Action |
 | --- | --- |
 | Blue window with turtle | Proceed to Step 3 |
