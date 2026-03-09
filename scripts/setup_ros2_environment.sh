@@ -237,11 +237,22 @@ configure_environment() {
 }
 
 #-------------------------------------------------------------------------------
-# Step 8: Installation Verification
+# Step 8: Installation Verification (FIXED???)
 #-------------------------------------------------------------------------------
 
 verify_installation() {
     print_step "Verifying ROS2 Installation"
+    
+    # First, ensure environment is sourced
+    print_info "Sourcing ROS2 environment..."
+    if [ -f /opt/ros/jazzy/setup.bash ]; then
+        source /opt/ros/jazzy/setup.bash
+        print_success "ROS2 environment sourced"
+    else
+        print_error "ROS2 setup.bash not found at /opt/ros/jazzy/setup.bash"
+        print_info "ROS2 installation may have failed"
+        exit 1
+    fi
     
     print_info "Checking ROS2 version..."
     if command -v ros2 &> /dev/null; then
@@ -249,6 +260,7 @@ verify_installation() {
         print_success "ROS2 installed: $ROS2_VERSION"
     else
         print_error "ROS2 command not found. Installation may have failed."
+        print_info "Try running: source /opt/ros/jazzy/setup.bash"
         exit 1
     fi
     
