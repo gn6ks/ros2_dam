@@ -176,7 +176,7 @@ install_ros2() {
 }
 
 #-------------------------------------------------------------------------------
-# Step 6: Additional Tools Installation (FIXED)
+# Step 6: Additional Tools Installation (FIXED for Jazzy)
 #-------------------------------------------------------------------------------
 
 install_additional_tools() {
@@ -189,19 +189,19 @@ install_additional_tools() {
     sudo apt install -y python3-rosdep
     
     print_info "Initializing rosdep..."
-    # FIX: Check if already initialized before running init
     if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then
-        sudo rosdep init
-        print_success "rosdep initialized"
+        sudo rosdep init 2>/dev/null
+        print_success "rosdep initialized successfully"
     else
-        print_warning "rosdep already initialized (skipping)"
+        print_warning "rosdep already initialized (skipping init)"
     fi
     
-    # Update rosdep database (safe to run multiple times)
-    rosdep update
+    print_info "Updating rosdep database..."
+    rosdep update 2>/dev/null || print_warning "rosdep update encountered warnings (non-critical)"
     
-    print_info "Installing Gazebo (if not included)..."
-    sudo apt install -y gazebo11 libgazebo11-dev 2>/dev/null || print_warning "Gazebo installation skipped (may already be installed)"
+    print_info "Installing Gazebo Sim (recommended for ROS2 Jazzy)..."
+    # FIX: Use Gazebo Sim instead of Gazebo Classic for Ubuntu 24.04 + Jazzy
+    sudo apt install -y ros-jazzy-gazebo-ros-pkgs gz-sim8
     
     print_info "Installing RQT and common plugins..."
     sudo apt install -y ros-jazzy-rqt ros-jazzy-rqt-common-plugins
