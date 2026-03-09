@@ -5,12 +5,8 @@
 # Author: gn6ks
 # License: MIT
 #===============================================================================
-# This script automates the complete ROS2 Jazzy installation and environment
-# configuration for Ubuntu 24.04 LTS (WSL2 or Native).
-#
-# Usage: 
-#   chmod +x setup_ros2_environment.sh
-#   ./setup_ros2_environment.sh
+# Updated for: Ubuntu 24.04 LTS + ROS2 Jazzy + Gazebo Harmonic
+# Gazebo Installation: Official instructions from gazebosim.org
 #===============================================================================
 
 set -e  # Exit on error
@@ -90,10 +86,10 @@ check_prerequisites() {
     
     print_info "Checking available disk space..."
     AVAILABLE_SPACE=$(df -BG / | tail -1 | awk '{print $4}' | sed 's/G//')
-    if [ "$AVAILABLE_SPACE" -ge 20 ]; then
+    if [ "$AVAILABLE_SPACE" -ge 30 ]; then
         print_success "Sufficient disk space available: ${AVAILABLE_SPACE}GB"
     else
-        print_warning "Low disk space: ${AVAILABLE_SPACE}GB. ROS2 installation requires ~15-20GB."
+        print_warning "Low disk space: ${AVAILABLE_SPACE}GB. ROS2 + Gazebo requires ~25-30GB."
     fi
 }
 
@@ -133,11 +129,11 @@ configure_locale() {
 }
 
 #-------------------------------------------------------------------------------
-# Step 4: Repository Configuration
+# Step 4: ROS2 Repository Configuration
 #-------------------------------------------------------------------------------
 
-configure_repositories() {
-    print_step "Configuring ROS2 Repositories"
+configure_ros2_repositories() {
+    print_step "Configuring ROS2 Repository"
     
     print_info "Installing software-properties-common..."
     sudo apt install -y software-properties-common
@@ -158,7 +154,7 @@ configure_repositories() {
     print_info "Updating package index after repository configuration..."
     sudo apt update
     
-    print_success "ROS2 repositories configured successfully"
+    print_success "ROS2 repository configured successfully"
 }
 
 #-------------------------------------------------------------------------------
@@ -176,7 +172,43 @@ install_ros2() {
 }
 
 #-------------------------------------------------------------------------------
-# Step 6: Additional Tools Installation (FIXED for Jazzy)
+# Step 6: Gazebo Harmonic Installation (OFFICIAL INSTRUCTIONS)
+#-------------------------------------------------------------------------------
+
+install_gazebo() {
+    print_step "Installing Gazebo Harmonic"
+    
+    print_info "Installing Gazebo Harmonic prerequisites..."
+    # Official Step 1: Install necessary tools
+    sudo apt-get update
+    sudo apt-get install -y curl lsb-release gnupg
+    
+    print_info "Adding Gazebo GPG key..."
+    # Official Step 2: Download GPG key
+    sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+    
+    print_info "Adding Gazebo repository..."
+    # Official Step 3: Add repository
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] https://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+    
+    print_info "Updating package index..."
+    # Official Step 4: Update package lists
+    sudo apt-get update
+    
+    print_info "Installing Gazebo Harmonic metapackage..."
+    # Official Step 5: Install gz-harmonic
+    print_warning "Gazebo Harmonic installation may take 10-20 minutes."
+    sudo apt-get install -y gz-harmonic
+    
+    print_info "Installing Gazebo ROS2 Jazzy integration..."
+    sudo apt install -y ros-jazzy-gazebo-dev 2>/dev/null || print_warning "gazebo-dev not available"
+    sudo apt install -y ros-jazzy-gazebo-msgs 2>/dev/null || print_warning "gazebo-msgs not available"
+    
+    print_success "Gazebo Harmonic installed successfully"
+}
+
+#-------------------------------------------------------------------------------
+# Step 7: Additional Tools Installation
 #-------------------------------------------------------------------------------
 
 install_additional_tools() {
@@ -199,10 +231,6 @@ install_additional_tools() {
     print_info "Updating rosdep database..."
     rosdep update 2>/dev/null || print_warning "rosdep update encountered warnings (non-critical)"
     
-    print_info "Installing Gazebo Sim (recommended for ROS2 Jazzy)..."
-    # FIX: Use Gazebo Sim instead of Gazebo Classic for Ubuntu 24.04 + Jazzy
-    sudo apt install -y ros-jazzy-gazebo-ros-pkgs gz-sim8
-    
     print_info "Installing RQT and common plugins..."
     sudo apt install -y ros-jazzy-rqt ros-jazzy-rqt-common-plugins
     
@@ -210,7 +238,7 @@ install_additional_tools() {
 }
 
 #-------------------------------------------------------------------------------
-# Step 7: Environment Configuration (.bashrc)
+# Step 8: Environment Configuration (.bashrc)
 #-------------------------------------------------------------------------------
 
 configure_environment() {
@@ -218,7 +246,6 @@ configure_environment() {
     
     print_info "Adding ROS2 sourcing to ~/.bashrc..."
     
-    # Check if already sourced in .bashrc
     if grep -q "source /opt/ros/jazzy/setup.bash" ~/.bashrc 2>/dev/null; then
         print_warning "ROS2 sourcing already exists in ~/.bashrc"
     else
@@ -226,6 +253,20 @@ configure_environment() {
         echo "# ROS2 Jazzy Environment Setup" >> ~/.bashrc
         echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
         print_success "ROS2 sourcing added to ~/.bashrc"
+    fi
+    
+    print_info "Adding Gazebo Harmonic environment to ~/.bashrc..."
+    if [ -f /usr/share/gz/harmonic/setup.bash ]; then
+        if grep -q "source /usr/share/gz/harmonic/setup.bash" ~/.bashrc 2>/dev/null; then
+            print_warning "Gazebo Harmonic sourcing already exists in ~/.bashrc"
+        else
+            echo "" >> ~/.bashrc
+            echo "# Gazebo Harmonic Environment" >> ~/.bashrc
+            echo "source /usr/share/gz/harmonic/setup.bash" >> ~/.bashrc
+            print_success "Gazebo Harmonic sourcing added to ~/.bashrc"
+        fi
+    else
+        print_warning "Gazebo Harmonic setup.bash not found (may not be required)"
     fi
     
     print_info "Adding colcon completion to ~/.bashrc..."
@@ -243,21 +284,15 @@ configure_environment() {
 }
 
 #-------------------------------------------------------------------------------
-# Step 8: Installation Verification (FIXED???)
+# Step 9: Installation Verification
 #-------------------------------------------------------------------------------
 
 verify_installation() {
-    print_step "Verifying ROS2 Installation"
+    print_step "Verifying Installation"
     
-    # First, ensure environment is sourced
-    print_info "Sourcing ROS2 environment..."
+    # Source environment before verification
     if [ -f /opt/ros/jazzy/setup.bash ]; then
-        source /opt/ros/jazzy/setup.bash
-        print_success "ROS2 environment sourced"
-    else
-        print_error "ROS2 setup.bash not found at /opt/ros/jazzy/setup.bash"
-        print_info "ROS2 installation may have failed"
-        exit 1
+        source /opt/ros/jazzy/setup.bash 2>/dev/null
     fi
     
     print_info "Checking ROS2 version..."
@@ -266,7 +301,6 @@ verify_installation() {
         print_success "ROS2 installed: $ROS2_VERSION"
     else
         print_error "ROS2 command not found. Installation may have failed."
-        print_info "Try running: source /opt/ros/jazzy/setup.bash"
         exit 1
     fi
     
@@ -282,10 +316,13 @@ verify_installation() {
     rmw_implementation=$(ros2 doctor --report 2>/dev/null | grep -A 5 "RMW Implementation" | tail -1 | xargs)
     print_success "RMW Implementation: $rmw_implementation"
     
-    print_info "Checking Gazebo installation..."
-    if command -v gzserver &> /dev/null; then
+    print_info "Checking Gazebo Harmonic installation..."
+    if command -v gz &> /dev/null; then
+        GAZEBO_VERSION=$(gz sim --version 2>/dev/null || gz --version 2>/dev/null)
+        print_success "Gazebo Harmonic installed: $GAZEBO_VERSION"
+    elif command -v gzserver &> /dev/null; then
         GAZEBO_VERSION=$(gzserver --version)
-        print_success "Gazebo installed: $GAZEBO_VERSION"
+        print_success "Gazebo Classic installed: $GAZEBO_VERSION"
     else
         print_warning "Gazebo not found (optional for basic ROS2)"
     fi
@@ -301,7 +338,7 @@ verify_installation() {
 }
 
 #-------------------------------------------------------------------------------
-# Step 9: Display Summary and Next Steps
+# Step 10: Display Summary and Next Steps
 #-------------------------------------------------------------------------------
 
 display_summary() {
@@ -309,28 +346,33 @@ display_summary() {
     
     echo ""
     echo -e "${GREEN}===============================================================================${NC}"
-    echo -e "${GREEN}  ROS2 Jazzy Environment Setup Complete${NC}"
+    echo -e "${GREEN}  ROS2 Jazzy + Gazebo Harmonic Environment Setup Complete${NC}"
     echo -e "${GREEN}===============================================================================${NC}"
     echo ""
     echo -e "${CYAN}Installation Summary:${NC}"
     echo "  • ROS2 Distribution: Jazzy Jalisco"
     echo "  • Ubuntu Version: 24.04 LTS"
+    echo "  • Simulator: Gazebo Harmonic (gz-sim7)"
     echo "  • Environment: Persistent in ~/.bashrc"
     echo ""
     echo -e "${CYAN}Next Steps:${NC}"
     echo "  1. Close and reopen your terminal (or run: source ~/.bashrc)"
     echo "  2. Verify installation: ros2 --version"
-    echo "  3. Proceed to Chapter 4: TurtleSim Simulation"
-    echo "  4. Run: ./scripts/run_turtlesim.sh"
+    echo "  3. Test Gazebo: gz sim"
+    echo "  4. Proceed to Chapter 4: TurtleSim Simulation"
+    echo "  5. Run: ./scripts/run_turtlesim.sh"
     echo ""
     echo -e "${CYAN}Useful Commands:${NC}"
     echo "  • ros2 pkg list          - List all available packages"
     echo "  • ros2 topic list        - List all active topics"
     echo "  • ros2 node list         - List all running nodes"
     echo "  • ros2 doctor            - Diagnose ROS2 issues"
+    echo "  • gz sim                 - Launch Gazebo Harmonic"
+    echo "  • gz sim -v 4            - Launch with verbose output"
     echo ""
     echo -e "${CYAN}Documentation:${NC}"
     echo "  • Official ROS2 Docs: https://docs.ros.org/en/jazzy/"
+    echo "  • Gazebo Harmonic Docs: https://gazebosim.org/docs/harmonic/"
     echo "  • This Research Repo: https://github.com/gn6ks/ros2-investigacion"
     echo ""
     echo -e "${GREEN}===============================================================================${NC}"
@@ -345,8 +387,8 @@ main() {
     print_header
     echo ""
     
-    print_warning "This script will install ROS2 Jazzy and configure your environment."
-    print_warning "Estimated time: 20-40 minutes depending on internet speed."
+    print_warning "This script will install ROS2 Jazzy + Gazebo Harmonic."
+    print_warning "Estimated time: 30-50 minutes depending on internet speed."
     echo ""
     read -p "Do you want to continue? (y/n): " -n 1 -r
     echo ""
@@ -359,8 +401,9 @@ main() {
     check_prerequisites
     update_system
     configure_locale
-    configure_repositories
+    configure_ros2_repositories
     install_ros2
+    install_gazebo
     install_additional_tools
     configure_environment
     verify_installation
