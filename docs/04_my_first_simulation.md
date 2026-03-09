@@ -383,3 +383,37 @@ ros2 service call /reset std_srvs/srv/Empty
 ```
 
 **Expected Result:** All spawned turtles are removed, and the simulation resets.
+
+## 4.9 Automated Simulation Launch
+
+For users who wish to execute the complete TurtleSim simulation with a single command, an automation script is provided in the repository.
+
+### Execution
+
+```bash
+# Navigate to the scripts directory
+cd scripts/
+
+# Grant execution permissions (only required once)
+chmod +x run_turtlesim.sh
+
+# Execute the simulation script
+./run_turtlesim.sh
+```
+
+### What the Script Does
+
+1. Verifies ROS2 Humble environment is properly sourced
+2. Checks if TurtleSim package is installed (installs if missing)
+3. Verifies RQT tools availability
+4. Launches `turtlesim_node` and `turtle_teleop_key`
+5. Displays control instructions and available commands
+6. Handles graceful cleanup when stopped (Ctrl + C)
+
+### Stopping the Simulation
+
+Press `Ctrl + C` in the terminal running the script, or execute:
+
+```bash
+./stop_turtlesim.sh
+```
