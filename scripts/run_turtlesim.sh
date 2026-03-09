@@ -6,7 +6,7 @@
 # License: MIT
 #===============================================================================
 # This script automates the complete TurtleSim simulation setup and execution.
-# It verifies dependencies, launches required nodes, and provides user guidance.
+# FIXED: turtle_teleop_key now runs in foreground to preserve TTY access.
 #===============================================================================
 
 set -e  # Exit on error
@@ -108,9 +108,10 @@ cleanup() {
     echo ""
     print_warning "Stopping TurtleSim simulation..."
     
-    # Kill all background ROS2 nodes started by this script
-    pkill -f "turtlesim_node" 2>/dev/null || true
-    pkill -f "turtle_teleop_key" 2>/dev/null || true
+    # Kill turtlesim_node (runs in background)
+    if [ -n "$TURTLESIM_PID" ]; then
+        kill $TURTLESIM_PID 2>/dev/null || true
+    fi
     
     print_success "All nodes terminated. Simulation stopped."
     echo ""
@@ -130,7 +131,7 @@ launch_simulation() {
     print_info "Launching TurtleSim simulation..."
     echo ""
     
-    # Launch turtlesim_node in background
+    # Launch turtlesim_node in background (GUI node, no keyboard input needed)
     print_info "Starting turtlesim_node..."
     ros2 run turtlesim turtlesim_node &
     TURTLESIM_PID=$!
@@ -144,22 +145,8 @@ launch_simulation() {
         exit 1
     fi
     
-    # Launch turtle_teleop_key in background
-    print_info "Starting turtle_teleop_key..."
-    ros2 run turtlesim turtle_teleop_key &
-    TELEOP_PID=$!
-    sleep 2
-    
-    # Verify turtle_teleop_key is running
-    if ps -p $TELEOP_PID > /dev/null; then
-        print_success "turtle_teleop_key is running (PID: $TELEOP_PID)"
-    else
-        print_error "Failed to start turtle_teleop_key"
-        exit 1
-    fi
-    
     echo ""
-    print_success "Simulation launched successfully!"
+    print_success "Simulation node launched successfully!"
 }
 
 #-------------------------------------------------------------------------------
@@ -197,17 +184,19 @@ display_instructions() {
     echo ""
     echo "==============================================================================="
     echo ""
-    print_info "Simulation is running. Press Ctrl + C to stop all nodes."
-    echo ""
 }
 
 #-------------------------------------------------------------------------------
-# Step 7: Keep Script Running (Wait for User Interrupt)
+# Step 7: Launch Teleop in Foreground (FIXED)
 #-------------------------------------------------------------------------------
 
-wait_for_interrupt() {
-    # Keep the script running so background nodes stay alive
-    wait
+launch_teleop() {
+    print_info "Starting turtle_teleop_key... (Press Ctrl+C to stop)"
+    echo ""
+    
+    # IMPORTANT: Run in foreground to preserve TTY/keyboard access
+    # This is the fix for "Failed to get old console mode" error
+    ros2 run turtlesim turtle_teleop_key
 }
 
 #-------------------------------------------------------------------------------
@@ -225,7 +214,7 @@ main() {
     echo ""
     launch_simulation
     display_instructions
-    wait_for_interrupt
+    launch_teleop  # Runs in foreground, blocks until Ctrl+C
     
     cleanup
 }
