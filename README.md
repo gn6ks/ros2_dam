@@ -27,9 +27,9 @@ This research presents a systematic approach to learning and implementing ROS2 (
 
 | Component | Specification |
 |-----------|---------------|
-| **ROS2 Distribution** | Humble Hawksbill (LTS) |
-| **Operating System** | Ubuntu 22.04 LTS / Windows 11 |
-| **Simulation Environment** | Gazebo Classic / Webots |
+| **ROS2 Distribution** | Jazzy Jalisco (LTS) |
+| **Operating System** | Ubuntu 24.02 (LTS) |
+| **Simulation Environment** | Gazebo Classic |
 
 ---
 
