@@ -1,12 +1,12 @@
 #!/bin/bash
 #===============================================================================
-# ROS2 Humble Environment Setup Script
+# ROS2 Jazzy Environment Setup Script
 # ROS2: From Simulation to Reality - Research Project
 # Author: gn6ks
 # License: MIT
 #===============================================================================
-# This script automates the complete ROS2 Humble installation and environment
-# configuration for Ubuntu 22.04 LTS (WSL2 or Native).
+# This script automates the complete ROS2 Jazzy installation and environment
+# configuration for Ubuntu 24.04 LTS (WSL2 or Native).
 #
 # Usage: 
 #   chmod +x setup_ros2_environment.sh
@@ -32,7 +32,7 @@ NC='\033[0m' # No Color
 print_header() {
     echo -e "${BLUE}"
     echo "==============================================================================="
-    echo "  ROS2 Humble Environment Setup"
+    echo "  ROS2 Jazzy Environment Setup"
     echo "  ROS2: From Simulation to Reality - Research Project"
     echo "  Author: gn6ks"
     echo "==============================================================================="
@@ -72,10 +72,10 @@ check_prerequisites() {
     print_info "Checking Ubuntu version..."
     if [ -f /etc/os-release ]; then
         source /etc/os-release
-        if [ "$VERSION_ID" = "22.04" ]; then
-            print_success "Ubuntu 22.04 LTS detected (Required for ROS2 Humble)"
+        if [ "$VERSION_ID" = "24.04" ]; then
+            print_success "Ubuntu 24.04 LTS detected (Required for ROS2 Jazzy)"
         else
-            print_warning "Detected Ubuntu $VERSION_ID. ROS2 Humble requires Ubuntu 22.04."
+            print_warning "Detected Ubuntu $VERSION_ID. ROS2 Jazzy requires Ubuntu 24.04."
             print_info "Proceeding anyway, but compatibility issues may occur."
         fi
     fi
@@ -166,13 +166,13 @@ configure_repositories() {
 #-------------------------------------------------------------------------------
 
 install_ros2() {
-    print_step "Installing ROS2 Humble"
+    print_step "Installing ROS2 Jazzy"
     
-    print_info "Installing ros-humble-desktop package..."
+    print_info "Installing ros-jazzy-desktop package..."
     print_warning "This may take 15-30 minutes depending on your internet connection."
-    sudo apt install -y ros-humble-desktop
+    sudo apt install -y ros-jazzy-desktop
     
-    print_success "ROS2 Humble installed successfully"
+    print_success "ROS2 Jazzy installed successfully"
 }
 
 #-------------------------------------------------------------------------------
@@ -192,11 +192,11 @@ install_additional_tools() {
     sudo rosdep init
     rosdep update
     
-    print_info "Installing Gazebo Classic (if not included)..."
+    print_info "Installing Gazebo (if not included)..."
     sudo apt install -y gazebo11 libgazebo11-dev 2>/dev/null || print_warning "Gazebo installation skipped (may already be installed)"
     
     print_info "Installing RQT and common plugins..."
-    sudo apt install -y ros-humble-rqt ros-humble-rqt-common-plugins
+    sudo apt install -y ros-jazzy-rqt ros-jazzy-rqt-common-plugins
     
     print_success "Additional tools installed successfully"
 }
@@ -211,12 +211,12 @@ configure_environment() {
     print_info "Adding ROS2 sourcing to ~/.bashrc..."
     
     # Check if already sourced in .bashrc
-    if grep -q "source /opt/ros/humble/setup.bash" ~/.bashrc 2>/dev/null; then
+    if grep -q "source /opt/ros/jazzy/setup.bash" ~/.bashrc 2>/dev/null; then
         print_warning "ROS2 sourcing already exists in ~/.bashrc"
     else
         echo "" >> ~/.bashrc
-        echo "# ROS2 Humble Environment Setup" >> ~/.bashrc
-        echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+        echo "# ROS2 Jazzy Environment Setup" >> ~/.bashrc
+        echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
         print_success "ROS2 sourcing added to ~/.bashrc"
     fi
     
@@ -289,12 +289,12 @@ display_summary() {
     
     echo ""
     echo -e "${GREEN}===============================================================================${NC}"
-    echo -e "${GREEN}  ROS2 Humble Environment Setup Complete${NC}"
+    echo -e "${GREEN}  ROS2 Jazzy Environment Setup Complete${NC}"
     echo -e "${GREEN}===============================================================================${NC}"
     echo ""
     echo -e "${CYAN}Installation Summary:${NC}"
-    echo "  • ROS2 Distribution: Humble Hawksbill"
-    echo "  • Ubuntu Version: 22.04 LTS"
+    echo "  • ROS2 Distribution: Jazzy Jalisco"
+    echo "  • Ubuntu Version: 24.04 LTS"
     echo "  • Environment: Persistent in ~/.bashrc"
     echo ""
     echo -e "${CYAN}Next Steps:${NC}"
@@ -310,7 +310,7 @@ display_summary() {
     echo "  • ros2 doctor            - Diagnose ROS2 issues"
     echo ""
     echo -e "${CYAN}Documentation:${NC}"
-    echo "  • Official ROS2 Docs: https://docs.ros.org/en/humble/"
+    echo "  • Official ROS2 Docs: https://docs.ros.org/en/jazzy/"
     echo "  • This Research Repo: https://github.com/gn6ks/ros2-investigacion"
     echo ""
     echo -e "${GREEN}===============================================================================${NC}"
@@ -325,7 +325,7 @@ main() {
     print_header
     echo ""
     
-    print_warning "This script will install ROS2 Humble and configure your environment."
+    print_warning "This script will install ROS2 Jazzy and configure your environment."
     print_warning "Estimated time: 20-40 minutes depending on internet speed."
     echo ""
     read -p "Do you want to continue? (y/n): " -n 1 -r
