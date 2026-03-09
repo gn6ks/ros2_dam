@@ -176,7 +176,7 @@ install_ros2() {
 }
 
 #-------------------------------------------------------------------------------
-# Step 6: Additional Tools Installation
+# Step 6: Additional Tools Installation (FIXED)
 #-------------------------------------------------------------------------------
 
 install_additional_tools() {
@@ -186,18 +186,24 @@ install_additional_tools() {
     sudo apt install -y python3-colcon-common-extensions
     
     print_info "Installing rosdep dependency manager..."
-    # FIX: Ubuntu 24.04 uses 'python3-rosdep' not 'python3-rosdep2'
     sudo apt install -y python3-rosdep
     
     print_info "Initializing rosdep..."
-    sudo rosdep init
+    # FIX: Check if already initialized before running init
+    if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then
+        sudo rosdep init
+        print_success "rosdep initialized"
+    else
+        print_warning "rosdep already initialized (skipping)"
+    fi
+    
+    # Update rosdep database (safe to run multiple times)
     rosdep update
     
     print_info "Installing Gazebo (if not included)..."
     sudo apt install -y gazebo11 libgazebo11-dev 2>/dev/null || print_warning "Gazebo installation skipped (may already be installed)"
     
     print_info "Installing RQT and common plugins..."
-    # FIX: Use ros-jazzy prefix for Ubuntu 24.04
     sudo apt install -y ros-jazzy-rqt ros-jazzy-rqt-common-plugins
     
     print_success "Additional tools installed successfully"
