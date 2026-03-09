@@ -110,3 +110,34 @@ echo $ROS_DISTRO
 ```
 
 > **Expected Output:** The terminal should return `humble`. If no output is displayed, the sourcing step failed.
+
+## 3.4 Automated Environment Setup
+
+For users who wish to automate the complete ROS2 installation and environment configuration, an automation script is provided in the repository.
+
+### 3.4.1 Execution
+
+```bash
+# Navigate to the scripts directory
+cd scripts/
+
+# Grant execution permissions (only required once)
+chmod +x setup_ros2_environment.sh
+
+# Execute the setup script
+./setup_ros2_environment.sh
+```
+
+### 3.4.3 Post-Installation Verification
+
+After the script completes, verify your installation:
+
+```bash
+# Quick verification
+./verify_ros2_installation.sh
+
+# Or manually
+source ~/.bashrc
+ros2 --version
+echo $ROS_DISTRO  # Should output: humble
+```
