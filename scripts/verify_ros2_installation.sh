@@ -6,6 +6,7 @@
 # License: MIT
 #===============================================================================
 # Updated for: Ubuntu 24.04 LTS + ROS2 Jazzy Jalisco
+# FIX: Sources ROS2 environment before verification
 #===============================================================================
 
 RED='\033[0;31m'
@@ -21,6 +22,23 @@ echo -e "${CYAN}  ROS2: From Simulation to Reality - Research Project${NC}"
 echo -e "${CYAN}  Author: gn6ks${NC}"
 echo -e "${CYAN}===============================================================================${NC}"
 echo ""
+
+#-------------------------------------------------------------------------------
+# CRITICAL FIX: Source ROS2 Environment Before Verification
+#-------------------------------------------------------------------------------
+
+if [ -f /opt/ros/jazzy/setup.bash ]; then
+    source /opt/ros/jazzy/setup.bash 2>/dev/null
+fi
+
+# Also source ~/.bashrc to pick up any additional configuration
+if [ -f ~/.bashrc ]; then
+    source ~/.bashrc 2>/dev/null
+fi
+
+#-------------------------------------------------------------------------------
+# Verification Checks
+#-------------------------------------------------------------------------------
 
 # Check ROS2 command
 if command -v ros2 &> /dev/null; then
@@ -99,3 +117,5 @@ else
     echo -e "${YELLOW}⚠ Environment requires attention before proceeding${NC}"
     echo -e "${CYAN}  → Run: ./scripts/setup_ros2_environment.sh${NC}"
 fi
+
+echo ""
