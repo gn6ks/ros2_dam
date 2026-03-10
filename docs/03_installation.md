@@ -289,9 +289,9 @@ rosdep update
 # RQT and plugins
 sudo apt install ros-jazzy-rqt ros-jazzy-rqt-common-plugins
 
-# Gazebo (if not included in desktop package)
-sudo apt install gazebo11 libgazebo11-dev
-```
+# Gazebo Harmonic (recommended for ROS2 Jazzy)
+# The automated setup script handles this installation
+# Manual installation: see Section 3.4 (Repository Configuration)
 
 ## 3.9 Troubleshooting
 
