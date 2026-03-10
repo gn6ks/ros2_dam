@@ -2,6 +2,8 @@
 
 This chapter introduces practical ROS2 development through the **TurtleSim** simulation environment. TurtleSim is a lightweight 2D simulator designed for learning ROS2 fundamentals, including node communication, topic publishing, and service calls. Follow each step sequentially to build hands-on experience with ROS2 tools and concepts.
 
+---
+
 ## 4.1 Introduction to TurtleSim
 
 **TurtleSim** is an educational tool that provides a simple 2D environment where a virtual turtle can be controlled through ROS2 commands. It was originally developed for the ROS Tutorials and remains the standard entry point for understanding ROS2 communication patterns.
@@ -10,12 +12,12 @@ This chapter introduces practical ROS2 development through the **TurtleSim** sim
 
 By completing this chapter step-by-step, you will:
 
-1.  Verify and install TurtleSim packages on your system
-2.  Launch multiple ROS2 nodes concurrently
-3.  Control the turtle using keyboard and manual commands
-4.  Visualize system behavior using RQT tools
-5.  Understand topics, services, and message structures
-6.  Complete guided exercises to reinforce learning
+1. Verify and install TurtleSim packages on your system
+2. Launch multiple ROS2 nodes concurrently
+3. Control the turtle using keyboard and manual commands
+4. Visualize system behavior using RQT tools
+5. Understand topics, services, and message structures
+6. Complete guided exercises to reinforce learning
 
 ### 4.1.2 TurtleSim Components
 
@@ -28,13 +30,15 @@ The TurtleSim package consists of two primary nodes that communicate through ROS
 
 These nodes communicate through the **publish-subscribe** pattern described in Chapter 2. The teleop node publishes velocity commands, and the simulation node subscribes to them to move the turtle.
 
+---
+
 ## 4.2 Step 1: Verify Installation
 
-Before proceeding, ensure that TurtleSim is properly installed in your ROS2 Humble environment.
+Before proceeding, ensure that TurtleSim is properly installed in your ROS2 Jazzy environment.
 
 ### 4.2.1 Check Package Availability
 
-Open a terminal in VS Code (connected to WSL) and run:
+Open a terminal and run:
 
 ```bash
 ros2 pkg list | grep turtlesim
@@ -48,7 +52,7 @@ If the previous command returns no output, install the package:
 
 ```bash
 sudo apt update
-sudo apt install ros-humble-turtlesim -y
+sudo apt install ros-jazzy-turtlesim -y
 ```
 
 ### 4.2.3 Install RQT Tools
@@ -56,11 +60,13 @@ sudo apt install ros-humble-turtlesim -y
 RQT is a visualization framework that will help you understand the ROS2 graph. Install it now:
 
 ```bash
-sudo apt install ros-humble-rqt -y
-sudo apt install ros-humble-rqt-common-plugins -y
+sudo apt install ros-jazzy-rqt -y
+sudo apt install ros-jazzy-rqt-common-plugins -y
 ```
 
 > **Technical Note:** After installation, run `rqt` once to initialize the configuration file. This prevents potential errors when launching plugins later.
+
+---
 
 ## 4.3 Step 2: Launch the Simulation Node
 
@@ -68,7 +74,7 @@ Now you will start the first node that creates the simulation environment.
 
 ### 4.3.1 Open Your First Terminal
 
-In VS Code, navigate to **Terminal → New Terminal**.
+Open a new terminal in your development environment.
 
 ### 4.3.2 Run the Simulation Node
 
@@ -86,18 +92,19 @@ ros2 run turtlesim turtlesim_node
   <img src="./assets/images/turtleSim.png"
        alt="Turtlesim Node"
        width="400">
-  <figcaption>Figure 4.3.3.1: Turtlesim Node figure simulation enviorenment</figcaption>
+  <figcaption>Figure 4.3.3.1: TurtleSim Node simulation environment</figcaption>
 </figure>
-
 
 | If you see... | Action |
 | --- | --- |
 | Blue window with turtle | Proceed to Step 3 |
 | Error: "package not found" | Run the installation commands in Section 4.2.2 |
-| No window appears | Check WSLg is enabled (see Troubleshooting Section 4.8) |
+| No window appears | Check display server is running (WSLg or X11) |
 | Window closes immediately | Check terminal for error messages |
 
 > **Important:** Do not close this terminal. The node will continue running and displaying log messages. Keep this terminal open throughout the exercise.
+
+---
 
 ## 4.4 Step 3: Launch the Teleoperation Node
 
@@ -105,9 +112,7 @@ Now you will start the second node that allows you to control the turtle with yo
 
 ### 4.4.1 Open Your Second Terminal
 
-In VS Code, open a **new terminal** by clicking the **split terminal icon** (two rectangles) in the terminal panel, or press `Ctrl + Shift + ` ``.
-
-You should now have two terminals visible side-by-side or stacked.
+Open a **new terminal** window or tab.
 
 ### 4.4.2 Run the Teleoperation Node
 
@@ -119,9 +124,9 @@ ros2 run turtlesim turtle_teleop_key
 
 ### 4.4.3 Test Keyboard Control
 
-1.  Click on the **second terminal** to ensure it has focus
-2.  Press the **arrow keys** on your keyboard
-3.  Observe the turtle moving in the simulation window
+1. Click on the **second terminal** to ensure it has focus
+2. Press the **arrow keys** on your keyboard
+3. Observe the turtle moving in the simulation window
 
 | Key | Turtle Movement |
 | --- | --- |
@@ -135,13 +140,15 @@ ros2 run turtlesim turtle_teleop_key
 
 > **Technical Note:** The teleop node only captures keyboard input when its terminal window has focus. If the turtle stops responding, click on the teleop terminal again.
 
+---
+
 ## 4.5 Step 4: Explore Topics with CLI Tools
 
 Now you will use ROS2 command-line tools to inspect the communication between nodes.
 
 ### 4.5.1 Open Your Third Terminal
 
-Open a **third terminal** in VS Code using the same split method as before.
+Open a **third terminal** using the same method as before.
 
 ### 4.5.2 List All Active Topics
 
@@ -171,6 +178,7 @@ ros2 topic type /turtle1/pose
 ```
 
 **Expected Output:**
+
 ```
 geometry_msgs/msg/Twist
 turtlesim/msg/Pose
@@ -185,6 +193,7 @@ ros2 interface show geometry_msgs/msg/Twist
 ```
 
 **Expected Output:**
+
 ```yaml
 geometry_msgs/Vector3 linear
   float64 x
@@ -208,6 +217,8 @@ While this command is running, use the arrow keys in the teleop terminal to move
 
 Press `Ctrl + C` to stop echoing the topic.
 
+---
+
 ## 4.6 Step 5: Visualize with RQT
 
 RQT provides graphical tools to understand the ROS2 system architecture.
@@ -226,9 +237,9 @@ The RQT window will open. It may appear empty initially.
 
 Follow these steps to visualize the node connections:
 
-1.  In the RQT menu, click **Plugins**
-2.  Select **Introspection**
-3.  Click **Node Graph**
+1. In the RQT menu, click **Plugins**
+2. Select **Introspection**
+3. Click **Node Graph**
 
 **What You Should See:** Two nodes (`/turtlesim_node` and `/turtle_teleop_key`) connected by arrows representing topics.
 
@@ -236,9 +247,9 @@ Follow these steps to visualize the node connections:
 
 To view topic statistics:
 
-1.  In the RQT menu, click **Plugins**
-2.  Select **Topics**
-3.  Click **Topic Monitor**
+1. In the RQT menu, click **Plugins**
+2. Select **Topics**
+3. Click **Topic Monitor**
 
 Expand the `/turtle1` namespace to see all available topics and their message types.
 
@@ -246,16 +257,16 @@ Expand the `/turtle1` namespace to see all available topics and their message ty
 
 To visualize data over time:
 
-1.  In the RQT menu, click **Plugins**
-2.  Select **Visualization**
-3.  Click **Plot**
+1. In the RQT menu, click **Plugins**
+2. Select **Visualization**
+3. Click **Plot**
 
 In the Plot window:
 
-1.  Click the **plus (+)** icon
-2.  Expand `/turtle1/pose`
-3.  Select `x` and `y` fields
-4.  Click **OK**
+1. Click the **plus (+)** icon
+2. Expand `/turtle1/pose`
+3. Select `x` and `y` fields
+4. Click **OK**
 
 Now move the turtle using the keyboard. You should see the plot lines updating in real-time showing the turtle's position changes.
 
@@ -263,12 +274,14 @@ Now move the turtle using the keyboard. You should see the plot lines updating i
 
 To save your current RQT layout for future use:
 
-1.  Click **Perspectives** in the menu
-2.  Select **Save Perspective As...**
-3.  Name it `turtlesim_view`
-4.  Click **OK**
+1. Click **Perspectives** in the menu
+2. Select **Save Perspective As...**
+3. Name it `turtlesim_view`
+4. Click **OK**
 
 Next time you launch RQT, you can load this perspective to restore all plugins at once.
+
+---
 
 ## 4.7 Step 6: Manual Topic Publishing
 
@@ -312,6 +325,8 @@ ros2 topic pub --rate 10 /turtle1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 
 
 **Expected Result:** The turtle rotates counter-clockwise.
 
+---
+
 ## 4.8 Step 7: Working with Services
 
 TurtleSim provides services for simulation management tasks.
@@ -325,6 +340,7 @@ ros2 service list
 ```
 
 **Expected Output:**
+
 ```
 /clear
 /kill
@@ -352,6 +368,7 @@ ros2 service call /spawn turtlesim/srv/Spawn "{x: 5.0, y: 5.0, theta: 0.0, name:
 ```
 
 **Expected Result:** A new turtle appears at position (5, 5). The terminal displays:
+
 ```yaml
 name: 'turtle2'
 ```
@@ -384,11 +401,13 @@ ros2 service call /reset std_srvs/srv/Empty
 
 **Expected Result:** All spawned turtles are removed, and the simulation resets.
 
+---
+
 ## 4.9 Automated Simulation Launch
 
 For users who wish to execute the complete TurtleSim simulation with a single command, an automation script is provided in the repository.
 
-### Execution
+### 4.9.1 Execution
 
 ```bash
 # Navigate to the scripts directory
@@ -401,19 +420,66 @@ chmod +x run_turtlesim.sh
 ./run_turtlesim.sh
 ```
 
-### What the Script Does
+### 4.9.2 What the Script Does
 
-1. Verifies ROS2 Humble environment is properly sourced
-2. Checks if TurtleSim package is installed (installs if missing)
-3. Verifies RQT tools availability
-4. Launches `turtlesim_node` and `turtle_teleop_key`
-5. Displays control instructions and available commands
-6. Handles graceful cleanup when stopped (Ctrl + C)
+| Step | Action |
+|------|--------|
+| 1 | Verifies ROS2 Jazzy environment is properly sourced |
+| 2 | Checks if TurtleSim package is installed (installs if missing) |
+| 3 | Verifies RQT tools availability |
+| 4 | Launches `turtlesim_node` and `turtle_teleop_key` |
+| 5 | Displays control instructions and available commands |
+| 6 | Handles graceful cleanup when stopped (Ctrl + C) |
 
-### Stopping the Simulation
+### 4.9.3 Stopping the Simulation
 
 Press `Ctrl + C` in the terminal running the script, or execute:
 
 ```bash
 ./stop_turtlesim.sh
+```
+
+---
+
+## 4.10 Troubleshooting
+
+### 4.10.1 Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| **"package not found" error** | Run `sudo apt install ros-jazzy-turtlesim` |
+| **No GUI window appears** | Verify WSLg is enabled (WSL2) or X11/Wayland is running (native Ubuntu) |
+| **Keyboard input not working** | Click on the teleop terminal to give it focus |
+| **ROS2 commands not found** | Run `source /opt/ros/jazzy/setup.bash` |
+| **RQT plugins fail to load** | Run `rqt` once to initialize configuration, then restart |
+
+### 4.10.2 WSL2-Specific Issues
+
+If you are running Ubuntu on WSL2:
+
+```bash
+# Verify WSL version (should be 2)
+wsl --list --verbose
+
+# Verify WSLg is available (for GUI support)
+echo $WAYLAND_DISPLAY
+echo $DISPLAY
+
+# If empty, restart WSL from Windows PowerShell
+wsl --shutdown
+# Then reopen Ubuntu terminal
+```
+
+### 4.10.3 Native Ubuntu Issues
+
+If you are running native Ubuntu 24.04:
+
+```bash
+# Verify display server is running
+echo $XDG_SESSION_TYPE
+
+# Should return: x11 or wayland
+
+# If GUI fails, install additional dependencies
+sudo apt install -y x11-apps
 ```
