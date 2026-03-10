@@ -6,6 +6,7 @@
 # License: MIT
 #===============================================================================
 # This script automates the complete TurtleSim simulation setup and execution.
+# Updated for: ROS2 Jazzy Jalisco (Ubuntu 24.04 LTS)
 # FIXED: turtle_teleop_key now runs in foreground to preserve TTY access.
 #===============================================================================
 
@@ -58,7 +59,7 @@ check_ros2_environment() {
     
     if [ -z "$ROS_VERSION" ]; then
         print_error "ROS2 environment is not sourced."
-        print_info "Please run: source /opt/ros/humble/setup.bash"
+        print_info "Please run: source /opt/ros/jazzy/setup.bash"
         print_info "Or add it to your ~/.bashrc for automatic sourcing."
         exit 1
     fi
@@ -78,7 +79,7 @@ check_turtlesim_installation() {
     else
         print_warning "TurtleSim package not found. Installing..."
         sudo apt update
-        sudo apt install ros-humble-turtlesim -y
+        sudo apt install ros-jazzy-turtlesim -y
         print_success "TurtleSim package installed successfully"
     fi
 }
@@ -92,8 +93,8 @@ check_rqt_installation() {
     
     if ! command -v rqt &> /dev/null; then
         print_warning "RQT tools not found. Installing..."
-        sudo apt install ros-humble-rqt -y
-        sudo apt install ros-humble-rqt-common-plugins -y
+        sudo apt install ros-jazzy-rqt -y
+        sudo apt install ros-jazzy-rqt-common-plugins -y
         print_success "RQT tools installed successfully"
     else
         print_success "RQT tools are available"
