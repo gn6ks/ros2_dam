@@ -5,9 +5,6 @@
 # Author: gn6ks
 # License: MIT
 #===============================================================================
-# Updated for: Ubuntu 24.04 LTS + ROS2 Jazzy Jalisco
-# FIX: Sources ROS2 environment before verification
-#===============================================================================
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -61,12 +58,17 @@ else
     echo -e "${YELLOW}  → Run: source /opt/ros/jazzy/setup.bash${NC}"
 fi
 
-# Check Gazebo
-if command -v gzserver &> /dev/null; then
-    echo -e "${GREEN}✓${NC} Gazebo: $(gzserver --version)"
+# Check Gazebo Harmonic (UPDATED)
+if command -v gz &> /dev/null; then
+    GAZEBO_VERSION=$(gz sim --version 2>/dev/null || gz --version 2>/dev/null)
+    echo -e "${GREEN}✓${NC} Gazebo Harmonic: $GAZEBO_VERSION"
+elif command -v gzserver &> /dev/null; then
+    GAZEBO_VERSION=$(gzserver --version)
+    echo -e "${GREEN}✓${NC} Gazebo Classic: $GAZEBO_VERSION"
+    echo -e "${YELLOW}  → Note: Gazebo Harmonic recommended for ROS2 Jazzy${NC}"
 else
     echo -e "${YELLOW}⚠${NC} Gazebo: Not installed"
-    echo -e "${YELLOW}  → Optional for basic ROS2, required for simulation${NC}"
+    echo -e "${YELLOW}  → Run: sudo apt install gz-harmonic${NC}"
 fi
 
 # Check RQT
@@ -88,10 +90,10 @@ fi
 # Check disk space
 AVAILABLE=$(df -BG / | tail -1 | awk '{print $4}')
 AVAILABLE_NUM=$(echo "$AVAILABLE" | sed 's/G//')
-if [ "$AVAILABLE_NUM" -ge 20 ]; then
+if [ "$AVAILABLE_NUM" -ge 30 ]; then
     echo -e "${GREEN}✓${NC} Available Disk Space: $AVAILABLE"
 else
-    echo -e "${YELLOW}⚠${NC} Available Disk Space: $AVAILABLE (Recommended: 20GB+)"
+    echo -e "${YELLOW}⚠${NC} Available Disk Space: $AVAILABLE (Recommended: 30GB+ for Gazebo)"
 fi
 
 # Check ROS2 sourcing in .bashrc
@@ -102,6 +104,16 @@ else
     echo -e "${YELLOW}  → Run: echo 'source /opt/ros/jazzy/setup.bash' >> ~/.bashrc${NC}"
 fi
 
+# Check Gazebo Harmonic sourcing in .bashrc (NEW)
+if [ -f /usr/share/gz/harmonic/setup.bash ]; then
+    if grep -q "source /usr/share/gz/harmonic/setup.bash" ~/.bashrc 2>/dev/null; then
+        echo -e "${GREEN}✓${NC} Gazebo Harmonic sourcing configured in ~/.bashrc"
+    else
+        echo -e "${YELLOW}⚠${NC} Gazebo Harmonic sourcing not in ~/.bashrc"
+        echo -e "${YELLOW}  → Run: echo 'source /usr/share/gz/harmonic/setup.bash' >> ~/.bashrc${NC}"
+    fi
+fi
+
 echo ""
 echo -e "${CYAN}===============================================================================${NC}"
 echo -e "${CYAN}  Verification Complete${NC}"
@@ -110,7 +122,12 @@ echo ""
 
 # Summary
 if command -v ros2 &> /dev/null && [ "$ROS_DISTRO" = "jazzy" ]; then
-    echo -e "${GREEN}✓ Environment is ready for ROS2 Jazzy development${NC}"
+    if command -v gz &> /dev/null; then
+        echo -e "${GREEN}✓ Environment is ready for ROS2 Jazzy + Gazebo Harmonic development${NC}"
+    else
+        echo -e "${GREEN}✓ Environment is ready for ROS2 Jazzy development${NC}"
+        echo -e "${YELLOW}⚠ Gazebo Harmonic recommended for simulation tasks${NC}"
+    fi
     echo -e "${GREEN}✓ Proceed to Chapter 4: TurtleSim Simulation${NC}"
     echo -e "${CYAN}  → Run: ./scripts/run_turtlesim.sh${NC}"
 else
