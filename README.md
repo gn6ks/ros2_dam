@@ -29,7 +29,7 @@ This research presents a systematic approach to learning and implementing ROS2 (
 |-----------|---------------|
 | **ROS2 Distribution** | Jazzy Jalisco (LTS) |
 | **Operating System** | Ubuntu 24.02 (LTS) |
-| **Simulation Environment** | Gazebo Classic |
+| **Simulation Environment** | Gazebo Harmonic |
 
 ---
 
