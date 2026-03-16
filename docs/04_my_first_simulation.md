@@ -92,7 +92,6 @@ ros2 run turtlesim turtlesim_node
   <img src="./assets/images/turtleSim.png"
        alt="Turtlesim Node"
        width="400">
-  <figcaption>Figure 4.3.3.1: TurtleSim Node simulation environment</figcaption>
 </figure>
 
 | If you see... | Action |
