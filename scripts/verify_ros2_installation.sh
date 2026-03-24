@@ -20,15 +20,10 @@ echo -e "${CYAN}  Author: gn6ks${NC}"
 echo -e "${CYAN}===============================================================================${NC}"
 echo ""
 
-#-------------------------------------------------------------------------------
-# CRITICAL FIX: Source ROS2 Environment Before Verification
-#-------------------------------------------------------------------------------
-
 if [ -f /opt/ros/jazzy/setup.bash ]; then
     source /opt/ros/jazzy/setup.bash 2>/dev/null
 fi
 
-# Also source ~/.bashrc to pick up any additional configuration
 if [ -f ~/.bashrc ]; then
     source ~/.bashrc 2>/dev/null
 fi
@@ -37,7 +32,6 @@ fi
 # Verification Checks
 #-------------------------------------------------------------------------------
 
-# Check ROS2 command
 if command -v ros2 &> /dev/null; then
     echo -e "${GREEN}✓${NC} ROS2: $(ros2 --version)"
 else
@@ -45,7 +39,6 @@ else
     echo -e "${YELLOW}  → Run: ./scripts/setup_ros2_environment.sh${NC}"
 fi
 
-# Check ROS_DISTRO
 if [ -n "$ROS_DISTRO" ]; then
     echo -e "${GREEN}✓${NC} ROS_DISTRO: $ROS_DISTRO"
     if [ "$ROS_DISTRO" = "jazzy" ]; then
@@ -58,7 +51,6 @@ else
     echo -e "${YELLOW}  → Run: source /opt/ros/jazzy/setup.bash${NC}"
 fi
 
-# Check Gazebo Harmonic (UPDATED)
 if command -v gz &> /dev/null; then
     GAZEBO_VERSION=$(gz sim --version 2>/dev/null || gz --version 2>/dev/null)
     echo -e "${GREEN}✓${NC} Gazebo Harmonic: $GAZEBO_VERSION"
@@ -71,7 +63,6 @@ else
     echo -e "${YELLOW}  → Run: sudo apt install gz-harmonic${NC}"
 fi
 
-# Check RQT
 if command -v rqt &> /dev/null; then
     echo -e "${GREEN}✓${NC} RQT: Available"
 else
@@ -79,7 +70,6 @@ else
     echo -e "${YELLOW}  → Run: sudo apt install ros-jazzy-rqt ros-jazzy-rqt-common-plugins${NC}"
 fi
 
-# Check colcon
 if command -v colcon &> /dev/null; then
     echo -e "${GREEN}✓${NC} colcon: Available"
 else
@@ -87,7 +77,6 @@ else
     echo -e "${YELLOW}  → Run: sudo apt install python3-colcon-common-extensions${NC}"
 fi
 
-# Check disk space
 AVAILABLE=$(df -BG / | tail -1 | awk '{print $4}')
 AVAILABLE_NUM=$(echo "$AVAILABLE" | sed 's/G//')
 if [ "$AVAILABLE_NUM" -ge 30 ]; then
@@ -96,7 +85,6 @@ else
     echo -e "${YELLOW}⚠${NC} Available Disk Space: $AVAILABLE (Recommended: 30GB+ for Gazebo)"
 fi
 
-# Check ROS2 sourcing in .bashrc
 if grep -q "source /opt/ros/jazzy/setup.bash" ~/.bashrc 2>/dev/null; then
     echo -e "${GREEN}✓${NC} ROS2 sourcing configured in ~/.bashrc"
 else
@@ -104,7 +92,6 @@ else
     echo -e "${YELLOW}  → Run: echo 'source /opt/ros/jazzy/setup.bash' >> ~/.bashrc${NC}"
 fi
 
-# Check Gazebo Harmonic sourcing in .bashrc (NEW)
 if [ -f /usr/share/gz/harmonic/setup.bash ]; then
     if grep -q "source /usr/share/gz/harmonic/setup.bash" ~/.bashrc 2>/dev/null; then
         echo -e "${GREEN}✓${NC} Gazebo Harmonic sourcing configured in ~/.bashrc"
@@ -120,7 +107,6 @@ echo -e "${CYAN}  Verification Complete${NC}"
 echo -e "${CYAN}===============================================================================${NC}"
 echo ""
 
-# Summary
 if command -v ros2 &> /dev/null && [ "$ROS_DISTRO" = "jazzy" ]; then
     if command -v gz &> /dev/null; then
         echo -e "${GREEN}✓ Environment is ready for ROS2 Jazzy + Gazebo Harmonic development${NC}"

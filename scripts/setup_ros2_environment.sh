@@ -9,17 +9,13 @@
 # Gazebo Installation: Official instructions from gazebosim.org
 #===============================================================================
 
-set -e  # Exit on error
-
-#-------------------------------------------------------------------------------
-# Color Definitions for Terminal Output
-#-------------------------------------------------------------------------------
+set -e  
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 #-------------------------------------------------------------------------------
 # Helper Functions
@@ -179,24 +175,19 @@ install_gazebo() {
     print_step "Installing Gazebo Harmonic"
     
     print_info "Installing Gazebo Harmonic prerequisites..."
-    # Official Step 1: Install necessary tools
     sudo apt-get update
     sudo apt-get install -y curl lsb-release gnupg
     
     print_info "Adding Gazebo GPG key..."
-    # Official Step 2: Download GPG key
     sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
     
     print_info "Adding Gazebo repository..."
-    # Official Step 3: Add repository
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] https://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
     
     print_info "Updating package index..."
-    # Official Step 4: Update package lists
     sudo apt-get update
     
     print_info "Installing Gazebo Harmonic metapackage..."
-    # Official Step 5: Install gz-harmonic
     print_warning "Gazebo Harmonic installation may take 10-20 minutes."
     sudo apt-get install -y gz-harmonic
     
@@ -289,8 +280,7 @@ configure_environment() {
 
 verify_installation() {
     print_step "Verifying Installation"
-    
-    # Source environment before verification
+
     if [ -f /opt/ros/jazzy/setup.bash ]; then
         source /opt/ros/jazzy/setup.bash 2>/dev/null
     fi
@@ -410,5 +400,4 @@ main() {
     display_summary
 }
 
-# Execute main function
 main

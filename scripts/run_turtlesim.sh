@@ -7,19 +7,15 @@
 #===============================================================================
 # This script automates the complete TurtleSim simulation setup and execution.
 # Updated for: ROS2 Jazzy Jalisco (Ubuntu 24.04 LTS)
-# FIXED: turtle_teleop_key now runs in foreground to preserve TTY access.
 #===============================================================================
 
-set -e  # Exit on error
+set -e 
 
-#-------------------------------------------------------------------------------
-# Color Definitions for Terminal Output
-#-------------------------------------------------------------------------------
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 #-------------------------------------------------------------------------------
 # Helper Functions
@@ -109,7 +105,6 @@ cleanup() {
     echo ""
     print_warning "Stopping TurtleSim simulation..."
     
-    # Kill turtlesim_node (runs in background)
     if [ -n "$TURTLESIM_PID" ]; then
         kill $TURTLESIM_PID 2>/dev/null || true
     fi
@@ -121,7 +116,6 @@ cleanup() {
     exit 0
 }
 
-# Register cleanup function for Ctrl+C and script exit
 trap cleanup SIGINT SIGTERM
 
 #-------------------------------------------------------------------------------
@@ -132,13 +126,11 @@ launch_simulation() {
     print_info "Launching TurtleSim simulation..."
     echo ""
     
-    # Launch turtlesim_node in background (GUI node, no keyboard input needed)
     print_info "Starting turtlesim_node..."
     ros2 run turtlesim turtlesim_node &
     TURTLESIM_PID=$!
     sleep 2
     
-    # Verify turtlesim_node is running
     if ps -p $TURTLESIM_PID > /dev/null; then
         print_success "turtlesim_node is running (PID: $TURTLESIM_PID)"
     else
@@ -194,9 +186,6 @@ display_instructions() {
 launch_teleop() {
     print_info "Starting turtle_teleop_key... (Press Ctrl+C to stop)"
     echo ""
-    
-    # IMPORTANT: Run in foreground to preserve TTY/keyboard access
-    # This is the fix for "Failed to get old console mode" error
     ros2 run turtlesim turtle_teleop_key
 }
 
@@ -215,10 +204,9 @@ main() {
     echo ""
     launch_simulation
     display_instructions
-    launch_teleop  # Runs in foreground, blocks until Ctrl+C
+    launch_teleop
     
     cleanup
 }
 
-# Execute main function
 main
