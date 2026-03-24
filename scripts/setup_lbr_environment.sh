@@ -122,13 +122,14 @@ installation_development_tools() {
 }
 
 workspace_creation() {
-    print_step "Creating workspace, cloning and installing dependencies"
+    print_step "Creating workspace in HOME directory"
     
+    WS_PATH="$HOME/lbr-stack"
     export FRI_CLIENT_VERSION=1.15
-    print_info "Exporting FRI client version: $FRI_CLIENT_VERSION"
-
-    print_info "Creating workspace directory: lbr-stack/src"
-    mkdir -p lbr-stack/src && cd lbr-stack || { print_error "Failed to enter workspace"; return 1; }
+    
+    print_info "Creating workspace directory: $WS_PATH/src"
+    mkdir -p "$WS_PATH/src"
+    cd "$WS_PATH" || { print_error "Failed to enter workspace"; return 1; }
 
     print_info "Cloning lbr_fri_ros2_stack | branch: jazzy"
     if [ ! -d "src/lbr_fri_ros2_stack" ]; then
@@ -145,11 +146,12 @@ workspace_creation() {
     rosdep update
     rosdep install --from-paths src -i -r -y --rosdistro jazzy
 
-    print_success "Workspace ready to be built with 'colcon build'"
+    print_success "Workspace ready at $WS_PATH"
 }
 
 colcon_build() {
     print_step "Building workspace with colcon"
+    cd "$HOME/lbr-stack"
     
     if colcon build --symlink-install; then
         print_success "Colcon build [OK]"
@@ -177,24 +179,6 @@ verify_build() {
     fi
 }
 
-mock_setup_iiwa7() {
-    print_step "Launching mock setup via bash"
-    source install/setup.bash
-    
-    print_info "Starting LBR Bringup Mock for iiwa7..."
-    ros2 launch lbr_bringup mock.launch.py model:=iiwa7 &
-    LAUNCH_PID=$!
-    
-    sleep 10
-    
-    if ps -p $LAUNCH_PID > /dev/null; then
-        print_success "Mock Setup running [OK]"
-    else
-        print_error "Mock Setup failed to launch."
-        exit 1
-    fi
-}
-
 main() {
     print_header
     check_prerequisites
@@ -202,7 +186,6 @@ main() {
     workspace_creation
     colcon_build
     verify_build
-    mock_setup_iiwa7
     print_step "Environment Setup Complete"
 
     print_info "In second terminal run setup_lbr_visualizer.sh"

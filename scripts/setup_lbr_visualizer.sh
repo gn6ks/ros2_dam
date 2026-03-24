@@ -11,7 +11,7 @@ NC='\033[0m'
 print_header() {
     echo -e "${BLUE}"
     echo "==============================================================================="
-    echo "  LBR_FRI_ROS2_Stack Environment setup script"
+    echo "  RViz visualizer"
     echo "  ROS2: From Simulation to Reality - Research Project"
     echo "  Author: gn6ks"
     echo "==============================================================================="
@@ -42,8 +42,10 @@ print_step() {
 }
 
 execute_rviz(){
-    print_step "Source setup.bash & launc lbr_bringup"
+    print_step "Source setup.bash & launch lbr_bringup"
 
+    cd ~/lbr-stack
+    source /opt/ros/jazzy/setup.bash
     source install/setup.bash
     ros2 launch lbr_bringup rviz.launch.py \
     rviz_cfg_pkg:=lbr_bringup \
@@ -51,3 +53,5 @@ execute_rviz(){
 
     print_success "rviz launch [OK]"
 }
+
+execute_rviz
