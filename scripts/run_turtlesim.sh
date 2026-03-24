@@ -5,10 +5,6 @@
 # Author: gn6ks
 # License: MIT
 #===============================================================================
-# This script automates the complete TurtleSim simulation setup and execution.
-# Updated for: ROS2 Jazzy Jalisco (Ubuntu 24.04 LTS)
-#===============================================================================
-
 set -e 
 
 RED='\033[0;31m'
