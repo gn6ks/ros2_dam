@@ -28,10 +28,7 @@ if [ -f ~/.bashrc ]; then
     source ~/.bashrc 2>/dev/null
 fi
 
-#-------------------------------------------------------------------------------
 # Verification Checks
-#-------------------------------------------------------------------------------
-
 if command -v ros2 &> /dev/null; then
     echo -e "${GREEN}✓${NC} ROS2: $(ros2 --version)"
 else

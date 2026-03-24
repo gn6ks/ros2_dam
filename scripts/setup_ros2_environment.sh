@@ -17,10 +17,7 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-#-------------------------------------------------------------------------------
 # Helper Functions
-#-------------------------------------------------------------------------------
-
 print_header() {
     echo -e "${BLUE}"
     echo "==============================================================================="
@@ -54,10 +51,7 @@ print_step() {
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
-#-------------------------------------------------------------------------------
 # Step 1: System Prerequisites Check
-#-------------------------------------------------------------------------------
-
 check_prerequisites() {
     print_step "System Prerequisites Check"
     
@@ -89,10 +83,7 @@ check_prerequisites() {
     fi
 }
 
-#-------------------------------------------------------------------------------
 # Step 2: System Update
-#-------------------------------------------------------------------------------
-
 update_system() {
     print_step "Updating System Packages"
     
@@ -105,10 +96,7 @@ update_system() {
     print_success "System updated successfully"
 }
 
-#-------------------------------------------------------------------------------
 # Step 3: Locale Configuration
-#-------------------------------------------------------------------------------
-
 configure_locale() {
     print_step "Configuring Locale Settings"
     
@@ -124,10 +112,7 @@ configure_locale() {
     print_success "Locale configured for UTF-8 support"
 }
 
-#-------------------------------------------------------------------------------
 # Step 4: ROS2 Repository Configuration
-#-------------------------------------------------------------------------------
-
 configure_ros2_repositories() {
     print_step "Configuring ROS2 Repository"
     
@@ -153,10 +138,7 @@ configure_ros2_repositories() {
     print_success "ROS2 repository configured successfully"
 }
 
-#-------------------------------------------------------------------------------
 # Step 5: ROS2 Installation
-#-------------------------------------------------------------------------------
-
 install_ros2() {
     print_step "Installing ROS2 Jazzy"
     
@@ -167,10 +149,7 @@ install_ros2() {
     print_success "ROS2 Jazzy installed successfully"
 }
 
-#-------------------------------------------------------------------------------
 # Step 6: Gazebo Harmonic Installation (OFFICIAL INSTRUCTIONS)
-#-------------------------------------------------------------------------------
-
 install_gazebo() {
     print_step "Installing Gazebo Harmonic"
     
@@ -198,10 +177,7 @@ install_gazebo() {
     print_success "Gazebo Harmonic installed successfully"
 }
 
-#-------------------------------------------------------------------------------
 # Step 7: Additional Tools Installation
-#-------------------------------------------------------------------------------
-
 install_additional_tools() {
     print_step "Installing Additional Development Tools"
     
@@ -228,10 +204,7 @@ install_additional_tools() {
     print_success "Additional tools installed successfully"
 }
 
-#-------------------------------------------------------------------------------
 # Step 8: Environment Configuration (.bashrc)
-#-------------------------------------------------------------------------------
-
 configure_environment() {
     print_step "Configuring Shell Environment"
     
@@ -274,10 +247,7 @@ configure_environment() {
     print_success "Shell environment configured successfully"
 }
 
-#-------------------------------------------------------------------------------
 # Step 9: Installation Verification
-#-------------------------------------------------------------------------------
-
 verify_installation() {
     print_step "Verifying Installation"
 
@@ -327,10 +297,7 @@ verify_installation() {
     print_success "All verifications passed"
 }
 
-#-------------------------------------------------------------------------------
 # Step 10: Display Summary and Next Steps
-#-------------------------------------------------------------------------------
-
 display_summary() {
     print_step "Installation Complete"
     
@@ -369,10 +336,7 @@ display_summary() {
     echo ""
 }
 
-#-------------------------------------------------------------------------------
 # Main Execution
-#-------------------------------------------------------------------------------
-
 main() {
     print_header
     echo ""

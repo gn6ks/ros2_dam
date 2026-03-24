@@ -17,10 +17,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-#-------------------------------------------------------------------------------
 # Helper Functions
-#-------------------------------------------------------------------------------
-
 print_header() {
     echo -e "${BLUE}"
     echo "==============================================================================="
@@ -46,10 +43,7 @@ print_info() {
     echo -e "${BLUE}ℹ $1${NC}"
 }
 
-#-------------------------------------------------------------------------------
 # Step 1: Verify ROS2 Environment
-#-------------------------------------------------------------------------------
-
 check_ros2_environment() {
     print_info "Checking ROS2 environment..."
     
@@ -63,10 +57,7 @@ check_ros2_environment() {
     print_success "ROS2 environment detected: $ROS_DISTRO"
 }
 
-#-------------------------------------------------------------------------------
 # Step 2: Verify/Install TurtleSim Package
-#-------------------------------------------------------------------------------
-
 check_turtlesim_installation() {
     print_info "Checking TurtleSim package installation..."
     
@@ -80,10 +71,7 @@ check_turtlesim_installation() {
     fi
 }
 
-#-------------------------------------------------------------------------------
 # Step 3: Verify/Install RQT Tools
-#-------------------------------------------------------------------------------
-
 check_rqt_installation() {
     print_info "Checking RQT tools installation..."
     
@@ -97,10 +85,7 @@ check_rqt_installation() {
     fi
 }
 
-#-------------------------------------------------------------------------------
 # Step 4: Cleanup Function (Trap for Ctrl+C)
-#-------------------------------------------------------------------------------
-
 cleanup() {
     echo ""
     print_warning "Stopping TurtleSim simulation..."
@@ -118,10 +103,7 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
-#-------------------------------------------------------------------------------
 # Step 5: Launch Simulation Nodes
-#-------------------------------------------------------------------------------
-
 launch_simulation() {
     print_info "Launching TurtleSim simulation..."
     echo ""
@@ -142,10 +124,7 @@ launch_simulation() {
     print_success "Simulation node launched successfully!"
 }
 
-#-------------------------------------------------------------------------------
 # Step 6: Display Usage Instructions
-#-------------------------------------------------------------------------------
-
 display_instructions() {
     echo ""
     echo "==============================================================================="
@@ -179,19 +158,12 @@ display_instructions() {
     echo ""
 }
 
-#-------------------------------------------------------------------------------
 # Step 7: Launch Teleop in Foreground (FIXED)
-#-------------------------------------------------------------------------------
-
 launch_teleop() {
     print_info "Starting turtle_teleop_key... (Press Ctrl+C to stop)"
     echo ""
     ros2 run turtlesim turtle_teleop_key
 }
-
-#-------------------------------------------------------------------------------
-# Main Execution
-#-------------------------------------------------------------------------------
 
 main() {
     print_header
