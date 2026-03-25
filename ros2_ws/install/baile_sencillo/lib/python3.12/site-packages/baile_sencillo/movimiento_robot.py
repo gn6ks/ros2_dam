@@ -7,7 +7,7 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 
 # Posiciones en radianes por articulación (A1..A7). ~1 rad ≈ 57°
 CERO      = [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
-BAILE_1   = [-1.5,  1.5, -1.5, 1.5,  1.5,  1.5,  2]   # inclinado izquierda
+BAILE_1   = [-1.5,  1.5, -1.5, 1.5,  1.5,  1.5,  2]   # inclinado izquierda, punto 1 de referencia??
 BAILE_2   = [1.5,  -1.5, 1.5, -1.5,  -1.5,  -1.5,  -2]   # inclinado derecha
 
 SECUENCIA_BAILE = [
@@ -25,7 +25,9 @@ class ClienteRobotIiwa7(Node):
     """
     Nodo ROS2 que controla el KUKA iiwa7 mediante la accion
     FollowJointTrajectory. Envia goals de posicion secuenciales
-    y espera confirmacion de cada uno antes de continuar.
+    y espera confirmacion de cada uno antes de continuar
+
+    param: nodo con el que hereda absolutamente todo
     """
 
     def __init__(self):
@@ -46,7 +48,7 @@ class ClienteRobotIiwa7(Node):
 
         :param posiciones: 7 floats en radianes, uno por articulacion A1-A7
         :param segundos:   tiempo maximo para completar el movimiento
-        :returns:          True si el movimiento fue exitoso, False si fallo
+        :returns:          true [OK] movimiento false [X] movimiento 
         """
         if len(posiciones) != 7:
             self.get_logger().error(f"7 positions required, only took {len(posiciones)}")
@@ -86,7 +88,7 @@ class ClienteRobotIiwa7(Node):
 
     def ejecutar_secuencia(self, secuencia: list, segundos_por_paso: int = 5):
         """
-        Ejecuta una lista de posiciones en orden.
+        Ejecuta una lista de posiciones en orden
 
         :param secuencia:         lista de objects¿? (posiciones, etiqueta)
         :param segundos_por_paso: tiempo por movimiento, aplicado a todos los pasos
