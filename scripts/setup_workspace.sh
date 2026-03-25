@@ -206,8 +206,10 @@ main() {
     print_step "Environment Setup Complete"
 
     print_info "Run a health check script ./verify_workspace.sh for safety"
-    print_info "CLOSE this script and run run_mockup.sh"
-    print_info "In second terminal run run_rviz.sh"
+    print_info "CLOSE this script and run run_mockup.sh to see iiwa7 r800 model MOCK UP"
+    print_info "In second terminal run run_rviz.sh to see iiwa7 r800 model MOCK UP"
+
+    print_success "Go to next part of chapter 5. Demos on Python | Gazebo Harmonic"
 }
 
 main
