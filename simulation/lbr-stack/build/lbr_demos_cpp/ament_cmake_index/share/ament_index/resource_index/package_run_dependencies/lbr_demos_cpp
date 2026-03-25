@@ -1,0 +1,1 @@
+control_msgs;fri_client_sdk;lbr_fri_idl;lbr_fri_ros2;rclcpp;rclcpp_action;sensor_msgs;trajectory_msgs;lbr_bringup;lbr_description;lbr_ros2_control;ament_lint_auto;ament_lint_common

@@ -1,0 +1,15 @@
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/ament_index/resource_index/package_run_dependencies/lbr_fri_ros2_stack
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/ament_index/resource_index/parent_prefix_path/lbr_fri_ros2_stack
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/environment/ament_prefix_path.sh
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/environment/ament_prefix_path.dsv
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/environment/path.sh
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/environment/path.dsv
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/local_setup.bash
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/local_setup.sh
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/local_setup.zsh
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/local_setup.dsv
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/package.dsv
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/ament_index/resource_index/packages/lbr_fri_ros2_stack
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/cmake/lbr_fri_ros2_stackConfig.cmake
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/cmake/lbr_fri_ros2_stackConfig-version.cmake
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2_stack/share/lbr_fri_ros2_stack/package.xml

@@ -1,0 +1,1 @@
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_ros2_control/ament_cmake_core/lbr_ros2_controlConfig.cmake

@@ -1,0 +1,22 @@
+[1.216s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/build --no-deps symlink_data
+[1.654s] running develop
+[1.946s] running egg_info
+[1.974s] writing lbr_moveit.egg-info/PKG-INFO
+[1.975s] writing dependency_links to lbr_moveit.egg-info/dependency_links.txt
+[1.975s] writing entry points to lbr_moveit.egg-info/entry_points.txt
+[1.975s] writing requirements to lbr_moveit.egg-info/requires.txt
+[1.975s] writing top-level names to lbr_moveit.egg-info/top_level.txt
+[1.975s] writing manifest file 'lbr_moveit.egg-info/SOURCES.txt'
+[2.039s] reading manifest file 'lbr_moveit.egg-info/SOURCES.txt'
+[2.039s] writing manifest file 'lbr_moveit.egg-info/SOURCES.txt'
+[2.070s] running build_ext
+[2.070s] Creating /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/lib/python3.12/site-packages/lbr-moveit.egg-link (link to .)
+[2.071s] Installing forward_keyboard script to /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/lib/lbr_moveit
+[2.071s] 
+[2.071s] Installed /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit
+[2.071s] running symlink_data
+[2.071s] symbolically linking /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/resource/lbr_moveit -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/share/ament_index/resource_index/packages
+[2.071s] symbolically linking /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/package.xml -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/share/lbr_moveit
+[2.071s] symbolically linking /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/config/forward_keyboard.yaml -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/share/lbr_moveit/config
+[2.071s] symbolically linking /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/launch/keyboard_driver.launch.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/share/lbr_moveit/launch
+[2.110s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/build --no-deps symlink_data

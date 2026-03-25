@@ -1,0 +1,334 @@
+[0.009s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl': CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig /usr/bin/cmake /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_idl -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl
+[0.073s] -- The C compiler identification is GNU 13.3.0
+[0.138s] -- The CXX compiler identification is GNU 13.3.0
+[0.154s] -- Detecting C compiler ABI info
+[0.244s] -- Detecting C compiler ABI info - done
+[0.254s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.255s] -- Detecting C compile features
+[0.255s] -- Detecting C compile features - done
+[0.264s] -- Detecting CXX compiler ABI info
+[0.366s] -- Detecting CXX compiler ABI info - done
+[0.377s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.377s] -- Detecting CXX compile features
+[0.377s] -- Detecting CXX compile features - done
+[0.382s] -- Found ament_cmake: 2.5.5 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[0.561s] -- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+[0.644s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.712s] -- Found builtin_interfaces: 2.0.3 (/opt/ros/jazzy/share/builtin_interfaces/cmake)
+[0.772s] -- Found rosidl_generator_c: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+[0.794s] -- Found rosidl_generator_cpp: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+[0.818s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.847s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.872s] -- Found rosidl_default_generators: 1.6.0 (/opt/ros/jazzy/share/rosidl_default_generators/cmake)
+[0.895s] -- Found rosidl_adapter: 4.6.7 (/opt/ros/jazzy/share/rosidl_adapter/cmake)
+[1.612s] -- Found ament_cmake_cppcheck: 0.17.4 (/opt/ros/jazzy/share/ament_cmake_cppcheck/cmake)
+[1.616s] -- Found ament_cmake_cpplint: 0.17.4 (/opt/ros/jazzy/share/ament_cmake_cpplint/cmake)
+[1.621s] -- Found ament_cmake_uncrustify: 0.17.4 (/opt/ros/jazzy/share/ament_cmake_uncrustify/cmake)
+[1.626s] -- Found ament_cmake_ros: 0.12.0 (/opt/ros/jazzy/share/ament_cmake_ros/cmake)
+[2.469s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[2.807s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[2.814s] -- Found python_cmake_module: 0.11.1 (/opt/ros/jazzy/share/python_cmake_module/cmake)
+[2.974s] -- Found PythonExtra: /usr/bin/python3  
+[3.474s] -- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter Development NumPy Development.Module Development.Embed 
+[3.546s] -- Found ament_cmake_flake8: 0.17.4 (/opt/ros/jazzy/share/ament_cmake_flake8/cmake)
+[3.557s] -- Found ament_cmake_pep257: 0.17.4 (/opt/ros/jazzy/share/ament_cmake_pep257/cmake)
+[3.572s] -- Found gtest sources under '/opt/ros/jazzy/src/gtest_vendor': C++ tests using 'Google Test' will be built
+[3.575s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[3.687s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[3.688s] -- Found Threads: TRUE  
+[3.704s] -- Configuring done (3.7s)
+[3.767s] -- Generating done (0.0s)
+[3.782s] -- Build files have been written to: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl
+[3.794s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl' returned '0': CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig /usr/bin/cmake /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_idl -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl
+[3.795s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl': CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig /usr/bin/cmake --build /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl -- -j12 -l12
+[3.861s] [  3%] [32mBuilding CXX object gtest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o[0m
+[3.861s] [  3%] [34m[1mGenerating type hashes for ROS interfaces[0m
+[3.861s] [  3%] [32mBuilding CXX object gtest/CMakeFiles/gtest.dir/src/gtest-all.cc.o[0m
+[3.870s] [  3%] Built target ament_cmake_python_symlink_lbr_fri_idl
+[4.154s] running egg_info
+[4.184s] writing lbr_fri_idl.egg-info/PKG-INFO
+[4.184s] writing dependency_links to lbr_fri_idl.egg-info/dependency_links.txt
+[4.185s] writing top-level names to lbr_fri_idl.egg-info/top_level.txt
+[4.185s] writing manifest file 'lbr_fri_idl.egg-info/SOURCES.txt'
+[4.258s] [  3%] Built target lbr_fri_idl__rosidl_generator_type_description
+[4.271s] [  5%] [34m[1mGenerating C code for ROS interfaces[0m
+[4.276s] reading manifest file 'lbr_fri_idl.egg-info/SOURCES.txt'
+[4.276s] writing manifest file 'lbr_fri_idl.egg-info/SOURCES.txt'
+[4.281s] [  6%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[4.311s] [  6%] Built target ament_cmake_python_build_lbr_fri_idl_egg
+[4.661s] [  7%] [32m[1mLinking CXX static library libgtest_main.a[0m
+[4.700s] [  7%] Built target gtest_main
+[4.872s] [  7%] Built target lbr_fri_idl__cpp
+[5.005s] [ 11%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_command__functions.c.o[0m
+[5.005s] [ 11%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_command__description.c.o[0m
+[5.005s] [ 11%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_joint_position_command__description.c.o[0m
+[5.005s] [ 12%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_joint_position_command__type_support.c.o[0m
+[5.005s] [ 13%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_state__functions.c.o[0m
+[5.006s] [ 15%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_state__type_support.c.o[0m
+[5.006s] [ 16%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_torque_command__description.c.o[0m
+[5.006s] [ 17%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_joint_position_command__functions.c.o[0m
+[5.006s] [ 18%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_torque_command__functions.c.o[0m
+[5.012s] [ 21%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_state__description.c.o[0m
+[5.012s] [ 21%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_command__type_support.c.o[0m
+[5.072s] [ 22%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_wrench_command__functions.c.o[0m
+[5.074s] [ 23%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_torque_command__type_support.c.o[0m
+[5.076s] [ 25%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_wrench_command__description.c.o[0m
+[5.086s] [ 26%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_c.dir/rosidl_generator_c/lbr_fri_idl/msg/detail/lbr_wrench_command__type_support.c.o[0m
+[5.195s] [ 27%] [32m[1mLinking C shared library liblbr_fri_idl__rosidl_generator_c.so[0m
+[5.249s] [ 27%] Built target lbr_fri_idl__rosidl_generator_c
+[5.261s] [ 30%] [34m[1mGenerating C++ introspection for ROS interfaces[0m
+[5.262s] [ 30%] [34m[1mGenerating C type support for eProsima Fast-RTPS[0m
+[5.264s] [ 31%] [34m[1mGenerating C++ type support dispatch for ROS interfaces[0m
+[5.265s] [ 32%] [34m[1mGenerating C++ type support for eProsima Fast-RTPS[0m
+[5.267s] [ 33%] [34m[1mGenerating C introspection for ROS interfaces[0m
+[5.267s] [ 35%] [34m[1mGenerating C type support dispatch for ROS interfaces[0m
+[5.786s] [ 38%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/lbr_fri_idl/msg/detail/lbr_state__type_support.cpp.o[0m
+[5.787s] [ 38%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/lbr_fri_idl/msg/detail/lbr_joint_position_command__type_support.cpp.o[0m
+[5.787s] [ 38%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/lbr_fri_idl/msg/detail/lbr_command__type_support.cpp.o[0m
+[5.787s] [ 40%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/lbr_fri_idl/msg/detail/lbr_torque_command__type_support.cpp.o[0m
+[5.787s] [ 41%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/lbr_fri_idl/msg/detail/lbr_wrench_command__type_support.cpp.o[0m
+[6.087s] [ 42%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/lbr_fri_idl/msg/detail/lbr_command__type_support_c.cpp.o[0m
+[6.110s] [ 43%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/lbr_fri_idl/msg/detail/lbr_joint_position_command__type_support_c.cpp.o[0m
+[6.191s] [ 45%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_c.dir/rosidl_typesupport_c/lbr_fri_idl/msg/lbr_command__type_support.cpp.o[0m
+[6.205s] [ 46%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/lbr_fri_idl/msg/lbr_command__type_support.cpp.o[0m
+[6.280s] [ 47%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_c.dir/rosidl_typesupport_c/lbr_fri_idl/msg/lbr_joint_position_command__type_support.cpp.o[0m
+[6.382s] [ 48%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_c.dir/rosidl_typesupport_c/lbr_fri_idl/msg/lbr_state__type_support.cpp.o[0m
+[6.436s] [ 50%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/lbr_fri_idl/msg/detail/lbr_command__type_support.c.o[0m
+[6.443s] [ 51%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/lbr_fri_idl/msg/lbr_joint_position_command__type_support.cpp.o[0m
+[6.452s] [ 52%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/lbr_fri_idl/msg/detail/lbr_joint_position_command__type_support.c.o[0m
+[6.454s] [ 53%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/lbr_fri_idl/msg/lbr_state__type_support.cpp.o[0m
+[6.474s] [ 55%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_c.dir/rosidl_typesupport_c/lbr_fri_idl/msg/lbr_torque_command__type_support.cpp.o[0m
+[6.504s] [ 56%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/lbr_fri_idl/msg/detail/lbr_state__type_support_c.cpp.o[0m
+[6.513s] [ 57%] [32m[1mLinking CXX shared library liblbr_fri_idl__rosidl_typesupport_introspection_cpp.so[0m
+[6.517s] [ 58%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/lbr_fri_idl/msg/detail/dds_fastrtps/lbr_command__type_support.cpp.o[0m
+[6.526s] [ 60%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/lbr_fri_idl/msg/detail/dds_fastrtps/lbr_joint_position_command__type_support.cpp.o[0m
+[6.549s] [ 61%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/lbr_fri_idl/msg/detail/lbr_state__type_support.c.o[0m
+[6.567s] [ 62%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_c.dir/rosidl_typesupport_c/lbr_fri_idl/msg/lbr_wrench_command__type_support.cpp.o[0m
+[6.587s] [ 62%] Built target lbr_fri_idl__rosidl_typesupport_introspection_cpp
+[6.603s] [ 63%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/lbr_fri_idl/msg/detail/lbr_torque_command__type_support_c.cpp.o[0m
+[6.656s] [ 65%] [32m[1mLinking CXX shared library liblbr_fri_idl__rosidl_typesupport_c.so[0m
+[6.756s] [ 66%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/lbr_fri_idl/msg/detail/lbr_torque_command__type_support.c.o[0m
+[6.797s] [ 66%] Built target lbr_fri_idl__rosidl_typesupport_c
+[6.822s] [ 67%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/lbr_fri_idl/msg/lbr_torque_command__type_support.cpp.o[0m
+[6.851s] [ 68%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/lbr_fri_idl/msg/detail/lbr_wrench_command__type_support.c.o[0m
+[6.864s] [ 70%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/lbr_fri_idl/msg/lbr_wrench_command__type_support.cpp.o[0m
+[6.942s] [ 71%] [32m[1mLinking C shared library liblbr_fri_idl__rosidl_typesupport_introspection_c.so[0m
+[6.998s] [ 71%] Built target lbr_fri_idl__rosidl_typesupport_introspection_c
+[7.016s] [ 72%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/lbr_fri_idl/msg/detail/dds_fastrtps/lbr_state__type_support.cpp.o[0m
+[7.063s] [ 73%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/lbr_fri_idl/msg/detail/lbr_wrench_command__type_support_c.cpp.o[0m
+[7.097s] [ 75%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/lbr_fri_idl/msg/detail/dds_fastrtps/lbr_torque_command__type_support.cpp.o[0m
+[7.152s] [ 76%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/lbr_fri_idl/msg/detail/dds_fastrtps/lbr_wrench_command__type_support.cpp.o[0m
+[7.500s] [ 77%] [32m[1mLinking CXX shared library liblbr_fri_idl__rosidl_typesupport_cpp.so[0m
+[7.554s] [ 77%] Built target lbr_fri_idl__rosidl_typesupport_cpp
+[7.811s] [ 78%] [32m[1mLinking CXX shared library liblbr_fri_idl__rosidl_typesupport_fastrtps_c.so[0m
+[7.864s] [ 78%] Built target lbr_fri_idl__rosidl_typesupport_fastrtps_c
+[7.908s] [ 80%] [32m[1mLinking CXX shared library liblbr_fri_idl__rosidl_typesupport_fastrtps_cpp.so[0m
+[7.975s] [ 80%] Built target lbr_fri_idl__rosidl_typesupport_fastrtps_cpp
+[8.002s] [ 80%] Built target lbr_fri_idl
+[8.029s] [ 81%] [34m[1mGenerating Python code for ROS interfaces[0m
+[8.945s] [ 81%] Built target lbr_fri_idl__py
+[8.970s] [ 85%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_py.dir/rosidl_generator_py/lbr_fri_idl/msg/_lbr_torque_command_s.c.o[0m
+[8.970s] [ 85%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_py.dir/rosidl_generator_py/lbr_fri_idl/msg/_lbr_joint_position_command_s.c.o[0m
+[8.970s] [ 85%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_py.dir/rosidl_generator_py/lbr_fri_idl/msg/_lbr_command_s.c.o[0m
+[8.971s] [ 86%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_py.dir/rosidl_generator_py/lbr_fri_idl/msg/_lbr_wrench_command_s.c.o[0m
+[8.974s] [ 87%] [32mBuilding C object CMakeFiles/lbr_fri_idl__rosidl_generator_py.dir/rosidl_generator_py/lbr_fri_idl/msg/_lbr_state_s.c.o[0m
+[9.301s] [ 88%] [32m[1mLinking C shared library liblbr_fri_idl__rosidl_generator_py.so[0m
+[9.355s] [ 88%] Built target lbr_fri_idl__rosidl_generator_py
+[9.378s] [ 90%] [32mBuilding C object CMakeFiles/lbr_fri_idl_s__rosidl_typesupport_fastrtps_c.dir/rosidl_generator_py/lbr_fri_idl/_lbr_fri_idl_s.ep.rosidl_typesupport_fastrtps_c.c.o[0m
+[9.380s] [ 91%] [32mBuilding C object CMakeFiles/lbr_fri_idl_s__rosidl_typesupport_c.dir/rosidl_generator_py/lbr_fri_idl/_lbr_fri_idl_s.ep.rosidl_typesupport_c.c.o[0m
+[9.380s] [ 92%] [32mBuilding C object CMakeFiles/lbr_fri_idl_s__rosidl_typesupport_introspection_c.dir/rosidl_generator_py/lbr_fri_idl/_lbr_fri_idl_s.ep.rosidl_typesupport_introspection_c.c.o[0m
+[9.561s] [ 93%] [32m[1mLinking C shared module rosidl_generator_py/lbr_fri_idl/lbr_fri_idl_s__rosidl_typesupport_introspection_c.so[0m
+[9.572s] [ 95%] [32m[1mLinking C shared module rosidl_generator_py/lbr_fri_idl/lbr_fri_idl_s__rosidl_typesupport_c.so[0m
+[9.572s] [ 96%] [32m[1mLinking C shared module rosidl_generator_py/lbr_fri_idl/lbr_fri_idl_s__rosidl_typesupport_fastrtps_c.so[0m
+[9.595s] [ 96%] Built target lbr_fri_idl_s__rosidl_typesupport_introspection_c
+[9.607s] [ 96%] Built target lbr_fri_idl_s__rosidl_typesupport_c
+[9.611s] [ 96%] Built target lbr_fri_idl_s__rosidl_typesupport_fastrtps_c
+[13.871s] [ 97%] [32m[1mLinking CXX static library libgtest.a[0m
+[13.921s] [ 97%] Built target gtest
+[13.949s] [ 98%] [32mBuilding CXX object CMakeFiles/lbr_fri_idl_test_command_interfaces.dir/test/test_command_interfaces.cpp.o[0m
+[15.192s] [100%] [32m[1mLinking CXX executable lbr_fri_idl_test_command_interfaces[0m
+[15.295s] [100%] Built target lbr_fri_idl_test_command_interfaces
+[15.312s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl' returned '0': CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig /usr/bin/cmake --build /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl -- -j12 -l12
+[15.314s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl': CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig /usr/bin/cmake --install /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl
+[15.325s] -- Install configuration: "Release"
+[15.326s] -- Execute custom install script
+[15.326s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/ament_index/resource_index/rosidl_interfaces/lbr_fri_idl
+[15.339s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRCommand.json
+[15.350s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRJointPositionCommand.json
+[15.361s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRState.json
+[15.373s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRTorqueCommand.json
+[15.385s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRWrenchCommand.json
+[15.397s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__functions.h
+[15.408s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__struct.h
+[15.422s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__type_support.h
+[15.433s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__functions.h
+[15.445s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__struct.h
+[15.456s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__type_support.h
+[15.467s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__functions.h
+[15.480s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__struct.h
+[15.493s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__type_support.h
+[15.504s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__functions.h
+[15.515s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__struct.h
+[15.527s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__type_support.h
+[15.538s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__functions.h
+[15.549s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__struct.h
+[15.560s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__type_support.h
+[15.573s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/lbr_command.h
+[15.586s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/lbr_joint_position_command.h
+[15.598s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/lbr_state.h
+[15.610s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/lbr_torque_command.h
+[15.622s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/lbr_wrench_command.h
+[15.633s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/rosidl_generator_c__visibility_control.h
+[15.644s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/environment/library_path.sh
+[15.655s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/environment/library_path.dsv
+[15.667s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__rosidl_typesupport_fastrtps_c.h
+[15.679s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__rosidl_typesupport_fastrtps_c.h
+[15.691s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__rosidl_typesupport_fastrtps_c.h
+[15.702s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__rosidl_typesupport_fastrtps_c.h
+[15.713s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__rosidl_typesupport_fastrtps_c.h
+[15.724s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[15.735s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__builder.hpp
+[15.746s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__struct.hpp
+[15.758s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__traits.hpp
+[15.769s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__type_support.hpp
+[15.783s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__builder.hpp
+[15.794s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__struct.hpp
+[15.806s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__traits.hpp
+[15.817s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__type_support.hpp
+[15.827s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__builder.hpp
+[15.839s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__struct.hpp
+[15.850s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__traits.hpp
+[15.863s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__type_support.hpp
+[15.874s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__builder.hpp
+[15.887s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__struct.hpp
+[15.897s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__traits.hpp
+[15.906s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__type_support.hpp
+[15.918s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__builder.hpp
+[15.928s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__struct.hpp
+[15.939s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__traits.hpp
+[15.949s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__type_support.hpp
+[15.959s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/lbr_command.hpp
+[15.968s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/lbr_joint_position_command.hpp
+[15.980s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/lbr_state.hpp
+[15.991s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/lbr_torque_command.hpp
+[16.001s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/lbr_wrench_command.hpp
+[16.010s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/rosidl_generator_cpp__visibility_control.hpp
+[16.020s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__rosidl_typesupport_fastrtps_cpp.hpp
+[16.031s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__rosidl_typesupport_fastrtps_cpp.hpp
+[16.041s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__rosidl_typesupport_fastrtps_cpp.hpp
+[16.050s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__rosidl_typesupport_fastrtps_cpp.hpp
+[16.059s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__rosidl_typesupport_fastrtps_cpp.hpp
+[16.068s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[16.082s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__rosidl_typesupport_introspection_c.h
+[16.093s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__rosidl_typesupport_introspection_c.h
+[16.104s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__rosidl_typesupport_introspection_c.h
+[16.116s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__rosidl_typesupport_introspection_c.h
+[16.127s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__rosidl_typesupport_introspection_c.h
+[16.138s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[16.149s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_command__rosidl_typesupport_introspection_cpp.hpp
+[16.160s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_joint_position_command__rosidl_typesupport_introspection_cpp.hpp
+[16.171s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_state__rosidl_typesupport_introspection_cpp.hpp
+[16.184s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_torque_command__rosidl_typesupport_introspection_cpp.hpp
+[16.195s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/include/lbr_fri_idl/lbr_fri_idl/msg/detail/lbr_wrench_command__rosidl_typesupport_introspection_cpp.hpp
+[16.206s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/environment/pythonpath.sh
+[16.217s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/environment/pythonpath.dsv
+[16.229s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl-1.5.0-py3.12.egg-info/PKG-INFO
+[16.239s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl-1.5.0-py3.12.egg-info/SOURCES.txt
+[16.250s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl-1.5.0-py3.12.egg-info/dependency_links.txt
+[16.261s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl-1.5.0-py3.12.egg-info/top_level.txt
+[16.273s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/__init__.py
+[16.285s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/_lbr_fri_idl_s.ep.rosidl_typesupport_c.c
+[16.297s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/_lbr_fri_idl_s.ep.rosidl_typesupport_fastrtps_c.c
+[16.308s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/_lbr_fri_idl_s.ep.rosidl_typesupport_introspection_c.c
+[16.319s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/lbr_fri_idl_s__rosidl_typesupport_c.so
+[16.329s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/lbr_fri_idl_s__rosidl_typesupport_fastrtps_c.so
+[16.341s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/lbr_fri_idl_s__rosidl_typesupport_introspection_c.so
+[16.351s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/__init__.py
+[16.362s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_command.py
+[16.374s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_command_s.c
+[16.386s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_joint_position_command.py
+[16.399s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_joint_position_command_s.c
+[16.411s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_state.py
+[16.422s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_state_s.c
+[16.433s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_torque_command.py
+[16.445s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_torque_command_s.c
+[16.456s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_wrench_command.py
+[16.467s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_wrench_command_s.c
+[16.479s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/lbr_fri_idl_s__rosidl_typesupport_fastrtps_c.so
+[16.480s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/lbr_fri_idl_s__rosidl_typesupport_introspection_c.so
+[16.480s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/lbr_fri_idl_s__rosidl_typesupport_c.so
+[16.481s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRCommand.idl
+[16.494s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRJointPositionCommand.idl
+[16.505s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRState.idl
+[16.516s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRTorqueCommand.idl
+[16.527s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRWrenchCommand.idl
+[16.540s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRCommand.msg
+[16.551s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRJointPositionCommand.msg
+[16.562s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRState.msg
+[16.574s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRTorqueCommand.msg
+[16.587s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/msg/LBRWrenchCommand.msg
+[16.598s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/ament_index/resource_index/package_run_dependencies/lbr_fri_idl
+[16.611s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/ament_index/resource_index/parent_prefix_path/lbr_fri_idl
+[16.622s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/environment/ament_prefix_path.sh
+[16.633s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/environment/ament_prefix_path.dsv
+[16.645s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/environment/path.sh
+[16.657s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/environment/path.dsv
+[16.668s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/local_setup.bash
+[16.681s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/local_setup.sh
+[16.692s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/local_setup.zsh
+[16.704s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/local_setup.dsv
+[16.715s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/package.dsv
+[16.727s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/ament_index/resource_index/packages/lbr_fri_idl
+[16.738s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/rosidl_cmake-extras.cmake
+[16.750s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/ament_cmake_export_dependencies-extras.cmake
+[16.761s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/ament_cmake_export_include_directories-extras.cmake
+[16.772s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/ament_cmake_export_libraries-extras.cmake
+[16.784s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/ament_cmake_export_targets-extras.cmake
+[16.796s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[16.807s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[16.818s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/lbr_fri_idlConfig.cmake
+[16.830s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/lbr_fri_idlConfig-version.cmake
+[16.841s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/package.xml
+[16.852s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_generator_c.so
+[16.852s] -- Set non-toolchain portion of runtime path of "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_generator_c.so" to ""
+[16.853s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_fastrtps_c.so
+[16.853s] -- Set non-toolchain portion of runtime path of "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_fastrtps_c.so" to ""
+[16.853s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_fastrtps_cpp.so
+[16.854s] -- Set non-toolchain portion of runtime path of "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_fastrtps_cpp.so" to ""
+[16.854s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_introspection_c.so
+[16.854s] -- Set non-toolchain portion of runtime path of "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_introspection_c.so" to ""
+[16.855s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_c.so
+[16.855s] -- Set non-toolchain portion of runtime path of "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_c.so" to ""
+[16.855s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_introspection_cpp.so
+[16.855s] -- Set non-toolchain portion of runtime path of "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_introspection_cpp.so" to ""
+[16.856s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_cpp.so
+[16.856s] -- Set non-toolchain portion of runtime path of "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_typesupport_cpp.so" to ""
+[16.913s] Listing '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl'...
+[16.914s] Compiling '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/__init__.py'...
+[16.914s] Listing '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg'...
+[16.914s] Compiling '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/__init__.py'...
+[16.914s] Compiling '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_command.py'...
+[16.914s] Compiling '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_joint_position_command.py'...
+[16.915s] Compiling '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_state.py'...
+[16.915s] Compiling '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_torque_command.py'...
+[16.915s] Compiling '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages/lbr_fri_idl/msg/_lbr_wrench_command.py'...
+[16.920s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_generator_py.so
+[16.921s] -- Set non-toolchain portion of runtime path of "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/liblbr_fri_idl__rosidl_generator_py.so" to ""
+[16.922s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/export_lbr_fri_idl__rosidl_generator_cExport.cmake
+[16.922s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/export_lbr_fri_idl__rosidl_generator_cExport-release.cmake
+[16.922s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/export_lbr_fri_idl__rosidl_typesupport_fastrtps_cExport.cmake
+[16.923s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/export_lbr_fri_idl__rosidl_typesupport_fastrtps_cExport-release.cmake
+[16.923s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/export_lbr_fri_idl__rosidl_generator_cppExport.cmake
+[16.924s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/export_lbr_fri_idl__rosidl_typesupport_fastrtps_cppExport.cmake
+[16.924s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/export_lbr_fri_idl__rosidl_typesupport_fastrtps_cppExport-release.cmake
+[16.924s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/lbr_fri_idl__rosidl_typesupport_introspection_cExport.cmake
+[16.925s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/lbr_fri_idl__rosidl_typesupport_introspection_cExport-release.cmake
+[16.925s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/lbr_fri_idl__rosidl_typesupport_cExport.cmake
+[16.925s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/lbr_fri_idl__rosidl_typesupport_cExport-release.cmake
+[16.926s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/lbr_fri_idl__rosidl_typesupport_introspection_cppExport.cmake
+[16.926s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/lbr_fri_idl__rosidl_typesupport_introspection_cppExport-release.cmake
+[16.926s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/lbr_fri_idl__rosidl_typesupport_cppExport.cmake
+[16.927s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/lbr_fri_idl__rosidl_typesupport_cppExport-release.cmake
+[16.927s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/export_lbr_fri_idl__rosidl_generator_pyExport.cmake
+[16.928s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake/export_lbr_fri_idl__rosidl_generator_pyExport-release.cmake
+[16.933s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl' returned '0': CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig /usr/bin/cmake --install /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl

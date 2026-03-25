@@ -1,0 +1,21 @@
+running develop
+running egg_info
+writing lbr_demos_py.egg-info/PKG-INFO
+writing dependency_links to lbr_demos_py.egg-info/dependency_links.txt
+writing entry points to lbr_demos_py.egg-info/entry_points.txt
+writing requirements to lbr_demos_py.egg-info/requires.txt
+writing top-level names to lbr_demos_py.egg-info/top_level.txt
+writing manifest file 'lbr_demos_py.egg-info/SOURCES.txt'
+reading manifest file 'lbr_demos_py.egg-info/SOURCES.txt'
+writing manifest file 'lbr_demos_py.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py/lib/python3.12/site-packages/lbr-demos-py.egg-link (link to .)
+Installing joint_sine_overlay script to /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py/lib/lbr_demos_py
+Installing joint_trajectory_client script to /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py/lib/lbr_demos_py
+Installing torque_sine_overlay script to /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py/lib/lbr_demos_py
+Installing wrench_sine_overlay script to /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py/lib/lbr_demos_py
+
+Installed /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_py
+running symlink_data
+symbolically linking /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_py/resource/lbr_demos_py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py/share/ament_index/resource_index/packages
+symbolically linking /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_py/package.xml -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py/share/lbr_demos_py

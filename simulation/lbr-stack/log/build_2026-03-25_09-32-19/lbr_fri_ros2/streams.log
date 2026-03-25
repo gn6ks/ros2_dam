@@ -1,0 +1,115 @@
+[0.023s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2': AMENT_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig PYTHONPATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_fri_ros2 -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2
+[0.097s] -- The C compiler identification is GNU 13.3.0
+[0.161s] -- The CXX compiler identification is GNU 13.3.0
+[0.181s] -- Detecting C compiler ABI info
+[0.299s] -- Detecting C compiler ABI info - done
+[0.313s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.313s] -- Detecting C compile features
+[0.313s] -- Detecting C compile features - done
+[0.325s] -- Detecting CXX compiler ABI info
+[0.459s] -- Detecting CXX compiler ABI info - done
+[0.490s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.491s] -- Detecting CXX compile features
+[0.493s] -- Detecting CXX compile features - done
+[0.503s] -- Found ament_cmake: 2.5.5 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[0.728s] -- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+[0.814s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.921s] -- Found eigen3_cmake_module: 0.3.0 (/opt/ros/jazzy/share/eigen3_cmake_module/cmake)
+[0.932s] -- Found Eigen3: TRUE (found version "3.4.0") 
+[0.937s] -- Found geometry_msgs: 5.3.6 (/opt/ros/jazzy/share/geometry_msgs/cmake)
+[1.006s] -- Found rosidl_generator_c: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+[1.029s] -- Found rosidl_generator_cpp: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+[1.054s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.082s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.150s] -- Found kdl_parser: 2.11.0 (/opt/ros/jazzy/share/kdl_parser/cmake)
+[1.163s] -- Ensuring Eigen3 include directory is part of orocos-kdl CMake target
+[1.168s] -- Found lbr_fri_idl: 1.5.0 (/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake)
+[1.190s] -- Found rclcpp: 28.1.16 (/opt/ros/jazzy/share/rclcpp/cmake)
+[1.286s] -- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+[1.291s] -- Found rmw_fastrtps_cpp: 8.4.3 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)
+[1.404s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.13")  
+[1.430s] -- Found FastRTPS: /opt/ros/jazzy/include (Required is at least version "2.13") 
+[1.457s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[1.562s] -- Found realtime_tools: 3.10.1 (/opt/ros/jazzy/share/realtime_tools/cmake)
+[1.782s] -- Found urdf: 2.10.0 (/opt/ros/jazzy/share/urdf/cmake)
+[1.835s] -- Found ament_cmake_gtest: 2.5.5 (/opt/ros/jazzy/share/ament_cmake_gtest/cmake)
+[1.840s] -- Found gtest sources under '/opt/ros/jazzy/src/gtest_vendor': C++ tests using 'Google Test' will be built
+[1.844s] -- Found Threads: TRUE  
+[1.955s] -- Configuring done (1.9s)
+[1.984s] -- Generating done (0.0s)
+[1.993s] -- Build files have been written to: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2
+[2.008s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2' returned '0': AMENT_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig PYTHONPATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_fri_ros2 -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2
+[2.010s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2': AMENT_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig PYTHONPATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2 -- -j12 -l12
+[2.085s] [ 18%] [32mBuilding CXX object gtest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o[0m
+[2.086s] [ 18%] [32mBuilding CXX object gtest/CMakeFiles/gtest.dir/src/gtest-all.cc.o[0m
+[2.086s] [ 18%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/guards/command_guard.cpp.o[0m
+[2.086s] [ 18%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/guards/state_guard.cpp.o[0m
+[2.087s] [ 22%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/interfaces/base_command.cpp.o[0m
+[2.087s] [ 27%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/interfaces/position_command.cpp.o[0m
+[2.087s] [ 31%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/interfaces/state.cpp.o[0m
+[2.087s] [ 36%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/interfaces/torque_command.cpp.o[0m
+[2.087s] [ 40%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/interfaces/wrench_command.cpp.o[0m
+[2.088s] [ 45%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/app.cpp.o[0m
+[2.088s] [ 50%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/async_client.cpp.o[0m
+[2.088s] [ 54%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/control.cpp.o[0m
+[3.897s] [ 59%] [32m[1mLinking CXX static library libgtest_main.a[0m
+[3.956s] [ 59%] Built target gtest_main
+[3.972s] [ 63%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/filters.cpp.o[0m
+[4.105s] [ 68%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/kinematics.cpp.o[0m
+[4.148s] [ 72%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/math.cpp.o[0m
+[4.244s] [ 77%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/worker.cpp.o[0m
+[4.621s] [ 81%] [32mBuilding CXX object CMakeFiles/lbr_fri_ros2.dir/src/wrench_estimator.cpp.o[0m
+[13.372s] [ 86%] [32m[1mLinking CXX static library libgtest.a[0m
+[13.422s] [ 86%] Built target gtest
+[19.305s] [ 90%] [32m[1mLinking CXX shared library liblbr_fri_ros2.so[0m
+[19.457s] [ 90%] Built target lbr_fri_ros2
+[19.485s] [ 95%] [32mBuilding CXX object CMakeFiles/test_command_interfaces.dir/test/test_command_interfaces.cpp.o[0m
+[21.613s] [100%] [32m[1mLinking CXX executable test_command_interfaces[0m
+[21.769s] [100%] Built target test_command_interfaces
+[21.784s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2' returned '0': AMENT_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig PYTHONPATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --build /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2 -- -j12 -l12
+[21.786s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2': AMENT_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig PYTHONPATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --install /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2
+[21.797s] -- Install configuration: "Release"
+[21.798s] -- Execute custom install script
+[21.798s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/environment/library_path.sh
+[21.808s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/environment/library_path.dsv
+[21.818s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/app.hpp
+[21.828s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/async_client.hpp
+[21.837s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/control.hpp
+[21.846s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/filters.hpp
+[21.859s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/formatting.hpp
+[21.870s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/guards/command_guard.hpp
+[21.882s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/guards/state_guard.hpp
+[21.895s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/interfaces/base_command.hpp
+[21.906s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/interfaces/position_command.hpp
+[21.917s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/interfaces/state.hpp
+[21.928s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/interfaces/torque_command.hpp
+[21.942s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/interfaces/wrench_command.hpp
+[21.953s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/kinematics.hpp
+[21.964s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/math.hpp
+[21.974s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/pinv.hpp
+[21.986s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/types.hpp
+[21.998s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/utils.hpp
+[22.009s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/worker.hpp
+[22.020s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/include/lbr_fri_ros2/wrench_estimator.hpp
+[22.031s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/ament_index/resource_index/package_run_dependencies/lbr_fri_ros2
+[22.042s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/ament_index/resource_index/parent_prefix_path/lbr_fri_ros2
+[22.053s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/environment/ament_prefix_path.sh
+[22.064s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/environment/ament_prefix_path.dsv
+[22.077s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/environment/path.sh
+[22.091s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/environment/path.dsv
+[22.103s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/local_setup.bash
+[22.117s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/local_setup.sh
+[22.129s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/local_setup.zsh
+[22.141s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/local_setup.dsv
+[22.153s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/package.dsv
+[22.164s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/ament_index/resource_index/packages/lbr_fri_ros2
+[22.175s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/cmake/ament_cmake_export_targets-extras.cmake
+[22.187s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/cmake/ament_cmake_export_dependencies-extras.cmake
+[22.199s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/cmake/lbr_fri_ros2Config.cmake
+[22.210s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/cmake/lbr_fri_ros2Config-version.cmake
+[22.221s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/package.xml
+[22.232s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/lib/liblbr_fri_ros2.so
+[22.233s] -- Set non-toolchain portion of runtime path of "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/lib/liblbr_fri_ros2.so" to ""
+[22.233s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/cmake/lbr_fri_ros2_exportExport.cmake
+[22.234s] -- Installing: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/cmake/lbr_fri_ros2_exportExport-release.cmake
+[22.237s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2' returned '0': AMENT_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk:/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib:${LD_LIBRARY_PATH} PKG_CONFIG_PATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/x86_64-linux-gnu/pkgconfig:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/pkgconfig PYTHONPATH=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/cmake --install /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2

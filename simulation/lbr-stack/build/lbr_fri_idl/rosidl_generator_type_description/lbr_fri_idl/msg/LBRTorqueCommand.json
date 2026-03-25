@@ -1,0 +1,36 @@
+{
+  "type_description_msg": {
+    "type_description": {
+      "type_name": "lbr_fri_idl/msg/LBRTorqueCommand",
+      "fields": [
+        {
+          "name": "joint_position",
+          "type": {
+            "type_id": 59,
+            "capacity": 7,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        },
+        {
+          "name": "torque",
+          "type": {
+            "type_id": 59,
+            "capacity": 7,
+            "string_capacity": 0,
+            "nested_type_name": ""
+          },
+          "default_value": ""
+        }
+      ]
+    },
+    "referenced_type_descriptions": []
+  },
+  "type_hashes": [
+    {
+      "type_name": "lbr_fri_idl/msg/LBRTorqueCommand",
+      "hash_string": "RIHS01_7cc062fe08eef66bd9bcc385ee6c309dfd7109293b2f995a9cce9c662dc52b64"
+    }
+  ]
+}

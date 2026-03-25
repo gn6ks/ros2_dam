@@ -1,0 +1,14 @@
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/libFRIClient.so
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/include/friUdpConnection.h
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/include/friLBRState.h
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/include/friClientIf.h
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/include/friLBRCommand.h
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/include/friClientVersion.h
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/include/friLBRClient.h
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/include/friClientApplication.h
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/include/friException.h
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/include/friConnectionIf.h
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/include/friTransformationClient.h
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/cmake/FRIClient/FRIClientConfig.cmake
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/cmake/FRIClient/FRIClientConfig-release.cmake
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/fri_client_sdk/lib/cmake/FRIClient/FRIClientConfigVersion.cmake

@@ -1,0 +1,37 @@
+[1.331s] Invoking command in '/home/pablo/Desktop/ros2_dam/ros2_ws/src/baile_sencillo': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/baile_sencillo build --build-base /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/build install --record /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/install.log --single-version-externally-managed install_data
+[1.782s] running egg_info
+[1.783s] creating ../../build/baile_sencillo/baile_sencillo.egg-info
+[1.822s] writing ../../build/baile_sencillo/baile_sencillo.egg-info/PKG-INFO
+[1.822s] writing dependency_links to ../../build/baile_sencillo/baile_sencillo.egg-info/dependency_links.txt
+[1.822s] writing entry points to ../../build/baile_sencillo/baile_sencillo.egg-info/entry_points.txt
+[1.823s] writing requirements to ../../build/baile_sencillo/baile_sencillo.egg-info/requires.txt
+[1.823s] writing top-level names to ../../build/baile_sencillo/baile_sencillo.egg-info/top_level.txt
+[1.823s] writing manifest file '../../build/baile_sencillo/baile_sencillo.egg-info/SOURCES.txt'
+[1.900s] reading manifest file '../../build/baile_sencillo/baile_sencillo.egg-info/SOURCES.txt'
+[1.901s] writing manifest file '../../build/baile_sencillo/baile_sencillo.egg-info/SOURCES.txt'
+[1.901s] running build
+[1.901s] running build_py
+[1.902s] creating /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/build
+[1.902s] creating /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/build/lib
+[1.902s] creating /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/build/lib/baile_sencillo
+[1.902s] copying baile_sencillo/__init__.py -> /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/build/lib/baile_sencillo
+[1.903s] copying baile_sencillo/movimiento_robot.py -> /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/build/lib/baile_sencillo
+[1.903s] running install
+[1.911s] running install_lib
+[1.952s] creating /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/lib/python3.12/site-packages/baile_sencillo
+[1.952s] copying /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/build/lib/baile_sencillo/__init__.py -> /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/lib/python3.12/site-packages/baile_sencillo
+[1.952s] copying /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/build/lib/baile_sencillo/movimiento_robot.py -> /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/lib/python3.12/site-packages/baile_sencillo
+[1.953s] byte-compiling /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/lib/python3.12/site-packages/baile_sencillo/__init__.py to __init__.cpython-312.pyc
+[1.954s] byte-compiling /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/lib/python3.12/site-packages/baile_sencillo/movimiento_robot.py to movimiento_robot.cpython-312.pyc
+[1.955s] running install_data
+[1.955s] creating /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/share/ament_index
+[1.956s] creating /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/share/ament_index/resource_index
+[1.956s] creating /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/share/ament_index/resource_index/packages
+[1.956s] copying resource/baile_sencillo -> /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/share/ament_index/resource_index/packages
+[1.956s] copying package.xml -> /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/share/baile_sencillo
+[1.956s] running install_egg_info
+[1.999s] Copying ../../build/baile_sencillo/baile_sencillo.egg-info to /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/lib/python3.12/site-packages/baile_sencillo-0.0.0-py3.12.egg-info
+[2.000s] running install_scripts
+[2.246s] Installing movimiento_robot script to /home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/lib/baile_sencillo
+[2.246s] writing list of installed files to '/home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/install.log'
+[2.281s] Invoked command in '/home/pablo/Desktop/ros2_dam/ros2_ws/src/baile_sencillo' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/baile_sencillo build --build-base /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/build install --record /home/pablo/Desktop/ros2_dam/ros2_ws/build/baile_sencillo/install.log --single-version-externally-managed install_data

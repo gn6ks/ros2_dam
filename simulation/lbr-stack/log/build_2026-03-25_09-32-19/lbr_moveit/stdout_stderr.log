@@ -1,0 +1,20 @@
+running develop
+running egg_info
+writing lbr_moveit.egg-info/PKG-INFO
+writing dependency_links to lbr_moveit.egg-info/dependency_links.txt
+writing entry points to lbr_moveit.egg-info/entry_points.txt
+writing requirements to lbr_moveit.egg-info/requires.txt
+writing top-level names to lbr_moveit.egg-info/top_level.txt
+writing manifest file 'lbr_moveit.egg-info/SOURCES.txt'
+reading manifest file 'lbr_moveit.egg-info/SOURCES.txt'
+writing manifest file 'lbr_moveit.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/lib/python3.12/site-packages/lbr-moveit.egg-link (link to .)
+Installing forward_keyboard script to /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/lib/lbr_moveit
+
+Installed /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit
+running symlink_data
+symbolically linking /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/resource/lbr_moveit -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/share/ament_index/resource_index/packages
+symbolically linking /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/package.xml -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/share/lbr_moveit
+symbolically linking /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/config/forward_keyboard.yaml -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/share/lbr_moveit/config
+symbolically linking /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit/launch/keyboard_driver.launch.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit/share/lbr_moveit/launch

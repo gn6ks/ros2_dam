@@ -1,0 +1,3 @@
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/lib/liblbr_fri_ros2.so
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/cmake/lbr_fri_ros2_exportExport.cmake
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/cmake/lbr_fri_ros2_exportExport-release.cmake

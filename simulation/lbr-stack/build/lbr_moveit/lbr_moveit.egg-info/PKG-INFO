@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: lbr-moveit
+Version: 2.4.3
+Summary: MoveIt demos for the LBRs.
+Maintainer: mhubii
+Maintainer-email: m.huber_1994@hotmail.de
+License: Apache-2.0

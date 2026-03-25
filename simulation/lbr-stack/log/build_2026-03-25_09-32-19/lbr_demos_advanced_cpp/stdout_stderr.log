@@ -1,0 +1,69 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 2.5.5 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Override CMake install command with custom implementation using symlinks instead of copying resources
+-- Found geometry_msgs: 5.3.6 (/opt/ros/jazzy/share/geometry_msgs/cmake)
+-- Found rosidl_generator_c: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+-- Found rosidl_generator_cpp: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found kdl_parser: 2.11.0 (/opt/ros/jazzy/share/kdl_parser/cmake)
+-- Found eigen3_cmake_module: 0.3.0 (/opt/ros/jazzy/share/eigen3_cmake_module/cmake)
+-- Found Eigen3: TRUE (found version "3.4.0") 
+-- Ensuring Eigen3 include directory is part of orocos-kdl CMake target
+-- Found lbr_fri_idl: 1.5.0 (/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_idl/share/lbr_fri_idl/cmake)
+-- Found lbr_fri_ros2: 2.4.3 (/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_fri_ros2/share/lbr_fri_ros2/cmake)
+-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+-- Found rmw_fastrtps_cpp: 8.4.3 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)
+-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.13")  
+-- Found FastRTPS: /opt/ros/jazzy/include (Required is at least version "2.13") 
+-- Using RMW implementation 'rmw_fastrtps_cpp' as default
+-- Found rclcpp_components: 28.1.16 (/opt/ros/jazzy/share/rclcpp_components/cmake)
+-- Configuring done (1.8s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_cpp
+[ 50%] [32mBuilding CXX object CMakeFiles/pose_planning_component.dir/src/pose_planning_node.cpp.o[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/pose_planning.dir/rclcpp_components/node_main_pose_planning.cpp.o[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/pose_control.dir/rclcpp_components/node_main_pose_control.cpp.o[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/pose_control_component.dir/src/pose_control_node.cpp.o[0m
+[ 62%] [32m[1mLinking CXX executable pose_planning[0m
+[ 75%] [32m[1mLinking CXX executable pose_control[0m
+[ 75%] Built target pose_planning
+[ 75%] Built target pose_control
+[ 87%] [32m[1mLinking CXX shared library libpose_planning_component.so[0m
+[ 87%] Built target pose_planning_component
+[100%] [32m[1mLinking CXX shared library libpose_control_component.so[0m
+[100%] Built target pose_control_component
+-- Install configuration: "Release"
+-- Execute custom install script
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/lib/lbr_demos_advanced_cpp/pose_planning
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/lib/lbr_demos_advanced_cpp/pose_control
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/lib/libpose_planning_component.so
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/lib/libpose_control_component.so
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/ament_index/resource_index/package_run_dependencies/lbr_demos_advanced_cpp
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/ament_index/resource_index/parent_prefix_path/lbr_demos_advanced_cpp
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/environment/ament_prefix_path.sh
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/environment/ament_prefix_path.dsv
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/environment/path.sh
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/environment/path.dsv
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/local_setup.bash
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/local_setup.sh
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/local_setup.zsh
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/local_setup.dsv
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/package.dsv
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/ament_index/resource_index/packages/lbr_demos_advanced_cpp
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/ament_index/resource_index/rclcpp_components/lbr_demos_advanced_cpp
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/cmake/lbr_demos_advanced_cppConfig.cmake
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/cmake/lbr_demos_advanced_cppConfig-version.cmake
+-- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_cpp/share/lbr_demos_advanced_cpp/package.xml

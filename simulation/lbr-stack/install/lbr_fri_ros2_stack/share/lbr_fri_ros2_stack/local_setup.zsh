@@ -1,0 +1,1 @@
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2_stack/ament_cmake_environment_hooks/local_setup.zsh

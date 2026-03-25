@@ -1,0 +1,6 @@
+source;share/baile_sencillo/hook/pythonpath.ps1
+source;share/baile_sencillo/hook/pythonpath.dsv
+source;share/baile_sencillo/hook/pythonpath.sh
+source;share/baile_sencillo/hook/ament_prefix_path.ps1
+source;share/baile_sencillo/hook/ament_prefix_path.dsv
+source;share/baile_sencillo/hook/ament_prefix_path.sh
