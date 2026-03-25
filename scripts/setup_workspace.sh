@@ -122,36 +122,53 @@ installation_development_tools() {
 }
 
 workspace_creation() {
-    print_step "Creating workspace in HOME directory"
+    print_step "Configuring workspace within repository"
+
+    #fix: detecta raiz del proyecto
+    REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
     
-    WS_PATH="$HOME/lbr-stack"
+    if [ -z "$REPO_ROOT" ]; then
+        print_error "No Git repository detected. Make sure to execute script within ros2_dam."
+        return 1
+    fi
+
+    WS_PATH="$REPO_ROOT/simulation/lbr-stack"
     export FRI_CLIENT_VERSION=1.15
     
-    print_info "Creating workspace directory: $WS_PATH/src"
-    mkdir -p "$WS_PATH/src"
-    cd "$WS_PATH" || { print_error "Failed to enter workspace"; return 1; }
+    mkdir -p "$WS_PATH" #fix: carpeta creada para poder entrar
+    cd "$WS_PATH" || { print_error "No access to $WS_PATH"; return 1; }
 
-    print_info "Cloning lbr_fri_ros2_stack | branch: jazzy"
+    print_info "Clonning lbr_fri_ros2_stack | branch: jazzy"
     if [ ! -d "src/lbr_fri_ros2_stack" ]; then
         git clone https://github.com/lbr-stack/lbr_fri_ros2_stack.git -b jazzy src/lbr_fri_ros2_stack
     else
-        print_info "Repository already exists, skipping clone."
+        print_info "lbr-stack already exists"
     fi
     
-    print_info "Importing dependencies from .yaml"
+    print_info "import of dependencies .yaml"
     vcs import src < src/lbr_fri_ros2_stack/lbr_fri_ros2_stack/repos-fri-${FRI_CLIENT_VERSION}.yaml
 
-    print_info "Installing ROS dependencies with rosdep"
+    print_info "Instaling dependencies ROS from rosdep"
     sudo apt update
     rosdep update
     rosdep install --from-paths src -i -r -y --rosdistro jazzy
 
-    print_success "Workspace ready at $WS_PATH"
+    print_success "wokspace on $WS_PATH [OK]"
 }
 
 colcon_build() {
     print_step "Building workspace with colcon"
-    cd "$HOME/lbr-stack"
+
+    REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+    
+    if [ -z "$REPO_ROOT" ]; then
+        print_error "No Git repository detected. Make sure to execute script within ros2_dam."
+        return 1
+    fi
+
+    #fix: se supone que ahora debe de entrar a la carpeta correcta
+    WS_PATH="$REPO_ROOT/simulation/lbr-stack"
+    cd "$WS_PATH"
     
     if colcon build --symlink-install; then
         print_success "Colcon build [OK]"
@@ -188,7 +205,9 @@ main() {
     verify_build
     print_step "Environment Setup Complete"
 
-    print_info "In second terminal run setup_lbr_visualizer.sh"
+    print_info "Run a health check script ./verify_workspace.sh for safety"
+    print_info "CLOSE this script and run run_mockup.sh"
+    print_info "In second terminal run run_rviz.sh"
 }
 
 main
