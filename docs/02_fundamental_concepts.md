@@ -124,7 +124,7 @@ This design exemplifies the power of the publish-subscribe pattern: new function
 
 ## 2.6 Services
 
-**Services** implement a synchronous *request-response* communication model within the ROS2 ecosystem. This mechanism enables nodes to execute discrete operations and await a result before continuing their execution flow.
+**Services** implement a synchronous _request-response_ communication model within the ROS2 ecosystem. This mechanism enables nodes to execute discrete operations and await a result before continuing their execution flow.
 
 ### 2.6.1 System Architecture
 
@@ -133,7 +133,7 @@ The interaction is based on a binary relationship between two primary entities:
 - **Server:** Advertises a service, listens for incoming requests, executes computation logic, and returns a response.
 - **Client:** Locates services on the network, sends a request, and blocks execution until receiving the server's return.
 
-> **Technical Note:** Unlike *Topics*, *Services* are not continuous data streams, but rather unique, finalized transactions that require reception confirmation.
+> **Technical Note:** Unlike _Topics_, _Services_ are not continuous data streams, but rather unique, finalized transactions that require reception confirmation.
 
 ### 2.6.2 Interface Definition (.srv)
 
@@ -158,22 +158,22 @@ ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 2, b: 3}"
 
 ### 2.6.4 Application Analysis and Constraints
 
-| Category | Description |
-| --- | --- |
-| **Use Cases** | Simulation control (spawn/reset), configuration changes, punctual status queries (sensors, maps). |
-| **Limitations** | Client execution thread blocking, lack of intermediate feedback, inability to cancel. |
-| **Recommendation** | For long-duration tasks or those requiring preemption, **Actions** (Section 2.7) must be used. |
+| Category           | Description                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| **Use Cases**      | Simulation control (spawn/reset), configuration changes, punctual status queries (sensors, maps). |
+| **Limitations**    | Client execution thread blocking, lack of intermediate feedback, inability to cancel.             |
+| **Recommendation** | For long-duration tasks or those requiring preemption, **Actions** (Section 2.7) must be used.    |
 
 ---
 
 ### 2.6.5 Introspection Tools
 
-The ROS2 CLI (*Command Line Interface*) provides specific tools for service inspection at runtime:
+The ROS2 CLI (_Command Line Interface_) provides specific tools for service inspection at runtime:
 
-| Command | Function |
-| --- | --- |
-| `ros2 service list` | Enumerates all active services in the ROS graph. |
-| `ros2 service type /name` | Identifies the interface type associated with a service. |
+| Command                       | Function                                                              |
+| ----------------------------- | --------------------------------------------------------------------- |
+| `ros2 service list`           | Enumerates all active services in the ROS graph.                      |
+| `ros2 service type /name`     | Identifies the interface type associated with a service.              |
 | `ros2 interface show pkg/Srv` | Breaks down the internal structure (fields) of the `.srv` definition. |
 
 ## 2.7 Actions
@@ -215,21 +215,21 @@ Client → Cancel Request → Server (optional)
 
 ### 2.7.4 Use Cases
 
-| Application | Example |
-| --- | --- |
-| **Navigation** | Travel to waypoint with progress updates |
-| **Manipulation** | Execute pick-and-place trajectory |
-| **Exploration** | Autonomous mapping with cancellation option |
-| **State Machines** | High-level task orchestration |
+| Application        | Example                                     |
+| ------------------ | ------------------------------------------- |
+| **Navigation**     | Travel to waypoint with progress updates    |
+| **Manipulation**   | Execute pick-and-place trajectory           |
+| **Exploration**    | Autonomous mapping with cancellation option |
+| **State Machines** | High-level task orchestration               |
 
 ### 2.7.5 Comparison: Services vs Actions
 
-| Feature | Service | Action |
-| --- | --- | --- |
-| Duration | Short operations | Long-running tasks |
-| Feedback | None | Periodic updates |
-| Cancellation | Not supported | Supported |
-| Overhead | Low | Higher |
+| Feature      | Service          | Action             |
+| ------------ | ---------------- | ------------------ |
+| Duration     | Short operations | Long-running tasks |
+| Feedback     | None             | Periodic updates   |
+| Cancellation | Not supported    | Supported          |
+| Overhead     | Low              | Higher             |
 
 ### 2.7.6 Introspection
 
@@ -250,26 +250,26 @@ Actions provide the appropriate communication paradigm for long-running, preempt
 
 ### 2.8.1 Parameter Characteristics
 
-| Characteristic | Description |
-| --- | --- |
-| **Typed Values** | Support strings, integers, floats, booleans, and arrays |
-| **Dynamic Reconfiguration** | Can be modified while the node is running |
-| **Persistence** | Can be saved to YAML files for reproducibility |
-| **Namespacing** | Organized hierarchically using node namespaces |
+| Characteristic              | Description                                             |
+| --------------------------- | ------------------------------------------------------- |
+| **Typed Values**            | Support strings, integers, floats, booleans, and arrays |
+| **Dynamic Reconfiguration** | Can be modified while the node is running               |
+| **Persistence**             | Can be saved to YAML files for reproducibility          |
+| **Namespacing**             | Organized hierarchically using node namespaces          |
 
 ### 2.8.2 Parameter Commands
 
 The ROS2 CLI provides the following commands for parameter management:
 
-| Command | Function | Example |
-| --- | --- | --- |
-| `ros2 param list` | List all parameters for a node | `ros2 param list /turtlebot3_node` |
-| `ros2 param get` | Retrieve a parameter value | `ros2 param get /node param_name` |
-| `ros2 param set` | Modify a parameter value | `ros2 param set /node param_name value` |
-| `ros2 param delete` | Remove a parameter | `ros2 param delete /node param_name` |
-| `ros2 param describe` | Show parameter metadata (type, constraints) | `ros2 param describe /node param_name` |
-| `ros2 param dump` | Export all parameters to YAML file | `ros2 param dump /node > config.yaml` |
-| `ros2 param load` | Import parameters from YAML file | `ros2 param load /node config.yaml` |
+| Command               | Function                                    | Example                                 |
+| --------------------- | ------------------------------------------- | --------------------------------------- |
+| `ros2 param list`     | List all parameters for a node              | `ros2 param list /turtlebot3_node`      |
+| `ros2 param get`      | Retrieve a parameter value                  | `ros2 param get /node param_name`       |
+| `ros2 param set`      | Modify a parameter value                    | `ros2 param set /node param_name value` |
+| `ros2 param delete`   | Remove a parameter                          | `ros2 param delete /node param_name`    |
+| `ros2 param describe` | Show parameter metadata (type, constraints) | `ros2 param describe /node param_name`  |
+| `ros2 param dump`     | Export all parameters to YAML file          | `ros2 param dump /node > config.yaml`   |
+| `ros2 param load`     | Import parameters from YAML file            | `ros2 param load /node config.yaml`     |
 
 ### 2.8.3 Practical Examples
 

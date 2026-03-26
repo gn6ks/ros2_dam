@@ -98,7 +98,7 @@ ros2 run turtlesim turtlesim_node
 | --- | --- |
 | Blue window with turtle | Proceed to Step 3 |
 | Error: "package not found" | Run the installation commands in Section 4.2.2 |
-| No window appears | Check display server is running (WSLg or X11) |
+| No window appears | Check display server is running X11 or Wayland |
 | Window closes immediately | Check terminal for error messages |
 
 > **Important:** Do not close this terminal. The node will continue running and displaying log messages. Keep this terminal open throughout the exercise.
@@ -447,29 +447,12 @@ Press `Ctrl + C` in the terminal running the script, or execute:
 | Issue | Solution |
 |-------|----------|
 | **"package not found" error** | Run `sudo apt install ros-jazzy-turtlesim` |
-| **No GUI window appears** | Verify WSLg is enabled (WSL2) or X11/Wayland is running (native Ubuntu) |
+| **No GUI window appears** | Verify X11/Wayland is running (native Ubuntu) |
 | **Keyboard input not working** | Click on the teleop terminal to give it focus |
 | **ROS2 commands not found** | Run `source /opt/ros/jazzy/setup.bash` |
 | **RQT plugins fail to load** | Run `rqt` once to initialize configuration, then restart |
 
-### 4.10.2 WSL2-Specific Issues
-
-If you are running Ubuntu on WSL2:
-
-```bash
-# Verify WSL version (should be 2)
-wsl --list --verbose
-
-# Verify WSLg is available (for GUI support)
-echo $WAYLAND_DISPLAY
-echo $DISPLAY
-
-# If empty, restart WSL from Windows PowerShell
-wsl --shutdown
-# Then reopen Ubuntu terminal
-```
-
-### 4.10.3 Native Ubuntu Issues
+### 4.10.2 Native Ubuntu Issues
 
 If you are running native Ubuntu 24.04:
 
