@@ -6,9 +6,9 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 
 
 # Posiciones en radianes por articulación (A1..A7). ~1 rad ≈ 57°
-CERO      = [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
-BAILE_1   = [-1.5,  1.5, -1.5, 1.5,  1.5,  1.5,  2]   # inclinado izquierda, punto 1 de referencia??
-BAILE_2   = [1.5,  -1.5, 1.5, -1.5,  -1.5,  -1.5,  -2]   # inclinado derecha
+CERO    = [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+BAILE_1 = [-1.0,  0.8, -0.8,  1.0,  1.0,  0.8,  1.0]
+BAILE_2 = [ 1.0, -0.8,  0.8, -1.0, -1.0, -0.8, -1.0]
 
 SECUENCIA_BAILE = [
     (BAILE_1, "-- izquierda"),

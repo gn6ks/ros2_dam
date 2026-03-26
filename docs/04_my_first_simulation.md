@@ -159,7 +159,7 @@ ros2 topic list
 
 **Expected Output:** You should see a list similar to:
 
-```
+```bash
 /parameter_events
 /turtle1/cmd_vel
 /turtle1/color_sensor
@@ -178,7 +178,7 @@ ros2 topic type /turtle1/pose
 
 **Expected Output:**
 
-```
+```bash
 geometry_msgs/msg/Twist
 turtlesim/msg/Pose
 ```
@@ -340,7 +340,7 @@ ros2 service list
 
 **Expected Output:**
 
-```
+```bash
 /clear
 /kill
 /reset
