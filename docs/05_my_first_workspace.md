@@ -171,7 +171,7 @@ colcon build --symlink-install
 source ~/ros2_ws/install/setup.bash
 ```
 
-> **Technical Note:** Add the source command to your `~/.bashrc` to avoid repeating it every session:
+> **Technical Note:** Add the source command to your `~/.bashrc` to avoid repeating it every session (if you don't know where your install/setup.bash is, do "pwd" command on where the install/setup.bash is located, then change the command below with the exact pwd output):
 > ```bash
 > echo 'source ~/ros2_ws/install/setup.bash' >> ~/.bashrc
 > ```
