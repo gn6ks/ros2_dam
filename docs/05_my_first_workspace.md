@@ -249,7 +249,7 @@ To simplify the launch procedure, the repository includes shell scripts that sta
 | --- | --- | --- |
 | `run_simulation.sh` | Gazebo simulation | Gazebo Harmonic, ros2_control |
 | `run_mockup.sh` | Mock (no physics) | ros2_control stub |
-| `gazebo_cleanup.sh` | — | Sends SIGINT to all launched processes and cleans up |
+| `cleanup.sh` | — | Sends SIGINT to all launched processes and cleans up |
 
 ### 5.5.2 Execution — Gazebo Mode
 
@@ -285,7 +285,7 @@ chmod +x run_mockup.sh
 Press `Ctrl + C` in the terminal running the script, or execute the cleanup script for processes on background.
 
 ```bash
-./gazebo_cleanup.sh
+./cleanup.sh
 ```
 
 > **Technical Note:** The stop script sends a clean shutdown signal to all spawned processes, preventing orphaned Gazebo or RViz2 instances that could conflict with the next launch.
