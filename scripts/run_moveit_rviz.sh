@@ -11,7 +11,7 @@ NC='\033[0m'
 print_header() {
     echo -e "${BLUE}"
     echo "==============================================================================="
-    echo "  Gazebo iiwa7 simulation"
+    echo "  Gazebo RViz MoveIt iiwa7 simulation"
     echo "  ROS2: From Simulation to Reality - Research Project"
     echo "  Author: gn6ks"
     echo "==============================================================================="
@@ -41,13 +41,14 @@ print_step() {
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
-cleanup() {
-    print_step "Killing all previuos work on gazebo harmonic"
+mock_setup_iiwa7() {
+    print_step "Launching RViz2 with MoveIt dependencies"
 
-    pkill -9 ruby || true
-    pkill -9 gz || true
-    sleep 3
-
-    print_success "Cleanup [OK], can run run_simulation.sh again"
+    # en vez de sin fisica gazebo las trae, se usa gazebo
+    ros2 launch lbr_bringup move_group.launch.py \
+    mode:=gazebo \
+    rviz:=true \
+    model:=iiwa7 # [iiwa7, iiwa14, med7, med14]
 }
-cleanup
+
+mock_setup_iiwa7

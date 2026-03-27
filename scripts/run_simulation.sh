@@ -52,4 +52,4 @@ ros2 launch lbr_bringup gazebo.launch.py \
     ctrl:=joint_trajectory_controller \
     model:=iiwa7 # [iiwa7, iiwa14, med7, med14]
 print_success "Joint Trajectory Client [OK]"
-print_success "Run gazebo_cleanup.sh for total cleanup"
+print_success "Run /.cleanup.sh for total cleanup"
