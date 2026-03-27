@@ -57,12 +57,6 @@ print_header
 print_step "Stopping RViz2"
 kill_process "RViz2"       "rviz2"
 
-print_step "Stopping MoveIt2"
-kill_process "move_group"              "move_group"
-kill_process "moveit_simple_controller" "moveit_simple_controller"
-kill_process "robot_state_publisher"   "robot_state_publisher"
-kill_process "joint_state_broadcaster" "joint_state_broadcaster"
-
 print_step "Stopping ROS2 Controllers"
 kill_process "controller_manager"      "controller_manager"
 kill_process "ros2_control_node"       "ros2_control_node"

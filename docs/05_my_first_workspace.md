@@ -28,14 +28,14 @@ When Gazebo Harmonic launches, it opens two main components:
 
 The interface is controlled through the menu bar at the top of the window and a toolbar on the left side. The most frequently used controls are:
 
-| Control | Location | Function |
-| --- | --- | --- |
-| Play / Pause | Bottom bar | Start or pause the physics simulation |
-| Step | Bottom bar | Advance the simulation by one time step |
-| Transform tools | Left toolbar | Translate, rotate, or scale models |
-| View angle | Left toolbar | Switch between perspective and orthographic views |
-| Topic viewer plugin | Plugins menu | Inspect live ROS2/Gazebo topic data |
-| Entity inspector | Right-click entity | View and edit model properties |
+| Control             | Location           | Function                                          |
+| ------------------- | ------------------ | ------------------------------------------------- |
+| Play / Pause        | Bottom bar         | Start or pause the physics simulation             |
+| Step                | Bottom bar         | Advance the simulation by one time step           |
+| Transform tools     | Left toolbar       | Translate, rotate, or scale models                |
+| View angle          | Left toolbar       | Switch between perspective and orthographic views |
+| Topic viewer plugin | Plugins menu       | Inspect live ROS2/Gazebo topic data               |
+| Entity inspector    | Right-click entity | View and edit model properties                    |
 
 <figure>
   <img src="./assets/images/gazebo_harmonic_iiwa7.png"
@@ -62,12 +62,12 @@ For the iiwa 7 R800, RViz2 is particularly useful for:
 
 The RViz2 window is divided into four main areas:
 
-| Area | Function |
-| --- | --- |
-| 3D Viewport (center) | Main display area. Shows the robot model, TF frames, and any added displays. |
+| Area                  | Function                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------------- |
+| 3D Viewport (center)  | Main display area. Shows the robot model, TF frames, and any added displays.              |
 | Displays panel (left) | List of active visualization plugins. Each plugin subscribes to a topic and renders data. |
-| Views panel (right) | Camera type and orientation presets (e.g., Orbit, TopDown, FPS). |
-| Tool bar (top) | Select, Measure, 2D Nav Goal, and other interaction tools. |
+| Views panel (right)   | Camera type and orientation presets (e.g., Orbit, TopDown, FPS).                          |
+| Tool bar (top)        | Select, Measure, 2D Nav Goal, and other interaction tools.                                |
 
 To add a new display, click the **Add** button at the bottom of the Displays panel and select a display type such as `RobotModel`, `TF`, or `JointState`.
 
@@ -90,11 +90,11 @@ The **lbr_fri_ros2_stack** is an open-source ROS2 package that provides a comple
 
 The stack is structured around the **KUKA Fast Robot Interface (FRI)**. On real hardware, FRI is a UDP-based protocol for high-frequency control at rates up to 1 kHz. In simulation and mock modes, the FRI layer is replaced by either a Gazebo physics plugin or a software stub that mirrors the same ROS2 interface. This means the same ROS2 nodes and Python scripts work identically in all three contexts:
 
-| Mode | FRI Layer | Use Case |
-| --- | --- | --- |
-| Mock | Software stub (no physics) | Testing controllers and Python scripts without a simulator |
-| Gazebo | Gazebo physics plugin via `ros_gz` | Full 3D simulation with physics and collision |
-| Real hardware | UDP FRI connection to KUKA controller | Deployment on the physical robot |
+| Mode          | FRI Layer                             | Use Case                                                   |
+| ------------- | ------------------------------------- | ---------------------------------------------------------- |
+| Mock          | Software stub (no physics)            | Testing controllers and Python scripts without a simulator |
+| Gazebo        | Gazebo physics plugin via `ros_gz`    | Full 3D simulation with physics and collision              |
+| Real hardware | UDP FRI connection to KUKA controller | Deployment on the physical robot                           |
 
 ### 5.3.2 The Purpose of lbr_fri_ros2_stack
 
@@ -116,13 +116,13 @@ This section walks through a complete installation of all required packages and 
 
 Before starting the installation, verify that your system meets the following requirements:
 
-| Requirement | Version | Verification Command |
-| --- | --- | --- |
-| Ubuntu | 24.04 LTS | `lsb_release -a` |
-| ROS2 | Jazzy Jalisco | `ros2 --version` |
-| Python | 3.10 or later | `python3 --version` |
-| Git | Any recent version | `git --version` |
-| colcon | Any recent version | `colcon version` |
+| Requirement | Version            | Verification Command |
+| ----------- | ------------------ | -------------------- |
+| Ubuntu      | 24.04 LTS          | `lsb_release -a`     |
+| ROS2        | Jazzy Jalisco      | `ros2 --version`     |
+| Python      | 3.10 or later      | `python3 --version`  |
+| Git         | Any recent version | `git --version`      |
+| colcon      | Any recent version | `colcon version`     |
 
 ### 5.4.2 Process Installation
 
@@ -172,6 +172,7 @@ source ~/ros2_ws/install/setup.bash
 ```
 
 > **Technical Note:** Add the source command to your `~/.bashrc` to avoid repeating it every session (if you don't know where your install/setup.bash is, do "pwd" command on where the install/setup.bash is located, then change the command below with the exact pwd output):
+>
 > ```bash
 > echo 'source ~/ros2_ws/install/setup.bash' >> ~/.bashrc
 > ```
@@ -193,12 +194,12 @@ lbr_ros2_control
 lbr_demos
 ```
 
-| If you see... | Action |
-| --- | --- |
-| All packages listed above | Proceed to Section 5.4.3 |
-| Empty output | Re-run `colcon build` and source the workspace again |
-| Build errors during colcon | Run `rosdep install` again, then rebuild |
-| `rosdep key not found` errors | Run `sudo rosdep init` followed by `rosdep update` |
+| If you see...                 | Action                                               |
+| ----------------------------- | ---------------------------------------------------- |
+| All packages listed above     | Proceed to Section 5.4.3                             |
+| Empty output                  | Re-run `colcon build` and source the workspace again |
+| Build errors during colcon    | Run `rosdep install` again, then rebuild             |
+| `rosdep key not found` errors | Run `sudo rosdep init` followed by `rosdep update`   |
 
 ### 5.4.3 Mock and Visualization Setup
 
@@ -221,12 +222,12 @@ ros2 launch lbr_bringup rviz.launch.py \
 
 **Expected state after launch:**
 
-| Component | Expected State |
-| --- | --- |
-| RViz2 window | Opens showing the iiwa 7 R800 model in the default configuration |
-| Gazebo window (sim mode only) | Opens showing the robot arm in the default world |
-| `/lbr/joint_states` topic | Publishing at ~100 Hz — verify with `ros2 topic hz /lbr/joint_states` |
-| Action server | Available at `joint_trajectory_controller/follow_joint_trajectory` |
+| Component                     | Expected State                                                        |
+| ----------------------------- | --------------------------------------------------------------------- |
+| RViz2 window                  | Opens showing the iiwa 7 R800 model in the default configuration      |
+| Gazebo window (sim mode only) | Opens showing the robot arm in the default world                      |
+| `/lbr/joint_states` topic     | Publishing at ~100 Hz — verify with `ros2 topic hz /lbr/joint_states` |
+| Action server                 | Available at `joint_trajectory_controller/follow_joint_trajectory`    |
 
 <figure>
   <img src="./assets/gifs/iiwa7_demo_gazebo_rviz_custom_pkg.gif"
@@ -245,11 +246,11 @@ To simplify the launch procedure, the repository includes shell scripts that sta
 
 ### 5.5.1 Available Scripts
 
-| Script | Mode | Launches |
-| --- | --- | --- |
-| `run_simulation.sh` | Gazebo simulation | Gazebo Harmonic, ros2_control |
-| `run_mockup.sh` | Mock (no physics) | ros2_control stub |
-| `cleanup.sh` | — | Sends SIGINT to all launched processes and cleans up |
+| Script              | Mode              | Launches                                             |
+| ------------------- | ----------------- | ---------------------------------------------------- |
+| `run_simulation.sh` | Gazebo simulation | Gazebo Harmonic, ros2_control                        |
+| `run_mockup.sh`     | Mock (no physics) | ros2_control stub                                    |
+| `cleanup.sh`        | —                 | Sends SIGINT to all launched processes and cleans up |
 
 ### 5.5.2 Execution — Gazebo Mode
 
@@ -273,12 +274,12 @@ chmod +x run_mockup.sh
 
 ### 5.5.4 What the Scripts Do
 
-| Step | Action |
-| --- | --- |
-| 1 | Sources the ROS2 Jazzy setup file and the local workspace overlay |
-| 2 | Verifies that the lbr_fri_ros2_stack packages are installed |
-| 3 | Launches the `lbr_bringup` launch file with the correct model and sim parameters |
-| 4 | Handles graceful cleanup when stopped with `Ctrl + C` |
+| Step | Action                                                                           |
+| ---- | -------------------------------------------------------------------------------- |
+| 1    | Sources the ROS2 Jazzy setup file and the local workspace overlay                |
+| 2    | Verifies that the lbr_fri_ros2_stack packages are installed                      |
+| 3    | Launches the `lbr_bringup` launch file with the correct model and sim parameters |
+| 4    | Handles graceful cleanup when stopped with `Ctrl + C`                            |
 
 ### 5.5.5 Stopping the Simulation
 
@@ -323,10 +324,10 @@ ros2 run lbr_demos_py joint_trajectory_client --ros-args -r __ns:=/lbr
 
 **Expected robot behavior:**
 
-| Phase | Joint Positions (A1–A7) | Duration |
-| --- | --- | --- |
+| Phase             | Joint Positions (A1–A7)                                    | Duration   |
+| ----------------- | ---------------------------------------------------------- | ---------- |
 | Rotate odd joints | A1=1.0, A2=0.0, A3=1.0, A4=0.0, A5=1.0, A6=0.0, A7=1.0 rad | 15 seconds |
-| Return to zero | All joints at 0.0 rad | 15 seconds |
+| Return to zero    | All joints at 0.0 rad                                      | 15 seconds |
 
 <figure>
   <img src="./assets/images/iiwa7_trajectory_demo.png"
@@ -387,10 +388,10 @@ while not self._joint_trajectory_action_client.wait_for_server(1):
     self.get_logger().info("Waiting for action server to become available...")
 ```
 
-| Method | Parameters | Description |
-| --- | --- | --- |
-| `__init__` | `node_name: str` | Initializes the ROS2 node and action client. Blocks until the action server is available. |
-| `execute` | `positions: list`, `sec_from_start: int = 15` | Builds and sends a `FollowJointTrajectory` goal. Blocks until the result is received or the timeout expires. |
+| Method     | Parameters                                    | Description                                                                                                  |
+| ---------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `__init__` | `node_name: str`                              | Initializes the ROS2 node and action client. Blocks until the action server is available.                    |
+| `execute`  | `positions: list`, `sec_from_start: int = 15` | Builds and sends a `FollowJointTrajectory` goal. Blocks until the result is received or the timeout expires. |
 
 #### Method: execute()
 
@@ -418,37 +419,109 @@ joint_trajectory_goal.trajectory.points.append(point)
 
 The `main` function initializes rclpy, creates a `JointTrajectoryClient` node, and calls `execute` twice in sequence:
 
-| Call | Target Positions (A1–A7) | Effect |
-| --- | --- | --- |
+| Call                      | Target Positions (A1–A7)              | Effect                                                         |
+| ------------------------- | ------------------------------------- | -------------------------------------------------------------- |
 | First — rotate odd joints | `[1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0]` | Odd-numbered joints rotate to 1 radian; even joints stay at 0. |
-| Second — return to zero | `[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]` | All joints return to the home configuration. |
+| Second — return to zero   | `[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]` | All joints return to the home configuration.                   |
 
 > **Technical Note:** The `sec_from_start` parameter controls how many seconds the controller is given to reach the target configuration. Increase this value for larger angular movements or when operating with lower velocity limits.
 
 #### Key ROS2 Concepts Demonstrated
 
-| Concept | Where Used | Purpose |
-| --- | --- | --- |
-| Action client | `ActionClient` in `__init__` | Asynchronous goal-based communication for long-running tasks |
-| `spin_until_future_complete` | `execute` method | Blocks the node until an async operation finishes |
-| `JointTrajectoryPoint` | `execute` method | Specifies target positions and velocities for all joints at a given time |
-| `FollowJointTrajectory` | Goal and Result types | Standard action interface for joint trajectory controllers in `ros2_control` |
+| Concept                      | Where Used                   | Purpose                                                                      |
+| ---------------------------- | ---------------------------- | ---------------------------------------------------------------------------- |
+| Action client                | `ActionClient` in `__init__` | Asynchronous goal-based communication for long-running tasks                 |
+| `spin_until_future_complete` | `execute` method             | Blocks the node until an async operation finishes                            |
+| `JointTrajectoryPoint`       | `execute` method             | Specifies target positions and velocities for all joints at a given time     |
+| `FollowJointTrajectory`      | Goal and Result types        | Standard action interface for joint trajectory controllers in `ros2_control` |
 
 ---
 
-## 5.8 Concerns and Simulation Limitations
+## 5.8 MoveIt Control on RViz and Gazebo
+
+**MoveIt2** is the standard motion planning framework for ROS2. Integrated with the lbr_fri_ros2_stack, it allows you to control the iiwa 7 R800 interactively through RViz2 using a drag-and-drop end-effector marker, while the computed trajectory is executed on the physics engine in Gazebo Harmonic. This combination gives you collision-aware motion planning without writing a single line of code.
+
+<figure>
+<img src="./assets/images/iiwa7_moveit.png"
+alt="MoveIt on RViz"
+width="600">
+<figcaption>Figure 5.8.1 — iiwa 7 R800 with MoveIt configuration for /joint_trajectory</figcaption>
+</figure>
+
+### 5.8.1 MoveIt via RViz — Simulation
+
+**Step 1 — Run the mock setup:**
+
+```bash
+ros2 launch lbr_bringup mock.launch.py \
+    model:=iiwa7 # [iiwa7, iiwa14, med7, med14]
+```
+
+> **Technical Note:** For a physics-based simulation, also try Gazebo (remember to set `mode:=gazebo` for the next steps):
+>
+> ```bash
+> ros2 launch lbr_bringup gazebo.launch.py \
+>     model:=iiwa7 # [iiwa7, iiwa14, med7, med14]
+> ```
+
+**Step 2 — Run MoveIt with RViz:**
+
+```bash
+ros2 launch lbr_bringup move_group.launch.py \
+    mode:=mock \
+    rviz:=true \
+    model:=iiwa7 # [iiwa7, iiwa14, med7, med14]
+```
+
+**Step 3 — You can now move the robot via MoveIt in RViz!**
+
+Use the interactive end-effector marker in RViz2 to set a goal pose, then use the **MotionPlanning** panel to plan and execute the trajectory:
+
+| MotionPlanning Panel Button | Function                                                                         |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| Plan                        | Computes a collision-free trajectory to the marker goal; does not move the robot |
+| Execute                     | Sends the last planned trajectory to the controller                              |
+| Plan & Execute              | Combines both steps in a single click                                            |
+| Stop                        | Halts execution immediately                                                      |
+
+### 5.8.2 Example on RViz2 + Gazebo and MoveIt
+
+<figure>
+<img src="./assets/gifs/iiwa7_moveit_rviz.gif"
+alt="Robot control through MoveIt on RViz2"
+width="600">
+<figcaption>Figure 5.8.2 — iiwa 7 R800 being controlled with the mouse on RViz2 through MoveIt2, with physics execution in Gazebo Harmonic.</figcaption>
+</figure>
+
+### 5.8.3 Automatic Script
+
+To launch the complete MoveIt + RViz setup with a single command, use the provided script:
+
+```bash
+# Grant execution permissions (only required once)
+chmod +x run_moveit_rviz.sh
+
+# Launch MoveIt with RViz
+./run_moveit_rviz.sh
+```
+
+> **Technical Note:** The `run_moveit_rviz.sh` script sources the workspace, starts the mock or Gazebo simulation, and launches `move_group.launch.py` with the correct parameters for the iiwa 7 R800 automatically.
+
+> **Technical Note:** To close correctly the ./run_moveit_rviz.sh script, must do `Ctrl + C` on the command window that executed the script for proper clossing ritual of the tool.
+
+## 5.9 Concerns and Simulation Limitations
 
 While Gazebo Harmonic and the lbr_fri_ros2_stack provide a high-fidelity simulation environment, there are several known limitations and considerations to keep in mind when working with the iiwa 7 R800 simulation.
 
-| Limitation | Description |
-| --- | --- |
-| **Physics fidelity gap** | Gazebo physics parameters (inertia, friction, damping) are approximations. Torques and joint behavior may differ from the real robot, especially under load. |
-| **FRI latency not simulated** | In real deployment, FRI communication introduces network latency. The simulation runs at wall-clock speed with no network delay, so timing-sensitive controllers may behave differently on hardware. |
-| **No tool/end-effector model** | The default simulation does not include a gripper or tool. Adding one requires modifying the URDF and rebuilding the workspace. |
-| **Single-point trajectories** | The `joint_trajectory.py` demo sends one trajectory point per call. Multi-point smooth trajectories require building a list of `JointTrajectoryPoint` objects with intermediate waypoints. |
-| **Velocity and acceleration limits** | The simulation enforces the joint limits defined in the URDF. Requesting movements that violate these limits will cause the goal to be rejected or result in incomplete motion. |
-| **Mock mode has no collision** | Mock mode does not run a physics engine. Self-collisions and environment collisions are not detected. Always validate configurations in Gazebo before deploying to hardware. |
-| **RViz2 display lag** | On systems with limited GPU resources, RViz2 may lag behind the actual joint state. This is a visualization issue only and does not affect the controller. |
+| Limitation                           | Description                                                                                                                                                                                          |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Physics fidelity gap**             | Gazebo physics parameters (inertia, friction, damping) are approximations. Torques and joint behavior may differ from the real robot, especially under load.                                         |
+| **FRI latency not simulated**        | In real deployment, FRI communication introduces network latency. The simulation runs at wall-clock speed with no network delay, so timing-sensitive controllers may behave differently on hardware. |
+| **No tool/end-effector model**       | The default simulation does not include a gripper or tool. Adding one requires modifying the URDF and rebuilding the workspace.                                                                      |
+| **Single-point trajectories**        | The `joint_trajectory.py` demo sends one trajectory point per call. Multi-point smooth trajectories require building a list of `JointTrajectoryPoint` objects with intermediate waypoints.           |
+| **Velocity and acceleration limits** | The simulation enforces the joint limits defined in the URDF. Requesting movements that violate these limits will cause the goal to be rejected or result in incomplete motion.                      |
+| **Mock mode has no collision**       | Mock mode does not run a physics engine. Self-collisions and environment collisions are not detected. Always validate configurations in Gazebo before deploying to hardware.                         |
+| **RViz2 display lag**                | On systems with limited GPU resources, RViz2 may lag behind the actual joint state. This is a visualization issue only and does not affect the controller.                                           |
 
 Best practices to mitigate these limitations:
 
