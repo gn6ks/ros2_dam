@@ -1,0 +1,115 @@
+[0.060s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_description -DCMAKE_INSTALL_PREFIX=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description
+[0.414s] -- Found ament_cmake: 2.5.5 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[0.421s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.442s] -- Found ament_cmake_pytest: 2.5.5 (/opt/ros/jazzy/share/ament_cmake_pytest/cmake)
+[1.251s] -- Configuring done (1.2s)
+[1.261s] -- Generating done (0.0s)
+[1.263s] -- Build files have been written to: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description
+[1.267s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_description -DCMAKE_INSTALL_PREFIX=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description
+[1.268s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description -- -j12 -l12
+[1.321s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description -- -j12 -l12
+[1.323s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description
+[1.336s] -- Install configuration: ""
+[1.337s] -- Execute custom install script
+[1.338s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/gazebo/lbr_gazebo.xacro
+[1.339s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/collision/link_0.stl
+[1.339s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/collision/link_1.stl
+[1.339s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/collision/link_2.stl
+[1.340s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/collision/link_3.stl
+[1.340s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/collision/link_4.stl
+[1.340s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/collision/link_5.stl
+[1.340s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/collision/link_6.stl
+[1.341s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/collision/link_7.stl
+[1.341s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_0.dae
+[1.341s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_1.dae
+[1.341s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_2.dae
+[1.342s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_3.dae
+[1.342s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_4.dae
+[1.342s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_5.dae
+[1.343s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_6.dae
+[1.343s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_7.dae
+[1.343s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_0.stl
+[1.343s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_1.stl
+[1.344s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_2.stl
+[1.344s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_3.stl
+[1.344s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_4.stl
+[1.344s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_5.stl
+[1.345s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_6.stl
+[1.345s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_7.stl
+[1.347s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/visual/link_0.dae
+[1.347s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/visual/link_1.dae
+[1.348s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/visual/link_2.dae
+[1.348s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/visual/link_3.dae
+[1.348s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/visual/link_4.dae
+[1.348s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/visual/link_5.dae
+[1.348s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/visual/link_6.dae
+[1.349s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/visual/link_7.dae
+[1.349s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/collision/link_0.stl
+[1.349s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/collision/link_1.stl
+[1.349s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/collision/link_2.stl
+[1.349s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/collision/link_3.stl
+[1.350s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/collision/link_4.stl
+[1.350s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/collision/link_5.stl
+[1.350s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/collision/link_6.stl
+[1.350s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/collision/link_7.stl
+[1.350s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/visual/link_0.dae
+[1.351s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/visual/link_1.dae
+[1.351s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/visual/link_2.dae
+[1.351s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/visual/link_3.dae
+[1.351s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/visual/link_4.dae
+[1.351s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/visual/link_5.dae
+[1.352s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/visual/link_6.dae
+[1.352s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med14/visual/link_7.dae
+[1.352s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/collision/link_0.stl
+[1.352s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/collision/link_1.stl
+[1.352s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/collision/link_2.stl
+[1.353s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/collision/link_3.stl
+[1.353s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/collision/link_4.stl
+[1.353s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/collision/link_5.stl
+[1.353s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/collision/link_6.stl
+[1.353s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/collision/link_7.stl
+[1.354s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/visual/link_0.dae
+[1.354s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/visual/link_1.dae
+[1.354s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/visual/link_2.dae
+[1.354s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/visual/link_3.dae
+[1.354s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/visual/link_4.dae
+[1.354s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/visual/link_5.dae
+[1.355s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/visual/link_6.dae
+[1.355s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/med7/visual/link_7.dae
+[1.355s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/ros2_control/gazebo_controllers.yaml
+[1.355s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/ros2_control/hardware_controllers.yaml
+[1.355s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/ros2_control/initial_joint_positions.yaml
+[1.355s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/ros2_control/lbr_system_config.yaml
+[1.356s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/ros2_control/lbr_system_interface.xacro
+[1.356s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/ros2_control/mock_controllers.yaml
+[1.357s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa14/iiwa14.urdf.xacro
+[1.357s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa14/iiwa14.xacro
+[1.357s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa14/joint_limits.yaml
+[1.358s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa7/ft45_sensor.xacro
+[1.372s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa7/iiwa7.urdf.xacro
+[1.372s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa7/iiwa7.xacro
+[1.372s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa7/joint_limits.yaml
+[1.372s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa7/polishing_tool.xacro
+[1.383s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/med14/joint_limits.yaml
+[1.384s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/med14/med14.urdf.xacro
+[1.384s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/med14/med14.xacro
+[1.384s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/med7/joint_limits.yaml
+[1.385s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/med7/med7.urdf.xacro
+[1.385s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/med7/med7.xacro
+[1.385s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/environment/lbr_description.dsv
+[1.385s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/ament_index/resource_index/package_run_dependencies/lbr_description
+[1.386s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/ament_index/resource_index/parent_prefix_path/lbr_description
+[1.386s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/environment/ament_prefix_path.sh
+[1.386s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/environment/ament_prefix_path.dsv
+[1.387s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/environment/path.sh
+[1.387s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/environment/path.dsv
+[1.388s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/local_setup.bash
+[1.388s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/local_setup.sh
+[1.388s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/local_setup.zsh
+[1.388s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/local_setup.dsv
+[1.389s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/package.dsv
+[1.401s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/ament_index/resource_index/packages/lbr_description
+[1.402s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/cmake/lbr_descriptionConfig.cmake
+[1.402s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/cmake/lbr_descriptionConfig-version.cmake
+[1.402s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/package.xml
+[1.406s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_description

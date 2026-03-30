@@ -1,0 +1,49 @@
+[0.389s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_demos/lbr_moveit_cpp -DCMAKE_INSTALL_PREFIX=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp
+[0.412s] -- Found ament_cmake: 2.5.5 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[0.728s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.748s] -- Found geometry_msgs: 5.3.6 (/opt/ros/jazzy/share/geometry_msgs/cmake)
+[0.803s] -- Found rosidl_generator_c: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+[0.817s] -- Found rosidl_generator_cpp: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+[0.833s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.854s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.938s] -- Found moveit_ros_planning_interface: 2.12.4 (/opt/ros/jazzy/share/moveit_ros_planning_interface/cmake)
+[0.974s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.83.0/BoostConfig.cmake (found version "1.83.0") found components: date_time filesystem program_options system thread 
+[1.407s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.83.0/BoostConfig.cmake (found version "1.83.0") found components: chrono date_time filesystem iostreams program_options regex serialization system thread 
+[1.507s] -- Found parameter_traits: 0.6.0 (/opt/ros/jazzy/share/parameter_traits/cmake)
+[1.604s] -- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+[1.609s] -- Found rmw_fastrtps_cpp: 8.4.3 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)
+[1.748s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[1.921s] -- Found rclcpp_lifecycle: 28.1.16 (/opt/ros/jazzy/share/rclcpp_lifecycle/cmake)
+[1.989s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.83.0/BoostConfig.cmake (found version "1.83.0") found components: filesystem 
+[2.118s] -- Ensuring Eigen3 include directory is part of orocos-kdl CMake target
+[2.350s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.83.0/BoostConfig.cmake (found version "1.83.0") found components: system filesystem date_time program_options thread chrono 
+[2.428s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.83.0/BoostConfig.cmake (found version "1.83.0") found components: thread system filesystem regex date_time program_options 
+[2.475s] -- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.83.0/BoostConfig.cmake (found version "1.83.0") found components: system filesystem date_time program_options thread 
+[2.677s] -- Configuring done (2.3s)
+[2.726s] -- Generating done (0.0s)
+[2.735s] -- Build files have been written to: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp
+[2.753s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_demos/lbr_moveit_cpp -DCMAKE_INSTALL_PREFIX=/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp
+[2.754s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp -- -j12 -l12
+[2.840s] [100%] Built target hello_moveit
+[2.855s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp -- -j12 -l12
+[2.857s] Invoking command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp
+[2.867s] -- Install configuration: "Release"
+[2.869s] -- Execute custom install script
+[2.870s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/launch/hello_moveit.launch.py
+[2.870s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/lib/lbr_moveit_cpp/hello_moveit
+[2.870s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/ament_index/resource_index/package_run_dependencies/lbr_moveit_cpp
+[2.871s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/ament_index/resource_index/parent_prefix_path/lbr_moveit_cpp
+[2.871s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/environment/ament_prefix_path.sh
+[2.871s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/environment/ament_prefix_path.dsv
+[2.872s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/environment/path.sh
+[2.872s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/environment/path.dsv
+[2.872s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/local_setup.bash
+[2.872s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/local_setup.sh
+[2.873s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/local_setup.zsh
+[2.873s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/local_setup.dsv
+[2.873s] -- Symlinking: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/package.dsv
+[2.886s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/ament_index/resource_index/packages/lbr_moveit_cpp
+[2.886s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/cmake/lbr_moveit_cppConfig.cmake
+[2.886s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/cmake/lbr_moveit_cppConfig-version.cmake
+[2.886s] -- Up-to-date symlink: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit_cpp/share/lbr_moveit_cpp/package.xml
+[2.889s] Invoked command in '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/pablo/Desktop/ros2_dam/ros2_ws/install/baile_sencillo:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_py:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_moveit:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_moveit_cpp

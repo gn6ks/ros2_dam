@@ -1,0 +1,47 @@
+running develop
+Removing /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr-demos-advanced-py.egg-link (link to .)
+running egg_info
+writing ../../../../build/lbr_demos_advanced_py/lbr_demos_advanced_py.egg-info/PKG-INFO
+writing dependency_links to ../../../../build/lbr_demos_advanced_py/lbr_demos_advanced_py.egg-info/dependency_links.txt
+writing entry points to ../../../../build/lbr_demos_advanced_py/lbr_demos_advanced_py.egg-info/entry_points.txt
+writing requirements to ../../../../build/lbr_demos_advanced_py/lbr_demos_advanced_py.egg-info/requires.txt
+writing top-level names to ../../../../build/lbr_demos_advanced_py/lbr_demos_advanced_py.egg-info/top_level.txt
+reading manifest file '../../../../build/lbr_demos_advanced_py/lbr_demos_advanced_py.egg-info/SOURCES.txt'
+writing manifest file '../../../../build/lbr_demos_advanced_py/lbr_demos_advanced_py.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build
+creating /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib
+creating /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py
+copying lbr_demos_advanced_py/lbr_base_position_command_node.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py
+copying lbr_demos_advanced_py/admittance_rcm_controller.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py
+copying lbr_demos_advanced_py/admittance_rcm_control_node.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py
+copying lbr_demos_advanced_py/__init__.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py
+copying lbr_demos_advanced_py/admittance_control_node.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py
+copying lbr_demos_advanced_py/admittance_controller.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py
+running install
+running install_lib
+creating /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py
+copying /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py/lbr_base_position_command_node.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py
+copying /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py/admittance_rcm_controller.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py
+copying /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py/admittance_rcm_control_node.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py
+copying /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py/__init__.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py
+copying /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py/admittance_control_node.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py
+copying /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/build/lib/lbr_demos_advanced_py/admittance_controller.py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py
+byte-compiling /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py/lbr_base_position_command_node.py to lbr_base_position_command_node.cpython-312.pyc
+byte-compiling /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py/admittance_rcm_controller.py to admittance_rcm_controller.cpython-312.pyc
+byte-compiling /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py/admittance_rcm_control_node.py to admittance_rcm_control_node.cpython-312.pyc
+byte-compiling /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py/__init__.py to __init__.cpython-312.pyc
+byte-compiling /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py/admittance_control_node.py to admittance_control_node.cpython-312.pyc
+byte-compiling /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py/admittance_controller.py to admittance_controller.cpython-312.pyc
+running install_data
+copying resource/lbr_demos_advanced_py -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/share/ament_index/resource_index/packages
+copying package.xml -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/share/lbr_demos_advanced_py
+copying config/admittance_rcm_control.yaml -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/share/lbr_demos_advanced_py/config
+copying config/admittance_control.yaml -> /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/share/lbr_demos_advanced_py/config
+running install_egg_info
+Copying ../../../../build/lbr_demos_advanced_py/lbr_demos_advanced_py.egg-info to /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/python3.12/site-packages/lbr_demos_advanced_py-2.4.3-py3.12.egg-info
+running install_scripts
+Installing admittance_control script to /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/lbr_demos_advanced_py
+Installing admittance_rcm_control script to /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_demos_advanced_py/lib/lbr_demos_advanced_py
+writing list of installed files to '/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_demos_advanced_py/install.log'

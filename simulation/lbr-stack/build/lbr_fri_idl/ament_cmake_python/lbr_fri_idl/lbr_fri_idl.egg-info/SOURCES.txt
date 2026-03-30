@@ -4,3 +4,9 @@ lbr_fri_idl.egg-info/PKG-INFO
 lbr_fri_idl.egg-info/SOURCES.txt
 lbr_fri_idl.egg-info/dependency_links.txt
 lbr_fri_idl.egg-info/top_level.txt
+lbr_fri_idl/msg/__init__.py
+lbr_fri_idl/msg/_lbr_command.py
+lbr_fri_idl/msg/_lbr_joint_position_command.py
+lbr_fri_idl/msg/_lbr_state.py
+lbr_fri_idl/msg/_lbr_torque_command.py
+lbr_fri_idl/msg/_lbr_wrench_command.py
