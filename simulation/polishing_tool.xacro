@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+<!--
+  polishing_tool.xacro
+  =====================
+  Macro XACRO del end-effector de pulido observado en las fotos:
+    1. Adaptador negro (impresión 3D / mecanizado) — conecta FT45 al backing pad
+    2. Backing pad rojo (soporte de velcro, Ø ~125mm)
+    3. Foam pad verde (esponja de pulido, Ø ~125mm, h ~35mm)
+
+  El TCP (Tool Center Point) se coloca en la cara activa de la esponja.
+
+  Uso:
+    <xacro:include filename="$(find iiwa_ft_sensor)/urdf/polishing_tool.xacro"/>
+    <xacro:polishing_tool
+        parent="ft45_measuring_point"
+        prefix="polishing"/>
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="polishing_tool"
+               params="parent prefix xyz:='0 0 0' rpy:='0 0 0'">
+
+    <!-- este es el "puente" entre el propio sensor de fuerza y la esponja-->
+    <link name="${prefix}_adapter_link">
+      <visual>
+        <geometry>
+          <cylinder radius="0.014" length="0.018"/>
+        </geometry>
+        <origin xyz="0 0 0.009" rpy="0 0 0"/>
+        <material name="adapter_black">
+          <color rgba="0.1 0.1 0.1 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="0.014" length="0.018"/>
+        </geometry>
+        <origin xyz="0 0 0.009" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="0.030"/>
+        <origin xyz="0 0 0.009" rpy="0 0 0"/>
+        <!-- Inercias cilindro: r=0.014m, h=0.018m -->
+        <inertia
+          ixx="2.1e-6" ixy="0" ixz="0"
+          iyy="2.1e-6" iyz="0"
+          izz="2.9e-6"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_adapter_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child  link="${prefix}_adapter_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+
+    <!-- soporte para poner las esponjas ¿realmente necesario? cargatelo si ves que ni lo usas-->
+    <link name="${prefix}_backing_pad_link">
+      <visual>
+        <geometry>
+          <!-- Forma de cono de chocolate aproximamos con cilindro -->
+          <cylinder radius="0.0625" length="0.022"/>
+        </geometry>
+        <origin xyz="0 0 0.011" rpy="0 0 0"/>
+        <material name="backing_pad_red">
+          <color rgba="0.85 0.1 0.1 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="0.0625" length="0.022"/>
+        </geometry>
+        <origin xyz="0 0 0.011" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="0.150"/>
+        <origin xyz="0 0 0.011" rpy="0 0 0"/>
+        <!-- Inercias cilindro: r=0.0625m, h=0.022m -->
+        <inertia
+          ixx="1.87e-4" ixy="0" ixz="0"
+          iyy="1.87e-4" iyz="0"
+          izz="2.93e-4"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_backing_pad_joint" type="fixed">
+      <parent link="${prefix}_adapter_link"/>
+      <child  link="${prefix}_backing_pad_link"/>
+      <!-- El backing pad se coloca justo debajo del adaptador -->
+      <origin xyz="0 0 0.018" rpy="0 0 0"/>
+    </joint>
+
+    <!-- esponjilla verde con propiedades de contacto blandillas,
+      si ves que las propiedades estan mal arreglalo para hacerlo mas fijo o si eso lo quitas y au-->
+    <link name="${prefix}_foam_pad_link">
+      <visual>
+        <geometry>
+          <cylinder radius="0.0625" length="0.035"/>
+        </geometry>
+        <origin xyz="0 0 0.0175" rpy="0 0 0"/>
+        <material name="foam_pad_green">
+          <color rgba="0.1 0.65 0.45 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="0.0625" length="0.035"/>
+        </geometry>
+        <origin xyz="0 0 0.0175" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="0.060"/>
+        <origin xyz="0 0 0.0175" rpy="0 0 0"/>
+        <!-- Inercias cilindro: r=0.0625m, h=0.035m -->
+        <inertia
+          ixx="8.1e-5" ixy="0" ixz="0"
+          iyy="8.1e-5" iyz="0"
+          izz="1.17e-4"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_foam_pad_joint" type="fixed">
+      <parent link="${prefix}_backing_pad_link"/>
+      <child  link="${prefix}_foam_pad_link"/>
+      <!-- El foam pad cuelga debajo del backing pad -->
+      <origin xyz="0 0 0.022" rpy="0 0 0"/>
+    </joint>
+
+    <!-- este es el punto de referencia para la cinematica inversa, es para que cuando esto choque con algo
+     los calculos al resto de los ejes del botardo se calculen progresivamente a la inversa de la fuerza necesaria
+     si eso mira como es que funciona en MatLab o usa servidor local Pink-->
+    <link name="${prefix}_tcp_link">
+      <visual>
+        <geometry>
+          <sphere radius="0.003"/>
+        </geometry>
+        <material name="tcp_yellow">
+          <color rgba="1.0 0.8 0.0 0.8"/>
+        </material>
+      </visual>
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="1e-9" ixy="0" ixz="0"
+                 iyy="1e-9" iyz="0" izz="1e-9"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_tcp_joint" type="fixed">
+      <parent link="${prefix}_foam_pad_link"/>
+      <child  link="${prefix}_tcp_link"/>
+      <!-- Cara inferior del foam pad -->
+      <origin xyz="0 0 0.035" rpy="0 0 0"/>
+    </joint>
+
+    <gazebo reference="${prefix}_foam_pad_link">
+      <material>Gazebo/Green</material>
+      <!-- Rigidez de contacto del foam (esponja blanda) -->
+      <kp>500.0</kp>
+      <kd>50.0</kd>
+      <!-- Coeficiente de fricción (superficie pulida) -->
+      <mu1>0.4</mu1>
+      <mu2>0.4</mu2>
+      <minDepth>0.001</minDepth>
+      <maxVel>1.0</maxVel>
+    </gazebo>
+
+    <gazebo reference="${prefix}_backing_pad_link">
+      <material>Gazebo/Red</material>
+      <kp>10000.0</kp>
+      <kd>100.0</kd>
+      <mu1>0.6</mu1>
+      <mu2>0.6</mu2>
+    </gazebo>
+
+    <gazebo reference="${prefix}_adapter_link">
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>
