@@ -15,6 +15,8 @@
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_5.dae
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_6.dae
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa14/visual/link_7.dae
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/carrito_azul/Cuerpo_carro_1.dae
+/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/carrito_azul/Cuerpo_carro_1.stl
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_0.stl
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_1.stl
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/meshes/iiwa7/collision/link_2.stl
@@ -72,11 +74,9 @@
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa14/iiwa14.urdf.xacro
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa14/iiwa14.xacro
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa14/joint_limits.yaml
-/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa7/ft45_sensor.xacro
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa7/iiwa7.urdf.xacro
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa7/iiwa7.xacro
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa7/joint_limits.yaml
-/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/iiwa7/polishing_tool.xacro
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/med14/joint_limits.yaml
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/med14/med14.urdf.xacro
 /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/install/lbr_description/share/lbr_description/urdf/med14/med14.xacro
