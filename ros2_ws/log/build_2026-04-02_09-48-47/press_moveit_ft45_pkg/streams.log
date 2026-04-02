@@ -1,0 +1,15 @@
+[1.487s] Invoking command in '/home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/pablo/Desktop/ros2_dam/ros2_ws/install/press_moveit_ft45_pkg/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/build --no-deps symlink_data
+[2.027s] running develop
+[2.401s] running egg_info
+[2.438s] writing press_moveit_ft45_pkg.egg-info/PKG-INFO
+[2.438s] writing dependency_links to press_moveit_ft45_pkg.egg-info/dependency_links.txt
+[2.438s] writing requirements to press_moveit_ft45_pkg.egg-info/requires.txt
+[2.439s] writing top-level names to press_moveit_ft45_pkg.egg-info/top_level.txt
+[2.511s] reading manifest file 'press_moveit_ft45_pkg.egg-info/SOURCES.txt'
+[2.513s] writing manifest file 'press_moveit_ft45_pkg.egg-info/SOURCES.txt'
+[2.549s] running build_ext
+[2.550s] Creating /home/pablo/Desktop/ros2_dam/ros2_ws/install/press_moveit_ft45_pkg/lib/python3.12/site-packages/press-moveit-ft45-pkg.egg-link (link to .)
+[2.550s] 
+[2.551s] Installed /home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg
+[2.551s] running symlink_data
+[2.597s] Invoked command in '/home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/pablo/Desktop/ros2_dam/ros2_ws/install/press_moveit_ft45_pkg/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/build --no-deps symlink_data

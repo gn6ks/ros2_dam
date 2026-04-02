@@ -1,0 +1,25 @@
+[1.137s] Invoking command in '/home/pablo/Desktop/ros2_dam/ros2_ws/src/press_moveit_ft45_pkg': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/pablo/Desktop/ros2_dam/ros2_ws/install/press_moveit_ft45_pkg/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/press_moveit_ft45_pkg build --build-base /home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/build install --record /home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/install.log --single-version-externally-managed install_data
+[1.519s] running egg_info
+[1.550s] writing ../../build/press_moveit_ft45_pkg/press_moveit_ft45_pkg.egg-info/PKG-INFO
+[1.551s] writing dependency_links to ../../build/press_moveit_ft45_pkg/press_moveit_ft45_pkg.egg-info/dependency_links.txt
+[1.551s] writing entry points to ../../build/press_moveit_ft45_pkg/press_moveit_ft45_pkg.egg-info/entry_points.txt
+[1.551s] writing requirements to ../../build/press_moveit_ft45_pkg/press_moveit_ft45_pkg.egg-info/requires.txt
+[1.552s] writing top-level names to ../../build/press_moveit_ft45_pkg/press_moveit_ft45_pkg.egg-info/top_level.txt
+[1.614s] reading manifest file '../../build/press_moveit_ft45_pkg/press_moveit_ft45_pkg.egg-info/SOURCES.txt'
+[1.615s] adding license file 'LICENSE'
+[1.615s] writing manifest file '../../build/press_moveit_ft45_pkg/press_moveit_ft45_pkg.egg-info/SOURCES.txt'
+[1.616s] running build
+[1.616s] running build_py
+[1.616s] copying press_moveit_ft45_pkg/press_motion_node.py -> /home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/build/lib/press_moveit_ft45_pkg
+[1.617s] running install
+[1.623s] running install_lib
+[1.653s] copying /home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/build/lib/press_moveit_ft45_pkg/press_motion_node.py -> /home/pablo/Desktop/ros2_dam/ros2_ws/install/press_moveit_ft45_pkg/lib/python3.12/site-packages/press_moveit_ft45_pkg
+[1.654s] byte-compiling /home/pablo/Desktop/ros2_dam/ros2_ws/install/press_moveit_ft45_pkg/lib/python3.12/site-packages/press_moveit_ft45_pkg/press_motion_node.py to press_motion_node.cpython-312.pyc
+[1.656s] running install_data
+[1.657s] running install_egg_info
+[1.687s] removing '/home/pablo/Desktop/ros2_dam/ros2_ws/install/press_moveit_ft45_pkg/lib/python3.12/site-packages/press_moveit_ft45_pkg-0.1.0-py3.12.egg-info' (and everything under it)
+[1.688s] Copying ../../build/press_moveit_ft45_pkg/press_moveit_ft45_pkg.egg-info to /home/pablo/Desktop/ros2_dam/ros2_ws/install/press_moveit_ft45_pkg/lib/python3.12/site-packages/press_moveit_ft45_pkg-0.1.0-py3.12.egg-info
+[1.688s] running install_scripts
+[1.880s] Installing press_motion_node script to /home/pablo/Desktop/ros2_dam/ros2_ws/install/press_moveit_ft45_pkg/lib/press_moveit_ft45_pkg
+[1.881s] writing list of installed files to '/home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/install.log'
+[1.912s] Invoked command in '/home/pablo/Desktop/ros2_dam/ros2_ws/src/press_moveit_ft45_pkg' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PYTHONPATH=/home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/pablo/Desktop/ros2_dam/ros2_ws/install/press_moveit_ft45_pkg/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/press_moveit_ft45_pkg build --build-base /home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/build install --record /home/pablo/Desktop/ros2_dam/ros2_ws/build/press_moveit_ft45_pkg/install.log --single-version-externally-managed install_data
