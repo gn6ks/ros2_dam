@@ -315,8 +315,8 @@ message(STATUS "Execute custom install script")
 
 # begin of custom install code
 
-# install(DIRECTORY "gazebo" "meshes" "ros2_control" "urdf" "DESTINATION" "share/lbr_description")
-ament_cmake_symlink_install_directory("/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_description" DIRECTORY "gazebo" "meshes" "ros2_control" "urdf" "DESTINATION" "share/lbr_description")
+# install(DIRECTORY "gazebo" "meshes" "ros2_control" "urdf" "models" "DESTINATION" "share/lbr_description")
+ament_cmake_symlink_install_directory("/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_description" DIRECTORY "gazebo" "meshes" "ros2_control" "urdf" "models" "DESTINATION" "share/lbr_description")
 
 # install(FILES "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_description/lbr_description.dsv" "DESTINATION" "share/lbr_description/environment")
 ament_cmake_symlink_install_files("/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_description" FILES "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_description/lbr_description.dsv" "DESTINATION" "share/lbr_description/environment")
