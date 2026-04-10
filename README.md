@@ -264,7 +264,7 @@ If you use this framework in your research or work, we would appreciate ❤️ i
 @misc{ros2_dam,
   author       = {gn6ks and contributors},
   title        = {ROS2\_DAM: Direct Application Method for KUKA LBR Robots},
-  year         = {2024},
+  year         = {2026},
   publisher    = {GitHub},
   howpublished = {\url{https://github.com/gn6ks/ros2_dam}}
 }
