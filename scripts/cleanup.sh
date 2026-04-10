@@ -1,4 +1,10 @@
 #!/bin/bash
+#===============================================================================
+# ROS2 Direct Application Method
+# Author: gn6ks 
+# Email: pguifon@idf.upv.es
+#===============================================================================
+
 set -e  
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -11,7 +17,7 @@ print_header() {
     echo -e "${BLUE}"
     echo "==============================================================================="
     echo "  iiwa7 Full Stack Reset (Gazebo + MoveIt2 + RViz2)"
-    echo "  ROS2: From Simulation to Reality - Research Project"
+    echo "  ROS2 Direct Application Method"
     echo "  Author: gn6ks"
     echo "==============================================================================="
     echo -e "${NC}"

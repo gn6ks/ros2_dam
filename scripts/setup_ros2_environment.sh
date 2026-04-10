@@ -1,12 +1,8 @@
 #!/bin/bash
 #===============================================================================
-# ROS2 Jazzy Environment Setup Script
-# ROS2: From Simulation to Reality - Research Project
-# Author: gn6ks
-# License: MIT
-#===============================================================================
-# Updated for: Ubuntu 24.04 LTS + ROS2 Jazzy + Gazebo Harmonic
-# Gazebo Installation: Official instructions from gazebosim.org
+# ROS2 Direct Application Method
+# Author: gn6ks 
+# Email: pguifon@idf.upv.es
 #===============================================================================
 
 set -e  
@@ -21,9 +17,9 @@ NC='\033[0m'
 print_header() {
     echo -e "${BLUE}"
     echo "==============================================================================="
-    echo "  ROS2 Jazzy Environment Setup"
-    echo "  ROS2: From Simulation to Reality - Research Project"
+    echo "  ROS2 Direct Application Method"
     echo "  Author: gn6ks"
+    echo "  Email: pguifon@idf.upv.es"
     echo "==============================================================================="
     echo -e "${NC}"
 }

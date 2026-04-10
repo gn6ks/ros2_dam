@@ -11,9 +11,9 @@ NC='\033[0m'
 print_header() {
     echo -e "${BLUE}"
     echo "==============================================================================="
-    echo "  Gazebo iiwa7 simulation"
-    echo "  ROS2: From Simulation to Reality - Research Project"
+    echo "  ROS2 Direct Application Method"
     echo "  Author: gn6ks"
+    echo "  Email: pguifon@idf.upv.es"
     echo "==============================================================================="
     echo -e "${NC}"
 }

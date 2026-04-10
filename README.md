@@ -1,156 +1,183 @@
-# ROS2: From Simulation to Reality
+# ROS2_DAM: ROS2 Direct Application Method
 
-## A Comprehensive Framework for Robotic Development and Deployment
+**Stack:** ROS2 Jazzy Jalisco · Ubuntu 24.04 LTS · Gazebo Harmonic · KUKA iiwa 7 R800
 
-**Author:** gn6ks  
-**Version:** 1.0.0  
-**Status:** In Progress  
-**License:** MIT  
+> All scripts must be run from inside the repository root. They use `git rev-parse --show-toplevel` to locate the workspace automatically.
 
 ---
 
-### Abstract
+## Requirements
 
-This research presents a systematic approach to learning and implementing ROS2 (Robot Operating System 2), covering the complete development lifecycle from theoretical foundations to physical deployment. The work is structured around progressive learning curves, enabling practitioners with varying levels of expertise to acquire competencies in robot simulation, navigation, and real-world implementation. All resources, configurations, and documentation are made publicly available to facilitate reproducibility and community contribution.
-
----
-
-### Table of Contents
-
-1. [Introduction](docs/01_introduction.md)
-2. [Fundamental Concepts](docs/02_fundamental_concepts.md)
-3. [Installation and Environment Setup](docs/03_installation.md)
-4. [Your First Simulation](docs/04_my_first_simulation.md)
-5. [Your First Real Robot Simulation](docs/05_my_first_workspace.md)
----
-
-### Technical Specifications
-
-| Component | Specification |
-|-----------|---------------|
-| **ROS2 Distribution** | Jazzy Jalisco (LTS) |
-| **Operating System** | Ubuntu 24.02 (LTS) |
-| **Simulation Environment** | Gazebo Harmonic |
+| Component | Version | Check |
+|-----------|---------|-------|
+| Ubuntu | 24.04 LTS | `lsb_release -a` |
+| ROS2 | Jazzy Jalisco | `echo $ROS_DISTRO` |
+| Python | 3.10+ | `python3 --version` |
+| Git | Any recent | `git --version` |
+| colcon | Any recent | `colcon version` |
+| Disk space | 30 GB+ free | `df -h /` |
 
 ---
 
-### Repository Structure
+## Repository Structure
 
-    ros2-investigacion/
-    ├── docs/                    # Documentation and research content
-    │   ├── 01_introduction.md
-    │   ├── 02_installation.md
-    │   ├── assets/
-    │   │   ├── figures/
-    │   │   └── diagrams/
-    │   └── learning_paths/
-    ├── ros2_ws/                 # ROS2 workspace and packages
-    │   ├── src/
-    │   │   ├── mi_robot_description/
-    │   │   ├── mi_robot_bringup/
-    │   │   └── mi_robot_navigation/
-    │   └── install_isolated.sh
-    ├── simulation/              # Simulation configurations and worlds
-    │   ├── gazebo/
-    │   │   ├── worlds/
-    │   │   └── models/
-    │   └── ignition/
-    ├── hardware/                # Hardware-specific configurations
-    │   ├── drivers/
-    │   ├── calibration/
-    │   └── troubleshooting/
-    ├── scripts/                 # Automation and utility scripts
-    │   ├── setup_ubuntu.sh
-    │   ├── build_workspace.sh
-    │   └── run_simulation.sh
-    ├── references/              # Bibliography and external resources
-    │   ├── bibliography.md
-    │   └── useful_links.md
-    ├── LICENSE
-    ├── CONTRIBUTING.md
-    └── .gitignore
+```
+ROS2_DAM/
+├── scripts/                  # All automation scripts (run from here)
+├── simulation/
+│   └── lbr-stack/            # Fork workspace (created by setup_workspace.sh)
+│       ├── src/
+│       └── install/
+└── docs/
+```
+
+> The `simulation/lbr-stack/` workspace is the **forked** version of `lbr_fri_ros2_stack`. Do not replace it with the upstream repository.
 
 ---
 
-### Citation
+## Step 1 — ROS2 + Gazebo Harmonic Installation
 
-If you use this work in your research, please cite as:
+```bash
+chmod +x scripts/setup_ros2_environment.sh
+./scripts/setup_ros2_environment.sh
+```
 
-    gn6ks. (2026). ROS2: From Simulation to Reality. GitHub Repository.
-    https://github.com/gn6ks/ros2-investigacion
+This script handles everything: locale, ROS2 Jazzy apt source, `ros-jazzy-desktop`, Gazebo Harmonic (`gz-harmonic`), colcon, rosdep, RQT, and `.bashrc` configuration.
 
----
+After it finishes, open a new terminal or run:
+```bash
+source ~/.bashrc
+```
 
-### Documentation for Agentic AI
-
----
-
-#### Overview
-
-This section provides guidance for leveraging artificial intelligence agents to enhance comprehension and navigation of this research documentation. By utilizing AI-assisted reading strategies, users can efficiently extract relevant information, clarify complex concepts, and accelerate their learning process.
-
----
-
-#### System Prompt Configuration
-
-To optimize AI-assisted reading of this research, users should configure the AI agent with appropriate context. The following system prompt structure is recommended:
-
-```markdown
-High-Performance System Prompt: Co-Sim Robotics Specialist
-
-Acts as a senior engineering intelligence core specializing exclusively in 
-collaborative robotics and simulation environments (Sim-to-Real). Its cognitive 
-architecture is optimized for in-depth interpretation of technical documentation 
-in PDF and Markdown. When processing files, prioritize: precision kinematics, 
-system dynamics, ROS/ROS2 protocols, ISO/TS 15066 safety standards, and physics 
-engines (Isaac Sim/Gazebo/Webots).
-
-Your output must be technical, eliminating redundancies and focusing on 
-implementation feasibility, hardware/software dependency detection, and trajectory 
-analysis. Ignore contexts unrelated to robotics. Maintain absolute rigor in 
-terminology related to actuators, sensors, and control logic. For any document, 
-extract the system architecture and critical failure points in human-robot 
-collaboration.
-
-Confirm your operational status right now.
+Verify:
+```bash
+chmod +x scripts/verify_ros2_installation.sh
+./scripts/verify_ros2_installation.sh
 ```
 
 ---
 
-#### Context Submission Methods
+## Step 2 — Fork Workspace Setup
 
-Users may share this documentation with an AI agent using the following approaches:
-
-##### Method 1: Full Repository Context
-
-For comprehensive analysis, provide the complete repository structure:
-
-```
-Context: This research repository contains the following structure:
-- README.md (project overview and technical specifications)
-- docs/01_introduction.md (research background and objectives)
-- docs/02_fundamental_concepts.md (ROS2 architecture and communication patterns)
-- docs/02_installation.md (environment setup and dual-boot configuration)
-- ros2_ws/ (ROS2 workspace and package implementations)
-- scripts/ (validation and automation utilities)
-
-Task: Assist me in understanding [specific topic or question].
+```bash
+chmod +x scripts/setup_workspace.sh
+./scripts/setup_workspace.sh
 ```
 
-##### Method 2: Section-Specific Context
+This script:
+- Creates `simulation/lbr-stack/` inside the repository
+- Clones the **forked** `lbr_fri_ros2_stack` into `simulation/lbr-stack/src/`
+- Imports dependencies via `vcs`
+- Runs `rosdep install`
+- Builds with `colcon build --symlink-install`
 
-For focused inquiries, share specific sections:
+> **Important:** The workspace lives inside this repository at `simulation/lbr-stack/`, not in `~/ros2_ws`. All launch scripts source `simulation/lbr-stack/install/setup.bash` automatically.
 
+Verify the build:
+```bash
+chmod +x scripts/verify_workspace.sh
+./scripts/verify_workspace.sh
 ```
-Context: I am providing Chapter 2.6 (Services) from the research documentation.
-[Paste content of docs/02_fundamental_concepts.md, Section 2.6]
 
-Task: Explain the request-response mechanism and provide examples of service 
-definitions for my use case: [describe your application].
+Expected output: `lbr_bringup` sourced and ready.
+
+---
+
+## Step 3 — Launching the Simulation
+
+All scripts auto-detect the repository root and source the workspace. Run them from anywhere inside the repo.
+
+### Mock mode (no physics, fastest)
+
+Terminal 1:
+```bash
+./scripts/run_mockup.sh
+```
+
+Terminal 2:
+```bash
+./scripts/run_rviz.sh
+```
+
+### Gazebo mode (full physics)
+
+```bash
+./scripts/run_simulation.sh
+```
+
+Launches Gazebo Harmonic with `joint_trajectory_controller` for the iiwa7.
+
+---
+
+## Step 4 — MoveIt2 via RViz2
+
+Requires Gazebo already running (`run_simulation.sh` in another terminal).
+
+```bash
+./scripts/run_moveit_rviz.sh
+```
+
+Opens RViz2 with the MoveIt2 MotionPlanning panel. Drag the end-effector marker → **Plan & Execute**.
+
+| Panel Button | Action |
+|---|---|
+| Plan | Compute collision-free trajectory |
+| Execute | Send last plan to controller |
+| Plan & Execute | Both in one click |
+| Stop | Halt immediately |
+
+> To close cleanly: `Ctrl + C` in the `run_moveit_rviz.sh` terminal.
+
+---
+
+## Step 5 — Cleanup
+
+To kill all simulation processes (Gazebo, RViz2, controllers, orphan nodes):
+
+```bash
+./scripts/cleanup.sh
 ```
 
 ---
 
-### Contact
+## Scripts Reference
 
-For inquiries regarding this research, please open an issue in this repository or contact the author directly through GitHub.
+| Script | Purpose |
+|--------|---------|
+| `setup_ros2_environment.sh` | Full ROS2 Jazzy + Gazebo Harmonic install |
+| `verify_ros2_installation.sh` | Post-install environment check |
+| `setup_workspace.sh` | Clone fork, build workspace in `simulation/lbr-stack/` |
+| `verify_workspace.sh` | Health check on built workspace |
+| `run_mockup.sh` | Launch iiwa7 mock (no physics) |
+| `run_rviz.sh` | Launch RViz2 (use alongside mockup) |
+| `run_simulation.sh` | Launch iiwa7 in Gazebo Harmonic |
+| `run_moveit_rviz.sh` | Launch MoveIt2 + RViz2 (Gazebo mode) |
+| `cleanup.sh` | Kill all running simulation processes |
+
+---
+
+## Troubleshooting
+
+```bash
+# ROS2 not found in terminal
+source /opt/ros/jazzy/setup.bash
+
+# lbr packages not found
+source simulation/lbr-stack/install/setup.bash
+
+# Workspace not built yet
+cd simulation/lbr-stack && colcon build --symlink-install
+
+# Diagnose ROS2 issues
+ros2 doctor
+
+# Check joint states are publishing (sim must be running)
+ros2 topic hz /lbr/joint_states   # Expected: ~100 Hz
+
+# Kill stuck Gazebo processes manually
+pkill -9 gz
+```
+
+---
+
+**License:** MIT · **ROS2:** Jazzy Jalisco · **Simulator:** Gazebo Harmonic

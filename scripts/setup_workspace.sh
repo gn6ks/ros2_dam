@@ -11,8 +11,8 @@ NC='\033[0m'
 print_header() {
     echo -e "${BLUE}"
     echo "==============================================================================="
-    echo "  LBR_FRI_ROS2_Stack Environment setup script"
-    echo "  ROS2: From Simulation to Reality - Research Project"
+    echo "  lbr_fri_ros2_stack custom code setup"
+    echo "  ROS2 Direct Application Method"
     echo "  Author: gn6ks"
     echo "==============================================================================="
     echo -e "${NC}"

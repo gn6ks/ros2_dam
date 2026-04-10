@@ -1,10 +1,4 @@
 #!/bin/bash
-#===============================================================================
-# ROS2 Installation Quick Verification
-# ROS2: From Simulation to Reality - Research Project
-# Author: gn6ks
-# License: MIT
-#===============================================================================
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -15,7 +9,7 @@ NC='\033[0m'
 echo ""
 echo -e "${CYAN}===============================================================================${NC}"
 echo -e "${CYAN}  ROS2 Installation Verification${NC}"
-echo -e "${CYAN}  ROS2: From Simulation to Reality - Research Project${NC}"
+echo -e "${CYAN}  ROS2 Direct Application Method${NC}"
 echo -e "${CYAN}  Author: gn6ks${NC}"
 echo -e "${CYAN}===============================================================================${NC}"
 echo ""
