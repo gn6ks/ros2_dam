@@ -8,7 +8,7 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-print_header() {
+print_header() {    
     echo -e "${BLUE}"
     echo "==============================================================================="
     echo "  lbr_fri_ros2_stack custom code setup"
@@ -140,7 +140,7 @@ workspace_creation() {
 
     print_info "Clonning lbr_fri_ros2_stack | branch: jazzy"
     if [ ! -d "src/lbr_fri_ros2_stack" ]; then
-        git clone https://github.com/lbr-stack/lbr_fri_ros2_stack.git -b jazzy src/lbr_fri_ros2_stack
+        git clone https://github.com/gn6ks/lbr_fri_ros2_stack.git -b jazzy src/lbr_fri_ros2_stack
     else
         print_info "lbr-stack already exists"
     fi
