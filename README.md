@@ -1,4 +1,5 @@
 # ros2_dam
+
 [![License](https://img.shields.io/github/license/gn6ks/ros2_dam)](https://github.com/gn6ks/ros2_dam/blob/main/LICENSE)
 [![ROS2](https://img.shields.io/badge/ROS2-Jazzy%20Jalisco-blue)](https://docs.ros.org/en/jazzy/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%20LTS-orange)](https://ubuntu.com/)
@@ -39,9 +40,9 @@ Supported robots: `iiwa7`, `iiwa14`, `med7`, `med14`.
 
 ## Status
 
-| OS | ROS Distribution | Simulator | Status |
-|:---|:---|:---|:---|
-| `Ubuntu 24.04` | `jazzy` | `Gazebo Harmonic` | [![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/gn6ks/ros2_dam) |
+| OS             | ROS Distribution | Simulator         | Status                                                                                                |
+| :------------- | :--------------- | :---------------- | :---------------------------------------------------------------------------------------------------- |
+| `Ubuntu 24.04` | `jazzy`          | `Gazebo Harmonic` | [![Build](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/gn6ks/ros2_dam) |
 
 ---
 
@@ -53,14 +54,14 @@ Supported robots: `iiwa7`, `iiwa14`, `med7`, `med14`.
 
 ## Requirements
 
-| Component | Version | Check |
-|-----------|---------|-------|
-| Ubuntu | 24.04 LTS | `lsb_release -a` |
-| ROS2 | Jazzy Jalisco | `echo $ROS_DISTRO` |
-| Python | 3.10+ | `python3 --version` |
-| Git | Any recent | `git --version` |
-| colcon | Any recent | `colcon version` |
-| Disk space | 30 GB+ free | `df -h /` |
+| Component  | Version       | Check               |
+| ---------- | ------------- | ------------------- |
+| Ubuntu     | 24.04 LTS     | `lsb_release -a`    |
+| ROS2       | Jazzy Jalisco | `echo $ROS_DISTRO`  |
+| Python     | 3.10+         | `python3 --version` |
+| Git        | Any recent    | `git --version`     |
+| colcon     | Any recent    | `colcon version`    |
+| Disk space | 30 GB+ free   | `df -h /`           |
 
 ---
 
@@ -68,12 +69,16 @@ Supported robots: `iiwa7`, `iiwa14`, `med7`, `med14`.
 
 ```
 ros2_dam/
-├── scripts/                  # All automation scripts (run from here)
+├── docs/
+│   └── # Assets for documentation
+├── ros2_ws/
+│   └── # Workspace on different demos with custom ros2 packages
+├── scripts/
+│   └── # Automated scripts for installation, verification, usage, etc.
 ├── simulation/
-│   └── lbr-stack/            # Fork workspace (created by setup_workspace.sh)
-│       ├── src/
-│       └── install/
-└── docs/
+│   └── # idf_lbr_fri_ros2_stack, former lbr_fri_ros2_stack forked
+├── LICENSE
+└── README.md
 ```
 
 > The `simulation/lbr-stack/` workspace is the **forked** version of `lbr_fri_ros2_stack`. Do not replace it with the upstream repository.
@@ -114,6 +119,7 @@ chmod +x scripts/setup_workspace.sh
 ```
 
 This script:
+
 - Creates `simulation/lbr-stack/` inside the repository
 - Clones the **forked** `lbr_fri_ros2_stack` into `simulation/lbr-stack/src/`
 - Imports dependencies via `vcs`
@@ -140,11 +146,13 @@ All scripts auto-detect the repository root and source the workspace. Run them f
 **Mock mode** (no physics, fastest)
 
 Terminal 1:
+
 ```shell
 ./scripts/run_mockup.sh
 ```
 
 Terminal 2:
+
 ```shell
 ./scripts/run_rviz.sh
 ```
@@ -169,12 +177,12 @@ Requires Gazebo already running (`run_simulation.sh` in another terminal).
 
 Opens RViz2 with the MoveIt2 MotionPlanning panel. Drag the end-effector marker → **Plan & Execute**.
 
-| Panel Button | Action |
-|---|---|
-| Plan | Compute collision-free trajectory |
-| Execute | Send last plan to controller |
-| Plan & Execute | Both in one click |
-| Stop | Halt immediately |
+| Panel Button   | Action                            |
+| -------------- | --------------------------------- |
+| Plan           | Compute collision-free trajectory |
+| Execute        | Send last plan to controller      |
+| Plan & Execute | Both in one click                 |
+| Stop           | Halt immediately                  |
 
 > To close cleanly: `Ctrl + C` in the `run_moveit_rviz.sh` terminal.
 
@@ -218,17 +226,17 @@ To kill all simulation processes (Gazebo, RViz2, controllers, orphan nodes):
 
 ## Scripts Reference
 
-| Script | Purpose |
-|--------|---------|
-| `setup_ros2_environment.sh` | Full ROS2 Jazzy + Gazebo Harmonic install |
-| `verify_ros2_installation.sh` | Post-install environment check |
-| `setup_workspace.sh` | Clone fork, build workspace in `simulation/lbr-stack/` |
-| `verify_workspace.sh` | Health check on built workspace |
-| `run_mockup.sh` | Launch iiwa7 mock (no physics) |
-| `run_rviz.sh` | Launch RViz2 (use alongside mockup) |
-| `run_simulation.sh` | Launch iiwa7 in Gazebo Harmonic |
-| `run_moveit_rviz.sh` | Launch MoveIt2 + RViz2 (Gazebo mode) |
-| `cleanup.sh` | Kill all running simulation processes |
+| Script                        | Purpose                                                |
+| ----------------------------- | ------------------------------------------------------ |
+| `setup_ros2_environment.sh`   | Full ROS2 Jazzy + Gazebo Harmonic install              |
+| `verify_ros2_installation.sh` | Post-install environment check                         |
+| `setup_workspace.sh`          | Clone fork, build workspace in `simulation/lbr-stack/` |
+| `verify_workspace.sh`         | Health check on built workspace                        |
+| `run_mockup.sh`               | Launch iiwa7 mock (no physics)                         |
+| `run_rviz.sh`                 | Launch RViz2 (use alongside mockup)                    |
+| `run_simulation.sh`           | Launch iiwa7 in Gazebo Harmonic                        |
+| `run_moveit_rviz.sh`          | Launch MoveIt2 + RViz2 (Gazebo mode)                   |
+| `cleanup.sh`                  | Kill all running simulation processes                  |
 
 ---
 
@@ -299,6 +307,6 @@ We would like to acknowledge all contributors 🚀
 
 ## Acknowledgements
 
-| Logo | Notes |
-|:--:|:---|
+|                                                      Logo                                                      | Notes                                                                                                                                  |
+| :------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------- |
 | <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/LOGOUPV.png" alt="UPV" width="150" align="left"> | Developed at the [Universitat Politècnica de València (UPV)](https://www.upv.es/), in the context of robotic research and development. |
