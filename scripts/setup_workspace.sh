@@ -140,7 +140,7 @@ workspace_creation() {
 
     print_info "Clonning lbr_fri_ros2_stack | branch: jazzy"
     if [ ! -d "src/lbr_fri_ros2_stack" ]; then
-        git clone https://github.com/gn6ks/lbr_fri_ros2_stack.git -b jazzy src/lbr_fri_ros2_stack
+        git clone https://github.com/gn6ks/idf_lbr_fri_ros2_stack.git -b jazzy src/lbr_fri_ros2_stack
     else
         print_info "lbr-stack already exists"
     fi
