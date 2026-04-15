@@ -18,21 +18,22 @@ Supported robots: `iiwa7`, `iiwa14`, `med7`, `med14`.
   </tr>
   <tr>
     <td align="center">
-      <!-- TODO: replace with image or GIF of iiwa7 simulation/demo -->
+    <!-- TODO: poner los gifs de demo para la muestra -->
       <i>Image / GIF — iiwa7</i>
     </td>
     <td align="center">
-      <!-- TODO: replace with image or GIF of iiwa14 simulation/demo -->
+    <!-- TODO: poner los gifs de demo para la muestra -->
       <i>Image / GIF — iiwa14</i>
     </td>
     <td align="center">
-      <!-- TODO: replace with image or GIF of med7 simulation/demo -->
+    <!-- TODO: poner los gifs de demo para la muestra -->
       <i>Image / GIF — med7</i>
     </td>
     <td align="center">
-      <!-- TODO: replace with image or GIF of med14 simulation/demo -->
+    <!-- TODO: poner los gifs de demo para la muestra -->
       <i>Image / GIF — med14</i>
     </td>
+
   </tr>
 </table>
 
@@ -82,6 +83,7 @@ ros2_dam/
 ```
 
 > The `simulation/lbr-stack/` workspace is the **forked** version of `lbr_fri_ros2_stack`. Do not replace it with the upstream repository.
+> `idf_lbr_fri_ros2_stack` is a fork of `lbr_fri_ros2_stack` currently maintained by the Artificial Intelligence and Robotics Association
 
 ---
 
@@ -208,17 +210,18 @@ To kill all simulation processes (Gazebo, RViz2, controllers, orphan nodes):
   </tr>
   <tr>
     <td align="center">
-      <!-- TODO: replace with image or GIF of motion planning demo -->
+      <!-- TODO: poner los gifs de demo para la muestra -->
       <i>Image / GIF — Motion Planning</i>
     </td>
     <td align="center">
-      <!-- TODO: replace with image or GIF of gravity compensation demo -->
+    <!-- TODO: poner los gifs de demo para la muestra -->
       <i>Image / GIF — Gravity Compensation</i>
     </td>
     <td align="center">
-      <!-- TODO: replace with image or GIF of trajectory execution demo -->
+      <!-- TODO: poner los gifs de demo para la muestra -->
       <i>Image / GIF — Trajectory Execution</i>
     </td>
+
   </tr>
 </table>
 
