@@ -25,9 +25,11 @@ class PressMotionNode(Node):
     EEF_LINK       = "tool_tcp_link"
     BASE_FRAME     = "lbr_link_0"
 
-    SURFACE_Z      = 0.45
-    PRESS_Z        = 0.44
-    PRECONTACT_Z   = 0.55
+    # La mesa (carro) se encuentra exactamente a Z=0.0 respecto a la base del robot (lbr_link_0)
+    SURFACE_Z      = 0.00
+    # Bajamos ligeramente por debajo de 0 para asegurar que hace fuerza contra la superficie
+    PRESS_Z        = -0.015 
+    PRECONTACT_Z   = 0.15
     FORCE_LIMIT_N  = 30.0
 
     def __init__(self):
@@ -82,8 +84,9 @@ class PressMotionNode(Node):
         box.dimensions = [0.50, 0.50, 0.10]
 
         pose = Pose()
-        pose.position.x    = 0.40
-        pose.position.y    = 0.00
+        # Colocamos la superficie virtual en las coordenadas donde vamos a presionar (a un lado del robot)
+        pose.position.x    = 0.00
+        pose.position.y    = 0.25
         pose.position.z    = self.SURFACE_Z - 0.05
         pose.orientation.w = 1.0
 
@@ -93,10 +96,16 @@ class PressMotionNode(Node):
 
         scene.world.collision_objects = [surface]
 
-        # ignorar colisiones entre la superficie y los links del tool
+        # Ignorar colisiones entre la mesa (lbr_base_link), nuestra caja virtual y los links de la herramienta
         from moveit_msgs.msg import AllowedCollisionMatrix
         acm = AllowedCollisionMatrix()
-        entry_names = ["press_surface", "tool_foam_pad_link", "tool_backing_pad_link"]
+        entry_names = [
+            "press_surface", 
+            "lbr_base_link", # <-- VITAL: La mesa real debajo del robot
+            "tool_base", 
+            "tool_body_base",
+            "brida_ft_base"
+        ]
         acm.entry_names = entry_names
         for _ in entry_names:
             entry = AllowedCollisionEntry()
@@ -163,6 +172,8 @@ class PressMotionNode(Node):
 
         request = MotionPlanRequest()
         request.group_name                      = self.PLANNING_GROUP
+        # no es necesario especificar start_state si queremos partir del estado actual del robot, pero hay que marcarlo como diff
+        request.start_state.is_diff = True
         request.goal_constraints                = [constraints]
         request.num_planning_attempts           = 10
         request.allowed_planning_time           = 10.0
@@ -220,6 +231,9 @@ class PressMotionNode(Node):
         if ec == 1:
             self.get_logger().info(f"  {label}: {code_str}")
             return True
+        elif ec in [-4, -5] and label == "Presionando objeto":
+            self.get_logger().info(f"  {label}: {code_str} (posible contacto real, continuando)")
+            return True
         else:
             self.get_logger().error(f"  {label}: {code_str}")
             return False
@@ -230,8 +244,8 @@ class PressMotionNode(Node):
 
     def run_press_sequence(self):
 
-        # fase 1: posicion segura sobre la superficie
-        goal_pre = self.make_pose_goal(x=0.40, y=0.0, z=self.PRECONTACT_Z)
+        # fase 1: posicion segura sobre la superficie (a un lado del robot, X=0, Y=0.25)
+        goal_pre = self.make_pose_goal(x=0.0, y=0.25, z=self.PRECONTACT_Z)
         if not self.send_goal_and_wait(goal_pre, "Pre-contacto"):
             self.get_logger().error("abortando: no se pudo alcanzar pre-contacto")
             return
@@ -240,7 +254,7 @@ class PressMotionNode(Node):
 
         # fase 2: bajada hasta contacto con velocidad reducida
         goal_press = self.make_pose_goal(
-            x=0.40, y=0.0, z=self.PRESS_Z,
+            x=0.0, y=0.25, z=self.PRESS_Z,
             pos_tol=0.005,
             ang_tol=0.4,
         )
@@ -265,7 +279,7 @@ class PressMotionNode(Node):
             time.sleep(0.2)
 
         # fase 4: retorno a posicion segura
-        goal_ret = self.make_pose_goal(x=0.40, y=0.0, z=self.PRECONTACT_Z)
+        goal_ret = self.make_pose_goal(x=0.0, y=0.25, z=self.PRECONTACT_Z)
         self.send_goal_and_wait(goal_ret, "Retorno")
 
         self.get_logger().info("secuencia completada")
