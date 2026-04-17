@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e  
+set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -8,7 +8,7 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-print_header() {    
+print_header() {
     echo -e "${BLUE}"
     echo "==============================================================================="
     echo "  lbr_fri_ros2_stack custom code setup"
@@ -43,7 +43,7 @@ print_step() {
 
 check_prerequisites() {
     print_step "System Prerequisites Check"
-    
+
     print_info "Checking Ubuntu version..."
     if [ -f /etc/os-release ]; then
         source /etc/os-release
@@ -54,7 +54,7 @@ check_prerequisites() {
             print_info "Proceeding anyway, but compatibility issues may occur."
         fi
     fi
-    
+
     print_info "Checking internet connectivity..."
     if ping -c 1 8.8.8.8 &> /dev/null; then
         print_success "Internet connection available"
@@ -62,7 +62,7 @@ check_prerequisites() {
         print_error "No internet connection. Please connect and retry."
         exit 1
     fi
-    
+
     print_info "Checking available disk space..."
     AVAILABLE_SPACE=$(df -BG / | tail -1 | awk '{print $4}' | sed 's/G//')
     if [ "$AVAILABLE_SPACE" -ge 30 ]; then
@@ -88,15 +88,16 @@ check_prerequisites() {
         fi
     else
         print_error "ROS_DISTRO: Not set | Run: source /opt/ros/jazzy/setup.bash"
+        exit 1
     fi
 }
 
 installation_development_tools() {
     print_step "Installation of Development Tools"
-    
+
     print_info "Updating package lists..."
     sudo apt update
-    
+
     print_info "Installing ROS2 development tools and dependencies..."
     sudo apt install -y \
         ros-dev-tools \
@@ -117,7 +118,7 @@ installation_development_tools() {
         sudo rosdep init
     fi
     rosdep update
-    
+
     print_success "Development tools installed successfully"
 }
 
@@ -126,7 +127,7 @@ workspace_creation() {
 
     #fix: detecta raiz del proyecto
     REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-    
+
     if [ -z "$REPO_ROOT" ]; then
         print_error "No Git repository detected. Make sure to execute script within ros2_dam."
         return 1
@@ -134,17 +135,19 @@ workspace_creation() {
 
     WS_PATH="$REPO_ROOT/simulation/lbr-stack"
     export FRI_CLIENT_VERSION=1.15
-    
+
     mkdir -p "$WS_PATH" #fix: carpeta creada para poder entrar
     cd "$WS_PATH" || { print_error "No access to $WS_PATH"; return 1; }
 
-    print_info "Clonning lbr_fri_ros2_stack | branch: jazzy"
+    mkdir -p src
+
+    print_info "Clonning idf_lbr_fri_ros2_stack | branch: jazzy"
     if [ ! -d "src/lbr_fri_ros2_stack" ]; then
         git clone https://github.com/gn6ks/idf_lbr_fri_ros2_stack.git -b jazzy src/lbr_fri_ros2_stack
     else
         print_info "lbr-stack already exists"
     fi
-    
+
     print_info "import of dependencies .yaml"
     vcs import src < src/lbr_fri_ros2_stack/lbr_fri_ros2_stack/repos-fri-${FRI_CLIENT_VERSION}.yaml
 
@@ -160,7 +163,7 @@ colcon_build() {
     print_step "Building workspace with colcon"
 
     REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-    
+
     if [ -z "$REPO_ROOT" ]; then
         print_error "No Git repository detected. Make sure to execute script within ros2_dam."
         return 1
@@ -169,7 +172,11 @@ colcon_build() {
     #fix: se supone que ahora debe de entrar a la carpeta correcta
     WS_PATH="$REPO_ROOT/simulation/lbr-stack"
     cd "$WS_PATH"
-    
+
+    if [ -f /opt/ros/jazzy/setup.bash ]; then
+        source /opt/ros/jazzy/setup.bash
+    fi
+
     if colcon build --symlink-install; then
         print_success "Colcon build [OK]"
     else
@@ -180,7 +187,7 @@ colcon_build() {
 
 verify_build() {
     print_step "Verifying Build Output"
-    
+
     if [ -f "install/setup.bash" ]; then
         print_success "Setup file found: install/setup.bash"
     else
@@ -208,8 +215,6 @@ main() {
     print_info "Run a health check script ./verify_workspace.sh for safety"
     print_info "CLOSE this script and run run_mockup.sh to see iiwa7 r800 model MOCK UP"
     print_info "In second terminal run run_rviz.sh to see iiwa7 r800 model MOCK UP"
-
-    print_success "Go to next part of chapter 5. Demos on Python | Gazebo Harmonic"
 }
 
 main
