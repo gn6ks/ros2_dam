@@ -46,7 +46,7 @@ print_header
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
 WS_PATH="$REPO_ROOT/simulation/lbr-stack"
 
-source ~/Desktop/ros2_dam/simulation/lbr-stack/install/setup.bash
+source $WS_PATH/install/setup.bash
 cd $WS_PATH
 ros2 launch lbr_bringup gazebo.launch.py \
     ctrl:=joint_trajectory_controller \
