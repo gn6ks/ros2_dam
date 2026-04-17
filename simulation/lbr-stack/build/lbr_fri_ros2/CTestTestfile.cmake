@@ -1,9 +1,0 @@
-# CMake generated Testfile for 
-# Source directory: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_fri_ros2
-# Build directory: /home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2
-# 
-# This file includes the relevant testing commands required for 
-# testing this directory and lists subdirectories to be tested as well.
-add_test([=[test_command_interfaces]=] "/usr/bin/python3" "-u" "/opt/ros/jazzy/share/ament_cmake_test/cmake/run_test.py" "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2/test_results/lbr_fri_ros2/test_command_interfaces.gtest.xml" "--package-name" "lbr_fri_ros2" "--output-file" "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2/ament_cmake_gtest/test_command_interfaces.txt" "--command" "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2/test_command_interfaces" "--gtest_output=xml:/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2/test_results/lbr_fri_ros2/test_command_interfaces.gtest.xml")
-set_tests_properties([=[test_command_interfaces]=] PROPERTIES  LABELS "gtest" REQUIRED_FILES "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2/test_command_interfaces" TIMEOUT "60" WORKING_DIRECTORY "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_ros2" _BACKTRACE_TRIPLES "/opt/ros/jazzy/share/ament_cmake_test/cmake/ament_add_test.cmake;125;add_test;/opt/ros/jazzy/share/ament_cmake_gtest/cmake/ament_add_gtest_test.cmake;95;ament_add_test;/opt/ros/jazzy/share/ament_cmake_gtest/cmake/ament_add_gtest.cmake;93;ament_add_gtest_test;/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_fri_ros2/CMakeLists.txt;86;ament_add_gtest;/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_fri_ros2/CMakeLists.txt;0;")
-subdirs("gtest")

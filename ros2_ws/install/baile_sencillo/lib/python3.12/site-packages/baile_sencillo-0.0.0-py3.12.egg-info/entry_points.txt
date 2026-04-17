@@ -1,2 +1,0 @@
-[console_scripts]
-movimiento_robot = baile_sencillo.movimiento_robot:main

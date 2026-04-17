@@ -1,1 +1,0 @@
-/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_fri_ros2/include/lbr_fri_ros2/control.hpp

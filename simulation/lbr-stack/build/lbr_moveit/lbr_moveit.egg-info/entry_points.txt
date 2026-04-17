@@ -1,2 +1,0 @@
-[console_scripts]
-forward_keyboard = scripts.forward_keyboard:main

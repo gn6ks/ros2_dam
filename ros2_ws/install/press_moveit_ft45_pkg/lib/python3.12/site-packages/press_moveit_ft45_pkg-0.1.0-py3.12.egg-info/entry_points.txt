@@ -1,2 +1,0 @@
-[console_scripts]
-press_motion_node = press_moveit_ft45_pkg.press_motion_node:main

@@ -1,1 +1,0 @@
-/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl/rosidl_typesupport_introspection_c/lbr_fri_idl/msg/rosidl_typesupport_introspection_c__visibility_control.h

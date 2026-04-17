@@ -1,1 +1,0 @@
-/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/iiwa7_moveit_config/ament_cmake_environment_hooks/local_setup.bash

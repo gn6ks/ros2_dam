@@ -1,1 +1,0 @@
-/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/src/lbr_fri_ros2_stack/lbr_bringup/launch/moveit_servo.launch.py

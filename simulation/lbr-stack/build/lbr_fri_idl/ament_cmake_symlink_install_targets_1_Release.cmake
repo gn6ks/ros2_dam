@@ -1,1 +1,0 @@
-ament_cmake_symlink_install_targets("TARGET_FILES" "/home/pablo/Desktop/ros2_dam/simulation/lbr-stack/build/lbr_fri_idl/rosidl_generator_py/lbr_fri_idl/lbr_fri_idl_s__rosidl_typesupport_introspection_c.so" "TARGETS" "lbr_fri_idl_s__rosidl_typesupport_introspection_c" "DESTINATION" "lib/python3.12/site-packages/lbr_fri_idl")
