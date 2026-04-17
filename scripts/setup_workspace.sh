@@ -203,6 +203,28 @@ verify_build() {
     fi
 }
 
+configure_bashrc() {
+    print_step "Configuring .bashrc for Workspace"
+
+    REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+    WS_SETUP="$REPO_ROOT/simulation/lbr-stack/install/setup.bash"
+
+    print_info "Adding workspace sourcing to ~/.bashrc..."
+    if grep -q "source $WS_SETUP" ~/.bashrc 2>/dev/null; then
+        print_warning "Workspace sourcing already exists in ~/.bashrc"
+    else
+        echo "" >> ~/.bashrc
+        echo "# LBR Stack Workspace" >> ~/.bashrc
+        echo "source $WS_SETUP" >> ~/.bashrc
+        print_success "Workspace sourcing added to ~/.bashrc"
+    fi
+
+    print_info "Applying environment variables for current session..."
+    if [ -f "$WS_SETUP" ]; then
+        source "$WS_SETUP"
+    fi
+}
+
 main() {
     print_header
     check_prerequisites
@@ -210,8 +232,11 @@ main() {
     workspace_creation
     colcon_build
     verify_build
+    configure_bashrc
     print_step "Environment Setup Complete"
 
+    print_info "Before running anything, you MUST source the workspace in your terminal if you haven't reloaded:"
+    print_info "source ~/.bashrc"
     print_info "Run a health check script ./verify_workspace.sh for safety"
     print_info "CLOSE this script and run run_mockup.sh to see iiwa7 r800 model MOCK UP"
     print_info "In second terminal run run_rviz.sh to see iiwa7 r800 model MOCK UP"
