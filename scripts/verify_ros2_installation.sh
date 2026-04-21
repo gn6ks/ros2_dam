@@ -105,8 +105,6 @@ if command -v ros2 &> /dev/null && [ "$ROS_DISTRO" = "jazzy" ]; then
         echo -e "${GREEN}✓ Environment is ready for ROS2 Jazzy development${NC}"
         echo -e "${YELLOW}⚠ Gazebo Harmonic recommended for simulation tasks${NC}"
     fi
-    echo -e "${GREEN}✓ Proceed to Chapter 4: TurtleSim Simulation${NC}"
-    echo -e "${CYAN}  → Run: ./scripts/run_turtlesim.sh${NC}"
 else
     echo -e "${YELLOW}⚠ Environment requires attention before proceeding${NC}"
     echo -e "${CYAN}  → Run: ./scripts/setup_ros2_environment.sh${NC}"

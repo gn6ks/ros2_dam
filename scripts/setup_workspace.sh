@@ -177,6 +177,9 @@ colcon_build() {
         source /opt/ros/jazzy/setup.bash
     fi
 
+    # Limpiar compilaciones anteriores que podrían tener caché de symlinks o errores
+    rm -rf build/ install/ log/
+
     #fix: no hay mas --symlink-install por problemas de build
     if colcon build; then
         print_success "Colcon build [OK]"
