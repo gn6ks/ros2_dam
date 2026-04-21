@@ -177,7 +177,8 @@ colcon_build() {
         source /opt/ros/jazzy/setup.bash
     fi
 
-    if colcon build --symlink-install; then
+    #fix: no hay mas --symlink-install por problemas de build
+    if colcon build; then
         print_success "Colcon build [OK]"
     else
         print_error "Colcon build failed"
