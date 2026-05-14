@@ -7,14 +7,11 @@
 
 ROS2: **Direct Application Method** — Custom framework for KUKA LBR robots, designed for robotic development and research at the [Universitat Politècnica de València (UPV)](https://www.upv.es/). Built on top of [`lbr_fri_ros2_stack`](https://github.com/lbr-stack/lbr_fri_ros2_stack), this repository provides a fully scripted, reproducible environment for simulation and motion planning of KUKA iiwa robots.
 
-Supported robots: `iiwa7`, `iiwa14`, `med7`, `med14`.
+Supported robots: `iiwa7`
 
 <table>
   <tr>
     <th align="left" width="25%">LBR IIWA 7 R800</th>
-    <th align="left" width="25%">LBR IIWA 14 R820</th>
-    <th align="left" width="25%">LBR Med 7 R800</th>
-    <th align="left" width="25%">LBR Med 14 R820</th>
   </tr>
   <tr>
     <td align="center">
