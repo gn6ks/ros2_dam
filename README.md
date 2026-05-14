@@ -18,19 +18,6 @@ Supported robots: `iiwa7`
     <!-- TODO: poner los gifs de demo para la muestra -->
       <i>Image / GIF — iiwa7</i>
     </td>
-    <td align="center">
-    <!-- TODO: poner los gifs de demo para la muestra -->
-      <i>Image / GIF — iiwa14</i>
-    </td>
-    <td align="center">
-    <!-- TODO: poner los gifs de demo para la muestra -->
-      <i>Image / GIF — med7</i>
-    </td>
-    <td align="center">
-    <!-- TODO: poner los gifs de demo para la muestra -->
-      <i>Image / GIF — med14</i>
-    </td>
-
   </tr>
 </table>
 
