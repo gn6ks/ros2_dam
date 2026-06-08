@@ -22,14 +22,6 @@ SECUENCIA_BAILE = [
 
 
 class ClienteRobotIiwa7(Node):
-    """
-    Nodo ROS2 que controla el KUKA iiwa7 mediante la accion
-    FollowJointTrajectory. Envia goals de posicion secuenciales
-    y espera confirmacion de cada uno antes de continuar
-
-    param: nodo con el que hereda absolutamente todo
-    """
-
     def __init__(self):
         super().__init__(node_name="iiwa7_baile")
         self._cliente = ActionClient(
@@ -43,13 +35,6 @@ class ClienteRobotIiwa7(Node):
         self.get_logger().info("server [OK]")
 
     def mover_a(self, posiciones: list, segundos: int = 5) -> bool:
-        """
-        Envia el robot a una posicion y bloquea hasta que termina.
-
-        :param posiciones: 7 floats en radianes, uno por articulacion A1-A7
-        :param segundos:   tiempo maximo para completar el movimiento
-        :returns:          true [OK] movimiento false [X] movimiento 
-        """
         if len(posiciones) != 7:
             self.get_logger().error(f"7 positions required, only took {len(posiciones)}")
             return False
@@ -87,12 +72,6 @@ class ClienteRobotIiwa7(Node):
         return exito
 
     def ejecutar_secuencia(self, secuencia: list, segundos_por_paso: int = 5):
-        """
-        Ejecuta una lista de posiciones en orden
-
-        :param secuencia:         lista de objects¿? (posiciones, etiqueta)
-        :param segundos_por_paso: tiempo por movimiento, aplicado a todos los pasos
-        """
         self.get_logger().info(f"-- INITIAL SECUENCE ({len(secuencia)} steps")
         for i, (posicion, etiqueta) in enumerate(secuencia):
             self.get_logger().info(f"[{i + 1}/{len(secuencia)}] {etiqueta}")
