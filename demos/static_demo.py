@@ -98,7 +98,7 @@ class MoveGroupPythonIntefaceControl(Node):
         from ament_index_python.packages import get_package_share_directory
         
         moveit_config = (
-            MoveItConfigsBuilder("iiwa7", package_name="lbr_moveit_config")
+            MoveItConfigsBuilder("iiwa7", package_name="iiwa7_moveit_config")
             .to_moveit_configs()
         )
         self._moveit = MoveItPy(config_dict=moveit_config)
