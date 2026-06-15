@@ -26,6 +26,7 @@ from moveit_msgs.msg import (
     DisplayTrajectory
     MoveItErrorCodes,
 )
+from moveit_msgs.msgs import RobotState as MoveItRobotState
 from trajectory_msgs.msg import JointTrajectoryPoint
 import PyKDL
 
@@ -93,7 +94,7 @@ class MoveGroupPythonIntefaceControl(Node):
     def __init__(self):
         super().__init__("move_group_control", namespace="/lbr")
         self._moveit = MoveItPy(node_name="move_group_control", namespace="/lbr")
-        self._robot = self._moveit.get_robot()          # RobotModel
+        self._robot = self._moveit.get_robot_model()          # RobotModel
         self._planning_scene = self._moveit.get_planning_scene_monitor()
 
         group_name = "manipulator"
