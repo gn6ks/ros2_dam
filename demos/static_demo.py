@@ -23,7 +23,7 @@ from std_msgs.msg import Header, Float64MultiArray, MultiArrayDimension
 from sensor_msgs.msg import JointState
 from moveit_msgs.msg import (
     RobotTrajectory,
-    DisplayTrajectory,
+    DisplayTrajectory
     MoveItErrorCodes,
 )
 from trajectory_msgs.msg import JointTrajectoryPoint
@@ -91,8 +91,8 @@ class MoveGroupPythonIntefaceControl(Node):
     """
 
     def __init__(self):
-        super().__init__("move_group_control")
-        self._moveit = MoveItPy(node_name="move_group_control")
+        super().__init__("move_group_control", namespace="/lbr")
+        self._moveit = MoveItPy(node_name="move_group_control", namespace="/lbr")
         self._robot = self._moveit.get_robot()          # RobotModel
         self._planning_scene = self._moveit.get_planning_scene_monitor()
 
@@ -106,7 +106,7 @@ class MoveGroupPythonIntefaceControl(Node):
         # Publisher for trajectory visualisation in RViz2
         self._display_traj_pub = self.create_publisher(
             DisplayTrajectory,
-            "/move_group/display_planned_path",
+            "display_planned_path",
             20,
         )
 
@@ -177,7 +177,7 @@ class MoveGroupPythonIntefaceControl(Node):
         self._arm.set_start_state_to_current_state()
 
         pose_stamped = PoseStamped()
-        pose_stamped.header.frame_id = "base_link"
+        pose_stamped.header.frame_id = "lbr/link_0"
         pose_stamped.header.stamp = self.get_clock().now().to_msg()
         pose_stamped.pose = pose
 
