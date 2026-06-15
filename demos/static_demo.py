@@ -23,10 +23,10 @@ from std_msgs.msg import Header, Float64MultiArray, MultiArrayDimension
 from sensor_msgs.msg import JointState
 from moveit_msgs.msg import (
     RobotTrajectory,
-    DisplayTrajectory
+    DisplayTrajectory,
     MoveItErrorCodes,
 )
-from moveit_msgs.msgs import RobotState as MoveItRobotState
+from moveit_msgs.msg import RobotState as MoveItRobotState
 from trajectory_msgs.msg import JointTrajectoryPoint
 import PyKDL
 
