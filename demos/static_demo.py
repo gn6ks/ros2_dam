@@ -92,7 +92,7 @@ class MoveGroupPythonIntefaceControl(Node):
     """
 
     def __init__(self):
-        super().__init__("move_group_control", name_space="/lbr")
+        super().__init__("move_group_control", namespace="/lbr")
         self._moveit = MoveItPy(node_name="move_group_control", name_space="/lbr")
         self._robot = self._moveit.get_robot_model()          # RobotModel
         self._planning_scene = self._moveit.get_planning_scene_monitor()
