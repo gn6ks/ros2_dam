@@ -108,23 +108,23 @@ class MoveGroupPythonIntefaceControl(Node):
                 .to_moveit_configs()
             )
         
-            self._moveit = MoveItPy(
+        self._moveit = MoveItPy(
                 node_name="move_group_control",
                 name_space="lbr",
                 config_dict=moveit_config.to_dict(),
             )
         
-            self._planning_scene = self._moveit.get_planning_scene_monitor()
-            group_name = "manipulator"
-            self._arm = self._moveit.get_planning_component(group_name)
-            self.eef_link = self._arm.get_end_effector_link()
-            self.get_logger().info(f"End effector link: {self.eef_link}")
+        self._planning_scene = self._moveit.get_planning_scene_monitor()
+        group_name = "manipulator"
+        self._arm = self._moveit.get_planning_component(group_name)
+        self.eef_link = self._arm.get_end_effector_link()
+        self.get_logger().info(f"End effector link: {self.eef_link}")
         
-            self._display_traj_pub = self.create_publisher(
-                DisplayTrajectory,
-                "display_planned_path",
-                20,
-            )
+        self._display_traj_pub = self.create_publisher(
+            DisplayTrajectory,
+            "display_planned_path",
+            20,
+        )
 
         # Service clients -------------------------------------------------------
         # FT sensor reset  (adapt srv type to your ROS2 port of ft17_publisher)
