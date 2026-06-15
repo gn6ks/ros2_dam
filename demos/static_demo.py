@@ -38,7 +38,6 @@ from tf_transformations import quaternion_from_euler
 # from iiwa_tools.srv import GetFK          # --> keep if ported to ROS2
 # from ft17_publisher.srv import Reset      # --> keep if ported to ROS2
 
-
 def all_close(goal, actual, tolerance):
     """
     Test whether a list of values (or Pose / PoseStamped) are within tolerance.
@@ -93,23 +92,39 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def __init__(self):
         super().__init__("move_group_control", namespace="/lbr")
-        self._moveit = MoveItPy(node_name="move_group_control", name_space="/lbr")
-        self._robot = self._moveit.get_robot_model()          # RobotModel
-        self._planning_scene = self._moveit.get_planning_scene_monitor()
 
-        group_name = "manipulator"
-        self._arm = self._moveit.get_planning_component(group_name)  # PlanningComponent
+        # librarys for moveit config
+        from moveit_configs_utils import MoveItConfigsBuilder
+        from ament_index_python import get_package_share_directory
 
-        # End-effector link name (read from planning component)
-        self.eef_link = self._arm.get_end_effector_link()
-        self.get_logger().info(f"End effector link: {self.eef_link}")
-
-        # Publisher for trajectory visualisation in RViz2
-        self._display_traj_pub = self.create_publisher(
-            DisplayTrajectory,
-            "display_planned_path",
-            20,
-        )
+        moveit_config = (
+                MoveItConfigsBuilder("iiwa7", package_name="iiwa7_moveit_config")
+                .robot_description(
+                    os.path.join(
+                        get_package_share_directory("lbr_description"),
+                        "urdf/iiwa7/iiwa7.xacro",
+                    )
+                )
+                .to_moveit_configs()
+            )
+        
+            self._moveit = MoveItPy(
+                node_name="move_group_control",
+                name_space="lbr",
+                config_dict=moveit_config.to_dict(),
+            )
+        
+            self._planning_scene = self._moveit.get_planning_scene_monitor()
+            group_name = "manipulator"
+            self._arm = self._moveit.get_planning_component(group_name)
+            self.eef_link = self._arm.get_end_effector_link()
+            self.get_logger().info(f"End effector link: {self.eef_link}")
+        
+            self._display_traj_pub = self.create_publisher(
+                DisplayTrajectory,
+                "display_planned_path",
+                20,
+            )
 
         # Service clients -------------------------------------------------------
         # FT sensor reset  (adapt srv type to your ROS2 port of ft17_publisher)
