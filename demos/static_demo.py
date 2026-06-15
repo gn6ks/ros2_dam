@@ -92,7 +92,16 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def __init__(self):
         super().__init__("move_group_control", namespace="/lbr")
-        self._moveit = MoveItPy(node_name="move_group_control", name_space="/lbr")
+        # self._moveit = MoveItPy(node_name="move_group_control", name_space="/lbr")
+
+        from moveit_configs_utils import MoveItConfigsBuilder
+        from ament_index_python.packages import get_package_share_directory
+        
+        moveit_config = (
+            MoveItConfigsBuilder("iiwa7", package_name="lbr_moveit_config")
+            .to_moveit_configs()
+        )
+        self._moveit = MoveItPy(config_dict=moveit_config)
         self._robot = self._moveit.get_robot_model()          # RobotModel
         self._planning_scene = self._moveit.get_planning_scene_monitor()
 
