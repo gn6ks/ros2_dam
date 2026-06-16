@@ -1,34 +1,31 @@
 #! /usr/bin/env python3
 
-import sys
-import os
 import copy
-import time
 import math
-import numpy as np
+import os
+import sys
+import time
 import xml.etree.ElementTree as ET
 
+import geometry_msgs.msg
+import numpy as np
+import PyKDL
 import rclpy
 import rclpy.duration
-from rclpy.node import Node
-
-from moveit.planning import MoveItPy
-from moveit.core.robot_state import RobotState
-
-import geometry_msgs.msg
+from builtin_interfaces.msg import Duration
 from geometry_msgs.msg import Pose, PoseStamped, Quaternion
-from std_msgs.msg import Header
-from sensor_msgs.msg import JointState
+from moveit.core.robot_state import RobotState
+from moveit.planning import MoveItPy
 from moveit_msgs.msg import (
-    RobotTrajectory,
     DisplayTrajectory,
     MoveItErrorCodes,
+    RobotTrajectory,
 )
-from trajectory_msgs.msg import JointTrajectoryPoint
-from builtin_interfaces.msg import Duration
-import PyKDL
-
+from rclpy.node import Node
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Header
 from tf_transformations import quaternion_from_euler
+from trajectory_msgs.msg import JointTrajectoryPoint
 
 # Descomentar cuando los servicios estén portados a ROS2:
 # from iiwa_tools.srv import GetFK
@@ -97,7 +94,54 @@ class MoveGroupPythonIntefaceControl(Node):
             MoveItConfigsBuilder("iiwa7", package_name="iiwa7_moveit_config")
             .to_moveit_configs()
         )
-        self._moveit = MoveItPy(config_dict=moveit_config)
+
+        def obj_to_dict(obj):
+            """Convierte recursivamente un objeto a dict/list/primitivos."""
+            if hasattr(obj, "__dict__"):
+                result = {}
+                for k, v in obj.__dict__.items():
+                    if not k.startswith("_"):
+                        result[k] = obj_to_dict(v)
+                return result
+            elif isinstance(obj, (list, tuple)):
+                return [obj_to_dict(x) for x in obj]
+            elif isinstance(obj, dict):
+                return {k: obj_to_dict(v) for k, v in obj.items()}
+            elif isinstance(obj, (str, int, float, bool)) or obj is None:
+                return obj
+            else:
+                # Para otros tipos (como pathlib.Path), convierte a string
+                return str(obj)
+
+        config_dict = obj_to_dict(moveit_config)
+
+        def fix_mixed_lists(obj, path=""):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    fix_mixed_lists(v, f"{path}.{k}")
+            elif isinstance(obj, list):
+                types = set()
+                for item in obj:
+                    if isinstance(item, bool):
+                        types.add("bool")
+                    elif isinstance(item, int):
+                        types.add("int")
+                    elif isinstance(item, float):
+                        types.add("float")
+                    elif isinstance(item, str):
+                        types.add("str")
+                # Si hay int y float mezclados, convierte todo a float
+                if "int" in types and "float" in types:
+                    for i in range(len(obj)):
+                        if isinstance(obj[i], int):
+                            obj[i] = float(obj[i])
+                for item in obj:
+                    fix_mixed_lists(item, path)
+
+        fix_mixed_lists(config_dict)
+
+        self._moveit = MoveItPy(config_dict=config_dict)
+
         self._robot = self._moveit.get_robot_model()
         self._planning_scene = self._moveit.get_planning_scene_monitor()
 
