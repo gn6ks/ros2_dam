@@ -95,50 +95,8 @@ class MoveGroupPythonIntefaceControl(Node):
             .to_moveit_configs()
         )
 
-        def obj_to_dict(obj):
-            """Convierte recursivamente un objeto a dict/list/primitivos."""
-            if hasattr(obj, "__dict__"):
-                result = {}
-                for k, v in obj.__dict__.items():
-                    if not k.startswith("_"):
-                        result[k] = obj_to_dict(v)
-                return result
-            elif isinstance(obj, (list, tuple)):
-                return [obj_to_dict(x) for x in obj]
-            elif isinstance(obj, dict):
-                return {k: obj_to_dict(v) for k, v in obj.items()}
-            elif isinstance(obj, (str, int, float, bool)) or obj is None:
-                return obj
-            else:
-                # Para otros tipos (como pathlib.Path), convierte a string
-                return str(obj)
-
-        config_dict = obj_to_dict(moveit_config)
-
-        def fix_mixed_lists(obj, path=""):
-            if isinstance(obj, dict):
-                for k, v in obj.items():
-                    fix_mixed_lists(v, f"{path}.{k}")
-            elif isinstance(obj, list):
-                types = set()
-                for item in obj:
-                    if isinstance(item, bool):
-                        types.add("bool")
-                    elif isinstance(item, int):
-                        types.add("int")
-                    elif isinstance(item, float):
-                        types.add("float")
-                    elif isinstance(item, str):
-                        types.add("str")
-                # Si hay int y float mezclados, convierte todo a float
-                if "int" in types and "float" in types:
-                    for i in range(len(obj)):
-                        if isinstance(obj[i], int):
-                            obj[i] = float(obj[i])
-                for item in obj:
-                    fix_mixed_lists(item, path)
-
-        fix_mixed_lists(config_dict)
+        # ← USA .to_dict() OFICIAL de MoveItConfigsBuilder
+        config_dict = moveit_config.to_dict()
 
         self._moveit = MoveItPy(config_dict=config_dict)
 
