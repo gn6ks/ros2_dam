@@ -94,10 +94,32 @@ class MoveGroupPythonIntefaceControl(Node):
             MoveItConfigsBuilder("iiwa7", package_name="iiwa7_moveit_config")
             .to_moveit_configs()
         )
-
-        # ← USA .to_dict() OFICIAL de MoveItConfigsBuilder
+        
+        # Convierte a diccionario plano y añade planning pipelines si faltan
         config_dict = moveit_config.to_dict()
-
+        
+        # Asegura que existan los planning pipelines (OMPL por defecto)
+        if "planning_pipelines" not in config_dict:
+            config_dict["planning_pipelines"] = {
+                "pipeline_names": ["ompl"],
+                "ompl": {
+                    "planning_plugin": "ompl_interface/OMPLPlanner",
+                    "request_adapters": (
+                        "default_planning_request_adapters/ResolveConstraintFrames "
+                        "default_planning_request_adapters/ValidateWorkspaceBounds "
+                        "default_planning_request_adapters/CheckStartStateBounds "
+                        "default_planning_request_adapters/CheckStartStateCollision"
+                    ),
+                    "response_adapters": (
+                        "default_planning_response_adapters/AddTimeOptimalParameterization "
+                        "default_planning_response_adapters/ValidateSolution "
+                        "default_planning_response_adapters/DisplayMotionPath"
+                    ),
+                },
+            }
+        if "default_planning_pipeline" not in config_dict:
+            config_dict["default_planning_pipeline"] = "ompl"
+        
         self._moveit = MoveItPy(config_dict=config_dict)
 
         self._robot = self._moveit.get_robot_model()
