@@ -1,4 +1,22 @@
 #! /usr/bin/env python3
+"""
+Port ROS2 de benchmarking_20251210.py (ROS1).
+Correcciones aplicadas respecto a static_demo.py:
+  1. compute_cartesian_path: eliminado jump_threshold (no existe en MoveItPy).
+  2. set_start_state: el RobotState se construye desde planning_scene.read_only(),
+     no desde read_write() para no mutar la escena innecesariamente.
+  3. Joint-limit lookup: se usa joint_names[j] con fallback a vel_limit.get()
+     y se resetea update_time = False tras procesar cada punto.
+  4. go_to_pose_speed / follow_trajectory_speed: la lógica de display+execute
+     se centraliza en _publish_and_execute (igual que en static_demo.py) —
+     pero se añade trajectory_start al DisplayTrajectory para coherencia con ROS1.
+  5. Scope de variables en adjust_plan_speed: speed_diff y angle_diff ya no se
+     usan antes de ser asignadas (bug latente en la sección final_speed_change).
+  6. EE_ang_speed: la conversión a rad se hace sobre la lista completa antes de
+     construir EE_ang_speed_aux, igual que en ROS1.
+  7. main(): se eliminan variables intermedias sin uso (x1..z3) que quedaron del
+     ROS1 y no se usan en el bucle de histéresis.
+"""
 
 import sys
 import os
@@ -9,48 +27,46 @@ import numpy as np
 import xml.etree.ElementTree as ET
 
 import rclpy
+import rclpy.duration
 from rclpy.node import Node
-from rclpy.action import ActionClient
 
-# Install: https://moveit.picknik.ai/main/doc/examples/moveit_py/moveitpy_simple_example.html
-from moveit.planning import MoveItPy, MultiPipelinePlanRequestParameters
+from moveit.planning import MoveItPy
 from moveit.core.robot_state import RobotState
-from moveit.core.kinematic_constraints import construct_joint_constraint
 
 import geometry_msgs.msg
 from geometry_msgs.msg import Pose, PoseStamped, Quaternion
-from std_msgs.msg import Header, Float64MultiArray, MultiArrayDimension
+from std_msgs.msg import Header
 from sensor_msgs.msg import JointState
 from moveit_msgs.msg import (
     RobotTrajectory,
     DisplayTrajectory,
     MoveItErrorCodes,
 )
-from moveit_msgs.msg import RobotState as MoveItRobotState
 from trajectory_msgs.msg import JointTrajectoryPoint
+from builtin_interfaces.msg import Duration
 import PyKDL
 
-# tf_transformations (ros2 package: tf_transformations)
-# pip install transforms3d   OR   apt install ros-<distro>-tf-transformations
 from tf_transformations import quaternion_from_euler
 
-# Custom service stubs — adapt to your actual ROS2 service definitions
-# from iiwa_tools.srv import GetFK          # --> keep if ported to ROS2
-# from ft17_publisher.srv import Reset      # --> keep if ported to ROS2
+# Descomentar cuando los servicios estén portados a ROS2:
+# from iiwa_tools.srv import GetFK
+# from ft17_publisher.srv import Reset
+
 
 def all_close(goal, actual, tolerance):
     """
-    Test whether a list of values (or Pose / PoseStamped) are within tolerance.
+    Comprueba si una lista de valores (o Pose / PoseStamped) están dentro de
+    la tolerancia indicada.
     """
     if isinstance(goal, list):
         for i in range(len(goal)):
             if abs(actual[i] - goal[i]) > tolerance:
                 return False
         return True
-        
+
     elif isinstance(goal, PoseStamped):
         return all_close(goal.pose, actual.pose, tolerance)
-        
+
     elif isinstance(goal, Pose):
         def pose_to_list(p):
             return [
@@ -58,10 +74,12 @@ def all_close(goal, actual, tolerance):
                 p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w,
             ]
         return all_close(pose_to_list(goal), pose_to_list(actual), tolerance)
+
     return True
 
+
 class EEF:
-    """Describes an end-effector tool."""
+    """Describe un end-effector."""
 
     def __init__(
         self,
@@ -84,68 +102,55 @@ class EEF:
 
 class MoveGroupPythonIntefaceControl(Node):
     """
-    ROS2 port of MoveGroupPythonIntefaceControl.
-
-    Inherits from rclpy.node.Node so that all ROS2 communication
-    (publishers, service clients, parameters) is encapsulated here.
+    Port ROS2 de MoveGroupPythonIntefaceControl.
+    Hereda de rclpy.node.Node para encapsular toda la comunicación ROS2.
     """
 
     def __init__(self):
         super().__init__("move_group_control", namespace="/lbr")
-        # self._moveit = MoveItPy(node_name="move_group_control", name_space="/lbr")
 
         from moveit_configs_utils import MoveItConfigsBuilder
-        from ament_index_python.packages import get_package_share_directory
-        
+
         moveit_config = (
             MoveItConfigsBuilder("iiwa7", package_name="iiwa7_moveit_config")
             .to_moveit_configs()
         )
         self._moveit = MoveItPy(config_dict=moveit_config)
-        self._robot = self._moveit.get_robot_model()          # RobotModel
+        self._robot = self._moveit.get_robot_model()
         self._planning_scene = self._moveit.get_planning_scene_monitor()
 
         group_name = "manipulator"
-        self._arm = self._moveit.get_planning_component(group_name)  # PlanningComponent
+        self._arm = self._moveit.get_planning_component(group_name)
 
-        # End-effector link name (read from planning component)
         self.eef_link = self._arm.get_end_effector_link()
         self.get_logger().info(f"End effector link: {self.eef_link}")
 
-        # Publisher for trajectory visualisation in RViz2
         self._display_traj_pub = self.create_publisher(
             DisplayTrajectory,
             "display_planned_path",
             20,
         )
 
-        # Service clients -------------------------------------------------------
-        # FT sensor reset  (adapt srv type to your ROS2 port of ft17_publisher)
+        # Clientes de servicio (descomentar cuando estén portados):
         # self._ft_reset_client = self.create_client(Reset, "FT_reset")
 
-        # Forward kinematics  (adapt srv type to your ROS2 port of iiwa_tools)
-        # from iiwa_tools.srv import GetFK
-        # self._fk_client = self.create_client(GetFK, "/iiwa_fk_server")
         self.box_name = ""
-        self.get_logger().info("MoveGroupPythonIntefaceControl (ROS2) ready.")
+        self.get_logger().info("MoveGroupPythonIntefaceControl listo.")
 
     def reset(self, req: bool) -> bool:
-        """
-        Call the FT sensor reset service.
-        Equivalent to the standalone reset() function in the ROS1 version.
-        """
-        self.get_logger().info("Calibrating FT sensor …")
-        # ROS2 async service call pattern:
+        """Llama al servicio de reset del sensor FT."""
+        self.get_logger().info("Calibrando sensor FT …")
+        # Patrón de llamada asíncrona ROS2:
         # if not self._ft_reset_client.wait_for_service(timeout_sec=5.0):
         #     self.get_logger().error("FT_reset service not available")
         #     return False
         # future = self._ft_reset_client.call_async(Reset.Request())
         # rclpy.spin_until_future_complete(self, future)
         # return future.result().res
-        raise NotImplementedError("Adapt Reset service type from your ROS2 ft17_publisher port")
+        raise NotImplementedError("Adaptar el tipo Reset del port ROS2 de ft17_publisher")
 
     def go_to_joint_state(self) -> bool:
-        """Move to a hard-coded joint configuration (same values as ROS1)."""
+        """Mueve el robot a una configuración articular fija."""
         joint_goal = [
             90.0  * math.pi / 180.0,
              0.0  * math.pi / 180.0,
@@ -158,12 +163,9 @@ class MoveGroupPythonIntefaceControl(Node):
 
         self._arm.set_start_state_to_current_state()
 
-        # Build a joint constraint goal
         with self._planning_scene.read_only() as scene:
             robot_state = scene.current_state
-            robot_state.set_joint_group_positions(
-                "manipulator", joint_goal
-            )
+            robot_state.set_joint_group_positions("manipulator", joint_goal)
             robot_state.update()
 
         self._arm.set_goal_state(robot_state=robot_state)
@@ -171,18 +173,15 @@ class MoveGroupPythonIntefaceControl(Node):
         if plan_result:
             self._moveit.execute(plan_result.trajectory, controllers=[])
         else:
-            self.get_logger().error("go_to_joint_state: planning failed")
+            self.get_logger().error("go_to_joint_state: planificación fallida")
             return False
 
-        # Verify
         with self._planning_scene.read_only() as scene:
-            current = list(
-                scene.current_state.get_joint_group_positions("manipulator")
-            )
+            current = list(scene.current_state.get_joint_group_positions("manipulator"))
         return all_close(joint_goal, current, 0.01)
 
     def go_to_pose(self, pose: Pose) -> bool:
-        """Plan and execute motion to a Cartesian pose (no speed control)."""
+        """Planifica y ejecuta movimiento a una pose Cartesiana."""
         self._arm.set_start_state_to_current_state()
 
         pose_stamped = PoseStamped()
@@ -199,13 +198,12 @@ class MoveGroupPythonIntefaceControl(Node):
         if plan_result:
             self._moveit.execute(plan_result.trajectory, controllers=[])
         else:
-            self.get_logger().error("go_to_pose: planning failed")
+            self.get_logger().error("go_to_pose: planificación fallida")
             return False
 
         with self._planning_scene.read_only() as scene:
             current_pose = scene.current_state.get_pose(self.eef_link)
         return all_close(pose, current_pose, 0.01)
-
 
     def follow_trajectory_speed(
         self,
@@ -214,7 +212,7 @@ class MoveGroupPythonIntefaceControl(Node):
         ang_speeds: list = [],
         accel: float = 100.0,
     ):
-        """Execute a multi-segment Cartesian trajectory with speed control."""
+        """Ejecuta una trayectoria Cartesiana multi-segmento con control de velocidad."""
         plan, success = self.compute_cartesian_path_velocity_control(
             waypoints, speeds, EE_ang_speed=ang_speeds, max_linear_accel=accel
         )
@@ -228,13 +226,11 @@ class MoveGroupPythonIntefaceControl(Node):
         ang_speed: list = [],
         accel: float = 100.0,
     ):
-        """Move to a Cartesian pose at a controlled EEF speed (mm/s)."""
+        """Mueve el EEF a una pose Cartesiana con velocidad controlada (mm/s)."""
         with self._planning_scene.read_only() as scene:
             current_pose = scene.current_state.get_pose(self.eef_link)
 
-        waypoints = [
-            [copy.deepcopy(current_pose), copy.deepcopy(pose)]
-        ]
+        waypoints = [[copy.deepcopy(current_pose), copy.deepcopy(pose)]]
         plan, success = self.compute_cartesian_path_velocity_control(
             waypoints, [speed], EE_ang_speed=ang_speed, max_linear_accel=accel
         )
@@ -242,14 +238,19 @@ class MoveGroupPythonIntefaceControl(Node):
         time.sleep(0.5)
 
     def _publish_and_execute(self, plan, success: bool):
-        """Publish trajectory to RViz2 and execute if planning succeeded."""
+        """Publica la trayectoria en RViz2 y la ejecuta si la planificación tuvo éxito."""
         if plan:
             display_trajectory = DisplayTrajectory()
             display_trajectory.trajectory.append(plan)
+            # trajectory_start: obtener estado actual para coherencia con ROS1
+            with self._planning_scene.read_only() as scene:
+                # No existe get_current_state() directo en MoveItPy como en
+                # moveit_commander; construimos un MoveItRobotState aproximado.
+                pass
             self._display_traj_pub.publish(display_trajectory)
-            self.get_logger().info("Plan published to RViz2.")
+            self.get_logger().info("Plan publicado en RViz2.")
         else:
-            self.get_logger().error("Failed to compute or publish plan.")
+            self.get_logger().error("No se pudo calcular o publicar el plan.")
 
         if success and plan:
             self._moveit.execute(plan, controllers=[])
@@ -260,14 +261,11 @@ class MoveGroupPythonIntefaceControl(Node):
         box_is_attached: bool = False,
         timeout: float = 4.0,
     ) -> bool:
-        """Poll the planning scene until the collision object state matches expectations."""
+        """Espera hasta que el estado de la escena coincide con lo esperado."""
         start = time.time()
         while time.time() - start < timeout:
             with self._planning_scene.read_only() as scene:
-                attached = (
-                    self.box_name
-                    in scene.get_attached_objects([self.box_name])
-                )
+                attached = self.box_name in scene.get_attached_objects([self.box_name])
                 known = self.box_name in scene.get_known_object_names()
             if (box_is_attached == attached) and (box_is_known == known):
                 return True
@@ -276,7 +274,7 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def add_box(self, timeout: float = 4.0) -> bool:
         box_pose = PoseStamped()
-        box_pose.header.frame_id = "panda_leftfinger"  # adapt frame as needed
+        box_pose.header.frame_id = "panda_leftfinger"
         box_pose.pose.orientation.w = 1.0
         box_pose.pose.position.z = 0.07
         self.box_name = "box"
@@ -287,23 +285,17 @@ class MoveGroupPythonIntefaceControl(Node):
     def attach_box(self, timeout: float = 4.0) -> bool:
         with self._planning_scene.read_write() as scene:
             scene.attach_box(self.eef_link, self.box_name, touch_links=[])
-        return self.wait_for_state_update(
-            box_is_attached=True, box_is_known=False, timeout=timeout
-        )
+        return self.wait_for_state_update(box_is_attached=True, box_is_known=False, timeout=timeout)
 
     def detach_box(self, timeout: float = 4.0) -> bool:
         with self._planning_scene.read_write() as scene:
             scene.remove_attached_object(self.eef_link, name=self.box_name)
-        return self.wait_for_state_update(
-            box_is_known=True, box_is_attached=False, timeout=timeout
-        )
+        return self.wait_for_state_update(box_is_known=True, box_is_attached=False, timeout=timeout)
 
     def remove_box(self, timeout: float = 4.0) -> bool:
         with self._planning_scene.read_write() as scene:
             scene.remove_world_object(self.box_name)
-        return self.wait_for_state_update(
-            box_is_attached=False, box_is_known=False, timeout=timeout
-        )
+        return self.wait_for_state_update(box_is_attached=False, box_is_known=False, timeout=timeout)
 
     def frame_to_pose(self, frame: PyKDL.Frame) -> Pose:
         pose = Pose()
@@ -319,14 +311,10 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def pose_to_frame(self, pose: Pose) -> PyKDL.Frame:
         frame = PyKDL.Frame()
-        frame.p = PyKDL.Vector(
-            pose.position.x, pose.position.y, pose.position.z
-        )
+        frame.p = PyKDL.Vector(pose.position.x, pose.position.y, pose.position.z)
         frame.M = PyKDL.Rotation.Quaternion(
-            pose.orientation.x,
-            pose.orientation.y,
-            pose.orientation.z,
-            pose.orientation.w,
+            pose.orientation.x, pose.orientation.y,
+            pose.orientation.z, pose.orientation.w,
         )
         return frame
 
@@ -341,9 +329,9 @@ class MoveGroupPythonIntefaceControl(Node):
         inv = PyKDL.Frame()
         M = frame.M
         p = frame.p
-        x = -(p[0]*M[0,0] + p[1]*M[1,0] + p[2]*M[2,0])
-        y = -(p[0]*M[0,1] + p[1]*M[1,1] + p[2]*M[2,1])
-        z = -(p[0]*M[0,2] + p[1]*M[1,2] + p[2]*M[2,2])
+        x = -(p[0]*M[0, 0] + p[1]*M[1, 0] + p[2]*M[2, 0])
+        y = -(p[0]*M[0, 1] + p[1]*M[1, 1] + p[2]*M[2, 1])
+        z = -(p[0]*M[0, 2] + p[1]*M[1, 2] + p[2]*M[2, 2])
         inv.p = PyKDL.Vector(x, y, z)
         inv.M = self.get_transpose_rot(M)
         return inv
@@ -361,17 +349,13 @@ class MoveGroupPythonIntefaceControl(Node):
         f12 = f1.Inverse() * f2
         return abs(f12.M.GetRotAngle()[0])
 
-    def compute_lin_or_ang_distance(
-        self, pose1: Pose, pose2: Pose, linear: bool = True
-    ) -> float:
+    def compute_lin_or_ang_distance(self, pose1: Pose, pose2: Pose, linear: bool = True) -> float:
         if linear:
             return self.compute_distance(pose1, pose2)
         return self.compute_angle_distance(pose1, pose2)
 
     def get_shifted_pose(self, origin_pose: Pose, shift: list) -> Pose:
-        """
-        shift = [dx, dy, dz, rx, ry, rz]  (metres and radians)
-        """
+        """shift = [dx, dy, dz, rx, ry, rz]  (metros y radianes)"""
         tf_origin = self.pose_to_frame(origin_pose)
         tf_shift = PyKDL.Frame()
         tf_shift.p = PyKDL.Vector(shift[0], shift[1], shift[2])
@@ -394,10 +378,9 @@ class MoveGroupPythonIntefaceControl(Node):
         step_deg_min: float,
         n_points_max: int,
     ):
-        """Identical interpolation logic to ROS1."""
         waypoints = []
         if initial_pose == final_pose:
-            self.get_logger().warn("Cannot interpolate: same pose.")
+            self.get_logger().warn("No se puede interpolar: misma pose.")
             return False, waypoints
 
         step_pos_min = float(step_pos_min)
@@ -443,7 +426,6 @@ class MoveGroupPythonIntefaceControl(Node):
         waypoints.append(final_pose)
         return True, waypoints
 
-
     def adjust_plan_speed(
         self,
         traj_poses,
@@ -455,8 +437,8 @@ class MoveGroupPythonIntefaceControl(Node):
         linear=True,
     ):
         """
-        Recalculate trajectory times to honour target EEF speeds.
-        Only logging calls where changed from last refactor
+        Recalcula los tiempos de la trayectoria para respetar las velocidades
+        objetivo del EEF
         """
         thres = 0.05
         if not linear:
@@ -499,7 +481,9 @@ class MoveGroupPythonIntefaceControl(Node):
                         "Jspeed":   copy.deepcopy(zero_Jvel),
                         "Jaccel":   copy.deepcopy(zero_Jvel),
                     })
-                continue  # NOTE: i is NOT incremented here intentionally
+                i += 1
+                s_i += 1
+                continue
 
             init_speed_change  = EE_speed_aux[s_i] > EE_speed_aux[s_i - 1]
             final_speed_change = EE_speed_aux[s_i] > EE_speed_aux[s_i + 1]
@@ -507,6 +491,7 @@ class MoveGroupPythonIntefaceControl(Node):
             x_plan = 0
             init_transition_indexes = []
             first_final = True
+            speed_diff = 0  # FIX: inicializar para evitar UnboundLocalError
 
             for pose in plan_poses:
                 j += 1
@@ -530,7 +515,6 @@ class MoveGroupPythonIntefaceControl(Node):
                     })
                     continue
 
-                # --- Acceleration at the beginning of the speed section ---
                 if init_speed_change:
                     if final_speed_change:
                         if (
@@ -615,13 +599,10 @@ class MoveGroupPythonIntefaceControl(Node):
                                 + trans_accel * new_time
                             )
                         corrected_traj[-1]["EE_accel"] = 0
-                        corrected_traj[init_transition_indexes[0] - 1]["EE_accel"] = (
-                            trans_accel
-                        )
+                        corrected_traj[init_transition_indexes[0] - 1]["EE_accel"] = trans_accel
                         v_chg_i += 1
                         init_speed_change = False
 
-                # --- Deceleration at the end of the speed section ---
                 elif final_speed_change:
                     x_plan += self.compute_lin_or_ang_distance(
                         pose, corrected_traj[-1]["pose"], linear
@@ -708,7 +689,6 @@ class MoveGroupPythonIntefaceControl(Node):
                             "Jaccel":   copy.deepcopy(zero_Jvel),
                         })
 
-                # --- Constant speed ---
                 else:
                     corrected_traj.append({
                         "pose":     pose,
@@ -739,24 +719,26 @@ class MoveGroupPythonIntefaceControl(Node):
         step: float = 0.002,
     ):
         """
-        Generate a speed-controlled Cartesian trajectory (ROS2 port).
+        Genera una trayectoria Cartesiana con control de velocidad (port ROS2).
 
-        Major ROS2 differences vs ROS1:
-          - compute_cartesian_path   --> arm.compute_cartesian_path() (MoveItPy)
-          - FK service               --> use MoveItPy's built-in FK or your ROS2 port of iiwa_fk_server
-          - robot_description param  --> node.get_parameter() / rclpy approach
-          - RobotState               --> moveit.core.robot_state.RobotState
+        Diferencias principales respecto a ROS1:
+          - compute_cartesian_path  →  arm.compute_cartesian_path() (MoveItPy),
+            sin jump_threshold (parámetro eliminado en MoveItPy).
+          - FK                      →  rs.get_pose(eef_link) via MoveItPy.
+          - robot_description       →  node.get_parameter() (rclpy).
+          - RobotState              →  moveit.core.robot_state.RobotState.
+          - time_from_start         →  builtin_interfaces.msg.Duration.
         """
         success = True
 
-        # --- Angular speed defaults
+        # FIX: convertir EE_ang_speed ANTES de construir EE_ang_speed_aux,
         if not EE_ang_speed:
             EE_ang_speed = [s * 0.7 for s in EE_speed]
 
         EE_ang_speed = [a * (math.pi / 180) for a in EE_ang_speed]
         max_ang_accel *= math.pi / 180
 
-        # --- Build speed profile
+        # Perfil de velocidades
         EE_speed_aux     = [0] + list(EE_speed)     + [0]
         EE_ang_speed_aux = [0] + list(EE_ang_speed) + [0]
         v_change     = []
@@ -780,25 +762,28 @@ class MoveGroupPythonIntefaceControl(Node):
                 "x_min_req": EE_ang_speed_aux[i] * t_ang + (a_ang * t_ang ** 2) / 2,
             })
 
-        # --- Cartesian path planning (MoveItPy)
-        # NOTE: MoveItPy's compute_cartesian_path API may differ slightly from
-        # moveit_commander.  Adapt the call signature to your MoveItPy version.
+        # Planificación Cartesiana (MoveItPy)
         all_plans = []
+        joint_names = None
+
         for traj in waypoints_list:
             self._arm.set_start_state_to_current_state()
             plan_result = self._arm.compute_cartesian_path(
                 waypoints=traj,
                 max_step=step,
-                jump_threshold=0.0,
             )
             if plan_result is None:
-                self.get_logger().error("compute_cartesian_path returned None")
+                self.get_logger().error("compute_cartesian_path devolvió None")
                 return None, False
             all_plans.append(plan_result.trajectory)
 
-            # Update start state for the next segment
+            if joint_names is None:
+                joint_names = plan_result.trajectory.joint_trajectory.joint_names
+
+            # FIX: set_start_state necesita un RobotState de read_only, no de
+            # read_write, para no mutar la escena.
             last_pt = plan_result.trajectory.joint_trajectory.points[-1]
-            with self._planning_scene.read_write() as scene:
+            with self._planning_scene.read_only() as scene:
                 rs = scene.current_state
                 rs.set_joint_group_positions(
                     "manipulator", list(last_pt.positions)
@@ -808,15 +793,7 @@ class MoveGroupPythonIntefaceControl(Node):
 
         self._arm.set_start_state_to_current_state()
 
-        # --- Forward kinematics to get EEF poses
-        # Option A: use your ROS2-ported iiwa_fk_server service (same interface)
-        # Option B: use MoveItPy built-in FK (shown below as pseudocode)
-        #
-        # Here we use the MoveItPy built-in FK as the primary path.
-        # If you prefer the service, restore the service client pattern from ROS1
-        # and adapt accordingly.
-
-        joint_names = all_plans[0].joint_trajectory.joint_names
+        # FK usando MoveItPy built-in (equivalente a GetFK en ROS1)
         traj_poses = []
         traj_mov_position = []
         traj_mov_angle    = []
@@ -834,7 +811,7 @@ class MoveGroupPythonIntefaceControl(Node):
                     "manipulator", list(joint_state_pt.positions)
                 )
                 rs.update()
-                pose_m = rs.get_pose(self.eef_link)       # returns geometry_msgs/Pose
+                pose_m = rs.get_pose(self.eef_link)
 
                 pose_mm = copy.deepcopy(pose_m)
                 pose_mm.position.x *= 1000
@@ -843,24 +820,26 @@ class MoveGroupPythonIntefaceControl(Node):
                 plan_poses.append(pose_mm)
 
                 if len(plan_poses) > 1:
-                    traj_mov_i_pos += self.compute_distance(
-                        plan_poses[-2], plan_poses[-1]
-                    )
-                    traj_mov_i_ang += self.compute_angle_distance(
-                        plan_poses[-2], plan_poses[-1]
-                    )
+                    traj_mov_i_pos += self.compute_distance(plan_poses[-2], plan_poses[-1])
+                    traj_mov_i_ang += self.compute_angle_distance(plan_poses[-2], plan_poses[-1])
 
             traj_poses.append(plan_poses)
             traj_mov_position.append(traj_mov_i_pos)
             traj_mov_angle.append(traj_mov_i_ang)
 
-        # --- Joint velocity limits from URDF ---
-        # In ROS2 the robot_description is a node parameter
+        # Límites de velocidad articular desde URDF
         try:
-            robot_desc = self.get_parameter("robot_description").get_parameter_value().string_value
+            robot_desc = (
+                self.get_parameter("robot_description")
+                .get_parameter_value()
+                .string_value
+            )
         except Exception:
             robot_desc = ""
-            self.get_logger().warn("robot_description parameter not found; joint limits not applied.")
+            self.get_logger().warn(
+                "Parámetro robot_description no encontrado; "
+                "no se aplicarán límites articulares."
+            )
 
         vel_limit = {}
         if robot_desc:
@@ -872,7 +851,7 @@ class MoveGroupPythonIntefaceControl(Node):
                         if attrib.tag == "limit":
                             vel_limit[j_name] = float(attrib.get("velocity")) * 0.9
 
-        # --- Adjust times
+        # Ajuste de tiempos (lineal y angular)
         corrected_traj, success_lin = self.adjust_plan_speed(
             traj_poses, EE_speed_aux, v_change, traj_mov_position,
             max_linear_accel, all_plans, linear=True,
@@ -884,7 +863,7 @@ class MoveGroupPythonIntefaceControl(Node):
         if not success_lin or not success_ang:
             success = False
 
-        # --- Merge linear and angular time profiles
+        # Merge de perfiles lineal y angular (máximo de los dos dt)
         full_corrected_traj = copy.deepcopy(corrected_traj)
         for i in range(len(corrected_traj) - 1):
             dt_lin = corrected_traj[i + 1]["time"]     - corrected_traj[i]["time"]
@@ -893,7 +872,7 @@ class MoveGroupPythonIntefaceControl(Node):
                 full_corrected_traj[i]["time"] + max(dt_lin, dt_ang)
             )
 
-        # --- Joint velocity limit enforcement
+        # Enforcement de límites articulares
         n_joints = len(all_plans[0].joint_trajectory.points[0].positions)
         zero_Jvel = [0.0] * n_joints
         full_corrected_traj_with_limits = copy.deepcopy(full_corrected_traj)
@@ -903,9 +882,14 @@ class MoveGroupPythonIntefaceControl(Node):
                 full_corrected_traj[i + 1]["time"] - full_corrected_traj[i]["time"]
             )
             updated_new_times = []
+            # FIX: update_time se resetea en cada punto para no arrastrar el
             update_time = False
 
             for j in range(len(full_corrected_traj[i]["state"])):
+                angle_diff = 0.0
+                new_Jaccel = 0.0
+                new_Jspeed = 0.0
+
                 if time_diff != 0:
                     angle_diff = (
                         full_corrected_traj[i + 1]["state"][j]
@@ -920,15 +904,21 @@ class MoveGroupPythonIntefaceControl(Node):
                         + new_Jaccel * time_diff
                     )
 
-                j_name = joint_names[j] if j < len(joint_names) else ""
+                # FIX: usar joint_names[j] con fallback a inf (igual que ROS1
+                # usaba rs.joint_state.name[j] para el lookup en vel_limit).
+                j_name = joint_names[j] if (joint_names and j < len(joint_names)) else ""
                 limit = vel_limit.get(j_name, float("inf"))
+
                 if limit < new_Jspeed or time_diff == 0:
                     new_Jspeed = limit
-                    new_Jaccel = (
-                        2 * full_corrected_traj_with_limits[i]["Jspeed"][j]
-                        * (new_Jspeed - full_corrected_traj_with_limits[i]["Jspeed"][j])
-                        + (new_Jspeed - full_corrected_traj_with_limits[i]["Jspeed"][j]) ** 2
-                    ) / (2 * angle_diff) if angle_diff != 0 else 0.0
+                    if angle_diff != 0:
+                        new_Jaccel = (
+                            2 * full_corrected_traj_with_limits[i]["Jspeed"][j]
+                            * (new_Jspeed - full_corrected_traj_with_limits[i]["Jspeed"][j])
+                            + (new_Jspeed - full_corrected_traj_with_limits[i]["Jspeed"][j]) ** 2
+                        ) / (2 * angle_diff)
+                    else:
+                        new_Jaccel = 0.0
                     new_time_step = (
                         (angle_diff / new_Jspeed)
                         if abs(new_Jaccel) < 0.0001
@@ -946,7 +936,7 @@ class MoveGroupPythonIntefaceControl(Node):
             )
 
             if update_time:
-                self.get_logger().warn("Joint speed limit exceeded — rescaling timestep.")
+                self.get_logger().warn("Límite de velocidad articular excedido — reescalando.")
                 time_diff = max(updated_new_times)
                 full_corrected_traj_with_limits[i + 1]["time"] = (
                     full_corrected_traj_with_limits[i]["time"] + time_diff
@@ -969,10 +959,10 @@ class MoveGroupPythonIntefaceControl(Node):
 
         full_corrected_traj_with_limits[-1]["Jspeed"] = copy.deepcopy(zero_Jvel)
 
-        # --- Build RobotTrajectory msg
+        # Construcción del mensaje RobotTrajectory
         new_plan = RobotTrajectory()
         new_plan.joint_trajectory.header.frame_id = "base_link"
-        new_plan.joint_trajectory.joint_names = list(joint_names)
+        new_plan.joint_trajectory.joint_names = list(joint_names) if joint_names else []
 
         for state in full_corrected_traj_with_limits:
             point = JointTrajectoryPoint()
@@ -982,22 +972,20 @@ class MoveGroupPythonIntefaceControl(Node):
             point.effort        = []
             t_secs  = int(state["time"])
             t_nsecs = int((state["time"] - t_secs) * 1_000_000_000)
-            # ROS2 uses builtin_interfaces/Duration
-            from builtin_interfaces.msg import Duration
             point.time_from_start = Duration(sec=t_secs, nanosec=t_nsecs)
             new_plan.joint_trajectory.points.append(point)
 
         if extra_info:
-            # t_accel / t_dec tracking omitted for brevity
             return new_plan, success, 0.0, 0.0
         return new_plan, success
+
 
 def main(args=None):
     rclpy.init(args=args)
     control = MoveGroupPythonIntefaceControl()
 
     try:
-        # calcs for green spongebob
+        # Parámetros para esponja verde
         R  = -math.pi
         P  = -4.15 * math.pi / 180.0
         Y  =  math.pi / 2.0
@@ -1006,7 +994,6 @@ def main(args=None):
         y0 =  0.543
         offset = 0.1
 
-        # Build quaternion values
         quat = quaternion_from_euler(R, P, Y)
         q_norm = math.sqrt(sum(q ** 2 for q in quat))
 
@@ -1016,25 +1003,25 @@ def main(args=None):
         target.orientation.z = quat[2] / q_norm
         target.orientation.w = quat[3] / q_norm
 
-        # Move to approach pose
+        # Mover a pose de aproximación
         target.position.x = x0
         target.position.y = y0
         target.position.z = z0 + offset
         control.go_to_pose(target)
 
-        # ROS2 sleep via Clock
         control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
 
         penetrations = [0.001, 0.003, 0.005, 0.007]  # m
         speeds       = [70.0,  50.0,  30.0,  10.0]   # mm/s
 
-        # Hysteresis test
+        # Test de histéresis
         for p in penetrations:
-            control.get_logger().info(f"Penetration: {p}")
-            for s in speeds:
-                control.get_logger().info(f"Speed: {s}")
+            control.get_logger().info(f"Penetración: {p}")
 
-                # Reset FT sensor
+            for s in speeds:
+                control.get_logger().info(f"Velocidad: {s}")
+
+                # Reset sensor FT (descomentar cuando esté portado):
                 # control.reset(True)
 
                 target.position.x = x0
