@@ -1,22 +1,4 @@
 #! /usr/bin/env python3
-"""
-Port ROS2 de benchmarking_20251210.py (ROS1).
-Correcciones aplicadas respecto a static_demo.py:
-  1. compute_cartesian_path: eliminado jump_threshold (no existe en MoveItPy).
-  2. set_start_state: el RobotState se construye desde planning_scene.read_only(),
-     no desde read_write() para no mutar la escena innecesariamente.
-  3. Joint-limit lookup: se usa joint_names[j] con fallback a vel_limit.get()
-     y se resetea update_time = False tras procesar cada punto.
-  4. go_to_pose_speed / follow_trajectory_speed: la lógica de display+execute
-     se centraliza en _publish_and_execute (igual que en static_demo.py) —
-     pero se añade trajectory_start al DisplayTrajectory para coherencia con ROS1.
-  5. Scope de variables en adjust_plan_speed: speed_diff y angle_diff ya no se
-     usan antes de ser asignadas (bug latente en la sección final_speed_change).
-  6. EE_ang_speed: la conversión a rad se hace sobre la lista completa antes de
-     construir EE_ang_speed_aux, igual que en ROS1.
-  7. main(): se eliminan variables intermedias sin uso (x1..z3) que quedaron del
-     ROS1 y no se usan en el bucle de histéresis.
-"""
 
 import sys
 import os
