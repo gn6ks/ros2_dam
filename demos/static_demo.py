@@ -998,9 +998,9 @@ class MoveGroupPythonIntefaceControl(Node):
 
         for state in full_corrected_traj_with_limits:
             point = JointTrajectoryPoint()
-            point.positions = copy.deepcopy(state["state"])
-            point.velocities = copy.deepcopy(state["Jspeed"])
-            point.accelerations = copy.deepcopy(state["Jaccel"])
+            point.positions = list(state["state"])
+            point.velocities = list(state["Jspeed"])
+            point.accelerations = list(state["Jaccel"])
             point.effort = []
             t_secs = int(state["time"])
             t_nsecs = int((state["time"] - t_secs) * 1_000_000_000)
