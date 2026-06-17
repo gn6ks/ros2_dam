@@ -742,7 +742,13 @@ class MoveGroupPythonIntefaceControl(Node):
                 self.get_logger().error("_plan_cartesian_path devolvió None.")
                 return None, False
             rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
-            plan = self._moveit2.get_trajectory(future)
+            # plan = self._moveit2.get_trajectory(future)
+
+            result = future.result()
+            if result is None or result.fraction < 0.5:
+                self.get_logger().error(f"Path cartesiano incompleto (fraction={result.fraction if result else 0:.2f}).")
+                return None, False
+            plan = result.solution
             
             if plan is None:
                 self.get_logger().error("No se obtuvo trayectoria cartesiana.")
