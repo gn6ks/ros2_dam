@@ -194,6 +194,8 @@ class MoveGroupPythonIntefaceControl(Node):
                 )
                 self._fjt_client.wait_for_server(timeout_sec=5.0)
             goal = FollowJointTrajectory.Goal()
+            plan.joint_trajectory.header.stamp = self.get_clock().now().to_msg()
+            plan.joint_trajectory.header.frame_id = self.BASE_LINK
             goal.trajectory = plan.joint_trajectory
             future = self._fjt_client.send_goal_async(goal)
             rclpy.spin_until_future_complete(self, future, timeout_sec=30.0)
