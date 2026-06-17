@@ -15,6 +15,7 @@ from moveit_msgs.msg import DisplayTrajectory, RobotState, RobotTrajectory
 
 # pymoveit2: biblioteca que envuelve la API de MoveIt2 de forma estable
 from pymoveit2 import MoveIt2
+
 # from pymoveit2.robots import (
 #     iiwa7 as robot_config,  # cambia al módulo de tu robot si es otro
 # )
@@ -85,8 +86,13 @@ class EEF:
 
 class MoveGroupPythonIntefaceControl(Node):
     JOINT_NAMES = [
-        "lbr_A1", "lbr_A2", "lbr_A3", "lbr_A4",
-        "lbr_A5", "lbr_A6", "lbr_A7",
+        "lbr_A1",
+        "lbr_A2",
+        "lbr_A3",
+        "lbr_A4",
+        "lbr_A5",
+        "lbr_A6",
+        "lbr_A7",
     ]
     BASE_LINK = "lbr_link_0"
     EEF_LINK = "lbr_link_ee"
@@ -746,19 +752,21 @@ class MoveGroupPythonIntefaceControl(Node):
 
             result = future.result()
             if result is None or result.fraction < 0.5:
-                self.get_logger().error(f"Path cartesiano incompleto (fraction={result.fraction if result else 0:.2f}).")
+                self.get_logger().error(
+                    f"Path cartesiano incompleto (fraction={result.fraction if result else 0:.2f})."
+                )
                 return None, False
             plan = result.solution
-            
+
             if plan is None:
                 self.get_logger().error("No se obtuvo trayectoria cartesiana.")
                 return None, False
-            
+
             all_plans.append(plan)
-            
+
             if joint_names is None:
                 joint_names = list(plan.joint_trajectory.joint_names)
-            
+
             # Avanzar start state al último punto del plan
             last_pt = plan.joint_trajectory.points[-1]
             self._moveit2.set_joint_goal(
@@ -810,7 +818,7 @@ class MoveGroupPythonIntefaceControl(Node):
         # ---- Límites de velocidad articular desde URDF (igual que ROS1) ----
         try:
             robot_desc = (
-                self.get_parameter("robot_description")
+                self.get_parameter("/lbr/robot_description")
                 .get_parameter_value()
                 .string_value
             )
@@ -955,6 +963,8 @@ class MoveGroupPythonIntefaceControl(Node):
                     "Límite de velocidad articular excedido — reescalando."
                 )
                 time_diff = max(updated_new_times)
+                if time_diff == 0: # problemas para computar los divisibles por frames
+                    continue  # nada que reescalar
                 full_corrected_traj_with_limits[i + 1]["time"] = (
                     full_corrected_traj_with_limits[i]["time"] + time_diff
                 )
