@@ -15,9 +15,9 @@ from moveit_msgs.msg import DisplayTrajectory, RobotState, RobotTrajectory
 
 # pymoveit2: biblioteca que envuelve la API de MoveIt2 de forma estable
 from pymoveit2 import MoveIt2
-from pymoveit2.robots import (
-    iiwa7 as robot_config,  # cambia al módulo de tu robot si es otro
-)
+# from pymoveit2.robots import (
+#     iiwa7 as robot_config,  # cambia al módulo de tu robot si es otro
+# )
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray, Header
