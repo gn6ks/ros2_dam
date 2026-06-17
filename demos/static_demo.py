@@ -182,15 +182,16 @@ class MoveGroupPythonIntefaceControl(Node):
             self._moveit2.wait_until_executed()
 
     def _get_current_eef_pose(self) -> Pose:
-        """
-        Devuelve la pose actual del EEF consultando TF2 a través de pymoveit2.
-        pymoveit2 expone get_end_effector_pose() que hace la consulta a TF.
-        """
-        pose_stamped = self._moveit2.get_end_effector_pose()
-        if pose_stamped is None:
-            self.get_logger().error("No se pudo obtener la pose actual del EEF.")
+        """Devuelve la pose actual del EEF via FK sobre el joint_state actual."""
+        js = self._moveit2.joint_state
+        if js is None:
+            self.get_logger().error("No hay joint_state disponible.")
             return Pose()
-        return pose_stamped.pose
+        pose = self._fk_from_joint_positions(list(js.name), list(js.position))
+        if pose is None:
+            self.get_logger().error("FK falló para el estado actual.")
+            return Pose()
+        return pose
 
     def _fk_from_joint_positions(
         self, joint_names: list, joint_positions: list
@@ -206,13 +207,13 @@ class MoveGroupPythonIntefaceControl(Node):
         from std_msgs.msg import Header as StdHeader
 
         if not hasattr(self, "_fk_client"):
-            self._fk_client = self.create_client(GetPositionFK, "/compute_fk")
+            self._fk_client = self.create_client(GetPositionFK, "/lbr/compute_fk")
             if not self._fk_client.wait_for_service(timeout_sec=5.0):
                 self.get_logger().error("Servicio /compute_fk no disponible.")
                 return None
 
         req = GetPositionFK.Request()
-        req.header.frame_id = self.BASE_FRAME
+        req.header.frame_id = self.BASE_LINK
         req.header.stamp = self.get_clock().now().to_msg()
         req.fk_link_names = [self.eef_link]
 
