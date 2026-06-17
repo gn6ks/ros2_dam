@@ -183,9 +183,27 @@ class MoveGroupPythonIntefaceControl(Node):
             return
 
         if success:
-            # pymoveit2: ejecutar una RobotTrajectory ya construida
-            self._moveit2.execute(plan)
-            self._moveit2.wait_until_executed()
+            from control_msgs.action import FollowJointTrajectory
+            from rclpy.action import ActionClient
+
+            if not hasattr(self, "_fjt_client"):
+                self._fjt_client = ActionClient(
+                    self,
+                    FollowJointTrajectory,
+                    "/lbr/joint_trajectory_controller/follow_joint_trajectory",
+                )
+                self._fjt_client.wait_for_server(timeout_sec=5.0)
+            goal = FollowJointTrajectory.Goal()
+            goal.trajectory = plan.joint_trajectory
+            future = self._fjt_client.send_goal_async(goal)
+            rclpy.spin_until_future_complete(self, future, timeout_sec=30.0)
+            goal_handle = future.result()
+            if goal_handle and goal_handle.accepted:
+                result_future = goal_handle.get_result_async()
+                rclpy.spin_until_future_complete(self, result_future, timeout_sec=60.0)
+                self.get_logger().info("Trayectoria ejecutada.")
+            else:
+                self.get_logger().error("Goal rechazado por el controlador.")
 
     def _get_current_eef_pose(self) -> Pose:
         """Devuelve la pose actual del EEF via FK sobre el joint_state actual."""
@@ -963,7 +981,7 @@ class MoveGroupPythonIntefaceControl(Node):
                     "Límite de velocidad articular excedido — reescalando."
                 )
                 time_diff = max(updated_new_times)
-                if time_diff == 0: # problemas para computar los divisibles por frames
+                if time_diff == 0:  # problemas para computar los divisibles por frames
                     continue  # nada que reescalar
                 full_corrected_traj_with_limits[i + 1]["time"] = (
                     full_corrected_traj_with_limits[i]["time"] + time_diff
