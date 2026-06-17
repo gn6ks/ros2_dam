@@ -731,30 +731,37 @@ class MoveGroupPythonIntefaceControl(Node):
                 for p in traj
             ]
 
-            plan = self._moveit2.compute_cartesian_path(
-                positions=positions,
-                quat_xyzw=quats,
-                max_step=step,
+            self._moveit2.set_pose_goal(
+                position=positions[-1],
+                quat_xyzw=quats[-1],
+                frame_id=self.BASE_LINK,
             )
 
-            if plan is None:
-                self.get_logger().error("compute_cartesian_path devolvió None.")
+            future = self._moveit2._plan_cartesian_path(max_step=step)
+            if future is None:
+                self.get_logger().error("_plan_cartesian_path devolvió None.")
                 return None, False
-
+            rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
+            plan = self._moveit2.get_trajectory(future)
+            
+            if plan is None:
+                self.get_logger().error("No se obtuvo trayectoria cartesiana.")
+                return None, False
+            
             all_plans.append(plan)
-
+            
             if joint_names is None:
                 joint_names = list(plan.joint_trajectory.joint_names)
-
+            
             # Avanzar start state al último punto del plan
             last_pt = plan.joint_trajectory.points[-1]
-            self._moveit2.set_start_state_to_joint_positions(
-                joint_names=joint_names,
+            self._moveit2.set_joint_goal(
                 joint_positions=list(last_pt.positions),
+                joint_names=joint_names,
             )
 
         # Resetear start state al estado actual real
-        self._moveit2.set_start_state_to_current_state()
+        self._moveit2.clear_goal_constraints()
 
         # ---- FK para cada punto de todos los planes ----
         # Usamos /compute_fk (servicio estándar de MoveIt2)
