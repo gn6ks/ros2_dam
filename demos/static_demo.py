@@ -84,9 +84,16 @@ class EEF:
 
 
 class MoveGroupPythonIntefaceControl(Node):
-    GROUP_NAME = "manipulator"
-    BASE_FRAME = "lbr_link_0"  # ajustar al frame base de tu robot
-    EEF_LINK = robot_config.end_effector_name()  # o definir directamente como string
+    JOINT_NAMES = [
+        "lbr_A1", "lbr_A2", "lbr_A3", "lbr_A4",
+        "lbr_A5", "lbr_A6", "lbr_A7",
+    ]
+    BASE_LINK = "lbr_link_0"
+    EEF_LINK = "lbr_link_ee"
+    GROUP_NAME = "arm"
+    # GROUP_NAME = "manipulator"
+    # BASE_FRAME = "lbr_link_0"  # ajustar al frame base de tu robot
+    # EEF_LINK = robot_config.end_effector_name()  # o definir directamente como string
 
     def __init__(self):
         super().__init__("move_group_control")
@@ -94,10 +101,10 @@ class MoveGroupPythonIntefaceControl(Node):
         # llamada con pymoveit2
         self._moveit2 = MoveIt2(
             node=self,
-            joint_names=robot_config.joint_names(),
-            base_link_name=self.BASE_FRAME,
-            end_effector_name=self.EEF_LINK,
-            group_name=self.GROUP_NAME,
+            joint_names=JOINT_NAMES,
+            base_link_name=BASE_LINK,
+            end_effector_name=EEF_LINK,
+            group_name=GROUP_NAME,
         )
 
         # Publisher de trayectoria para RViz2
