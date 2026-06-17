@@ -993,7 +993,7 @@ class MoveGroupPythonIntefaceControl(Node):
 
         # ---- Construir el mensaje RobotTrajectory ----
         new_plan = RobotTrajectory()
-        new_plan.joint_trajectory.header.frame_id = self.BASE_FRAME
+        new_plan.joint_trajectory.header.frame_id = self.BASE_LINK
         new_plan.joint_trajectory.joint_names = list(joint_names) if joint_names else []
 
         for state in full_corrected_traj_with_limits:
