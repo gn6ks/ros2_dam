@@ -96,7 +96,7 @@ class MoveGroupPythonIntefaceControl(Node):
     # EEF_LINK = robot_config.end_effector_name()  # o definir directamente como string
 
     def __init__(self):
-        super().__init__("move_group_control")
+        super().__init__("move_group_control", namespace="/lbr")
 
         # llamada con pymoveit2
         self._moveit2 = MoveIt2(
