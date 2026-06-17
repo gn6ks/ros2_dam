@@ -101,10 +101,10 @@ class MoveGroupPythonIntefaceControl(Node):
         # llamada con pymoveit2
         self._moveit2 = MoveIt2(
             node=self,
-            joint_names=JOINT_NAMES,
-            base_link_name=BASE_LINK,
-            end_effector_name=EEF_LINK,
-            group_name=GROUP_NAME,
+            joint_names=self.JOINT_NAMES,
+            base_link_name=self.BASE_LINK,
+            end_effector_name=self.EEF_LINK,
+            group_name=self.GROUP_NAME,
         )
 
         # Publisher de trayectoria para RViz2
