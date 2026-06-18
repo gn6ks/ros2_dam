@@ -726,7 +726,7 @@ class MoveGroupPythonIntefaceControl(Node):
         req.header.stamp = self.get_clock().now().to_msg()
         req.group_name = self.GROUP_NAME
         req.link_name = self.EEF_LINK
-        req.waypoints = waypoint[1:] if len(waypoints) > 1 else waypoints
+        req.waypoints = waypoints[1:] if len(waypoints) > 1 else waypoints
         req.max_step = step
         req.jump_threshold = 0.0  # 0.0 deshabilita el jump check
         req.avoid_collisions = True
