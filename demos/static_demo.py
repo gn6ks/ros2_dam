@@ -208,6 +208,12 @@ class MoveGroupPythonIntefaceControl(Node):
             plan.joint_trajectory.header.stamp = self.get_clock().now().to_msg()
             plan.joint_trajectory.header.frame_id = self.BASE_LINK
             goal.trajectory = plan.joint_trajectory
+
+            self.get_logger().info(
+                f"Plan final | puntos={len(plan.joint_trajectory.points)} | "
+                f"duración={plan.joint_trajectory.points[-1].time_from_start.sec + plan.joint_trajectory.points[-1].time_from_start.nanosec * 1e-9:.2f}s"
+            )
+            
             future = self._fjt_client.send_goal_async(goal)
             rclpy.spin_until_future_complete(self, future, timeout_sec=30.0)
             goal_handle = future.result()
