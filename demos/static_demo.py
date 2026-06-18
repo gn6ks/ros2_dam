@@ -99,7 +99,7 @@ class MoveGroupPythonIntefaceControl(Node):
     GROUP_NAME = "arm"
     # GROUP_NAME = "manipulator"
     # BASE_FRAME = "lbr_link_0"  # ajustar al frame base de tu robot
-    # EEF_LINK = robot_config.end_effector_name()  # o definir directamente como string
+    # EEF_LINK = robot_config.end_effector_name()  # definir directamente como string
 
     def __init__(self):
         super().__init__("move_group_control", namespace="/lbr")
@@ -113,6 +113,17 @@ class MoveGroupPythonIntefaceControl(Node):
             group_name=self.GROUP_NAME,
         )
 
+        from moveit_msgs.srv import GetCartesianPath
+
+        self._cartesian_client = self.create_client(
+            GetCartesianPath,
+            "/lbr/compute_cartesian_path",  # ajustar namespace si cambia
+        )
+        if not self._cartesian_client.wait_for_service(timeout_sec=5.0):
+            self.get_logger().warn(
+                "Servicio /compute_cartesian_path no disponible aún."
+            )
+
         # Publisher de trayectoria para RViz2
         self._display_traj_pub = self.create_publisher(
             DisplayTrajectory, "display_planned_path", 20
@@ -122,12 +133,12 @@ class MoveGroupPythonIntefaceControl(Node):
         self.eef_link = self.EEF_LINK
 
         # Objeto de planning scene (para leer URDF y hacer FK)
-        # pymoveit2 expone el robot_model a través de MoveIt2.robot_model
+        # pymoveit2 expone el robot_model a traves de MoveIt2.robot_model
         self.box_name = ""
         self.get_logger().info("MoveGroupPythonIntefaceControl listo.")
 
     def go_to_joint_state(self):
-        """Mueve el robot a la configuración articular fija del benchmark."""
+        """Mueve el robot a la configuracion articular fija del benchmark."""
         joint_goal = [
             90.0 * math.pi / 180.0,
             0.0 * math.pi / 180.0,
@@ -197,6 +208,13 @@ class MoveGroupPythonIntefaceControl(Node):
             plan.joint_trajectory.header.stamp = self.get_clock().now().to_msg()
             plan.joint_trajectory.header.frame_id = self.BASE_LINK
             goal.trajectory = plan.joint_trajectory
+
+            # logger para los puntos final despues de publicar y ejecutar la secuencia en RViz2
+            self.get_logger().info(
+                f"Plan final | puntos={len(plan.joint_trajectory.points)} | "
+                f"duración={plan.joint_trajectory.points[-1].time_from_start.sec + plan.joint_trajectory.points[-1].time_from_start.nanosec * 1e-9:.2f}s"
+            )
+            
             future = self._fjt_client.send_goal_async(goal)
             rclpy.spin_until_future_complete(self, future, timeout_sec=30.0)
             goal_handle = future.result()
@@ -215,7 +233,7 @@ class MoveGroupPythonIntefaceControl(Node):
             return Pose()
         pose = self._fk_from_joint_positions(list(js.name), list(js.position))
         if pose is None:
-            self.get_logger().error("FK falló para el estado actual.")
+            self.get_logger().error("FK fallido para el estado actual.")
             return Pose()
         return pose
 
@@ -226,8 +244,8 @@ class MoveGroupPythonIntefaceControl(Node):
         FK para un conjunto de posiciones articulares.
 
         pymoveit2 no expone FK directamente, pero podemos usar el servicio
-        /compute_fk de MoveIt2 a través de rclpy.
-        Este método reemplaza la llamada al servicio iiwa_fk_server del original.
+        /compute_fk de MoveIt2 a traves de rclpy.
+        Este metodo reemplaza la llamada al servicio iiwa_fk_server del original.
         """
         from moveit_msgs.srv import GetPositionFK
         from std_msgs.msg import Header as StdHeader
@@ -610,7 +628,7 @@ class MoveGroupPythonIntefaceControl(Node):
                             )
                             continue
 
-                        tA = trans_accel / 2
+                        tA = trans_accel / 2 # TODO: problemas de lintter por posible Unbound
                         tB = corrected_traj[-1]["EE_speed"]
                         tC = -self.compute_lin_or_ang_distance(
                             pose, corrected_traj[-1]["pose"], linear
@@ -696,6 +714,141 @@ class MoveGroupPythonIntefaceControl(Node):
 
         return corrected_traj, success
 
+    def _plan_cartesian_path_waypoints(
+        self,
+        waypoints: list,  # lista de geometry_msgs/Pose
+        start_joint_positions: list,  # posiciones articulares de inicio
+        joint_names: list,
+        step: float = 0.002,
+    ):
+        """
+        Llama al servicio GetCartesianPath de MoveIt2 con todos los waypoints.
+        Devuelve (RobotTrajectory, fraction) o (None, 0.0) si falla.
+        """
+        from moveit_msgs.msg import RobotState
+        from moveit_msgs.srv import GetCartesianPath
+
+        req = GetCartesianPath.Request()
+        req.header.frame_id = self.BASE_LINK
+        req.header.stamp = self.get_clock().now().to_msg()
+        req.group_name = self.GROUP_NAME
+        req.link_name = self.EEF_LINK
+        req.waypoints = waypoints[1:] if len(waypoints) > 1 else waypoints
+        req.max_step = step
+        req.jump_threshold = 0.0  # 0.0 deshabilita el jump check para los frames
+        req.avoid_collisions = True
+
+        # TODO: loggers para apuntar los waipoint desde los start_joints
+        self.get_logger().info(
+            f"GetCartesianPath request | waypoints={len(req.waypoints)} | "
+            f"max_step={req.max_step} | start_joints={list(req.start_state.joint_state.position)}"
+        )
+
+        # Estado inicial para encadenar segmentos
+        rs = RobotState()
+        rs.joint_state.name = list(joint_names)
+        rs.joint_state.position = list(start_joint_positions)
+        req.start_state = rs
+
+        self.get_logger().info(
+            f"GetCartesianPath request | waypoints={len(req.waypoints)} | "
+            f"max_step={req.max_step} | "
+            f"start_joints={list(req.start_state.joint_state.position)}"
+        )
+
+        future = self._cartesian_client.call_async(req)
+        rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
+        result = future.result()
+
+        if result is None:
+            self.get_logger().error("GetCartesianPath: sin respuesta del servicio.")
+            return None, 0.0
+
+        if result.fraction < 0.5:
+            self.get_logger().error(
+                f"GetCartesianPath: fraction demasiado baja ({result.fraction:.2f}). "
+                "Revisa que los waypoints sean alcanzables."
+            )
+            return None, result.fraction
+
+        self.get_logger().info(
+            f"GetCartesianPath OK | fraction={result.fraction:.3f} | "
+            f"puntos={len(result.solution.joint_trajectory.points)}"
+        )
+
+        return result.solution, result.fraction
+
+    def verify_cartesian_path(
+        self,
+        plan,
+        joint_names: list,
+        tolerance_mm: float = 1.0,
+    ) -> bool:
+        """
+        Verifica que los puntos FK del plan describen una trayectoria
+        aproximadamente rectilinea en el espacio cartesiano usando PyKDL
+        """
+        pts = plan.joint_trajectory.points
+        if len(pts) < 2:
+            self.get_logger().warn("Plan con menos de 2 puntos, no se puede verificar.")
+            return False
+
+        # FK del primer y ultimo punto para definir la linea de referencia
+        pose_start = self._fk_from_joint_positions(joint_names, list(pts[0].positions))
+        pose_end = self._fk_from_joint_positions(joint_names, list(pts[-1].positions))
+
+        if pose_start is None or pose_end is None:
+            self.get_logger().error("FK falló al verificar el path cartesiano.")
+            return False
+
+        f_start = self.pose_to_frame(pose_start)
+        f_end = self.pose_to_frame(pose_end)
+
+        # Vector director de la linea recta ideal (en metros)
+        p0 = f_start.p
+        p1 = f_end.p
+        line_vec = p1 - p0
+        line_len = line_vec.Norm()
+
+        if line_len < 1e-6:
+            self.get_logger().warn(
+                "Inicio y fin son el mismo punto — trayectoria nula."
+            )
+            return True
+
+        line_dir = line_vec * (1.0 / line_len)  # vector unitario
+
+        max_deviation_mm = 0.0
+        n_points = len(pts)
+
+        for i, pt in enumerate(pts):
+            pose_i = self._fk_from_joint_positions(joint_names, list(pt.positions))
+            if pose_i is None:
+                continue
+            p_i = self.pose_to_frame(pose_i).p
+
+            # Distancia del punto a la línea recta p0→p1
+            v = p_i - p0
+            # Proyección escalar sobre la dirección
+            proj_scalar = PyKDL.dot(v, line_dir)
+            # Punto proyectado sobre la línea
+            proj_point = p0 + line_dir * proj_scalar
+            # Distancia perpendicular (desviación del path recto)
+            deviation = (p_i - proj_point).Norm() * 1000.0  # a mm
+
+            if deviation > max_deviation_mm:
+                max_deviation_mm = deviation
+
+        ok = max_deviation_mm <= tolerance_mm
+        status = "✓ CORRECTO" if ok else "✗ DESVIACION EXCESIVA"
+        self.get_logger().info(
+            f"[verify_cartesian_path] {status} | "
+            f"Puntos: {n_points} | "
+            f"Longitud: {line_len * 1000:.2f} mm | "
+            f"Desviación máx: {max_deviation_mm:.3f} mm (límite: {tolerance_mm} mm)"
+        )
+        return ok
+
     def compute_cartesian_path_velocity_control(
         self,
         waypoints_list: list,
@@ -744,42 +897,99 @@ class MoveGroupPythonIntefaceControl(Node):
                 }
             )
 
-        # ---- Planificación Cartesiana via pymoveit2 ----
-        # pymoveit2 expone compute_cartesian_path() que devuelve RobotTrajectory | None
+        # # ---- Planificación Cartesiana via pymoveit2 ----
+        # # pymoveit2 expone compute_cartesian_path() que devuelve RobotTrajectory | None
+        # all_plans = []
+        # joint_names = None
+
+        # for traj in waypoints_list:
+        #     # Construir lista de poses para pymoveit2
+        #     positions = [[p.position.x, p.position.y, p.position.z] for p in traj]
+        #     quats = [
+        #         [p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]
+        #         for p in traj
+        #     ]
+
+        #     self._moveit2.set_pose_goal(
+        #         position=positions[-1],
+        #         quat_xyzw=quats[-1],
+        #         frame_id=self.BASE_LINK,
+        #     )
+
+        #     future = self._moveit2._plan_cartesian_path(max_step=step)
+        #     if future is None:
+        #         self.get_logger().error("_plan_cartesian_path devolvió None.")
+        #         return None, False
+        #     rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
+        #     # plan = self._moveit2.get_trajectory(future)
+
+        #     result = future.result()
+        #     if result is None or result.fraction < 0.5:
+        #         self.get_logger().error(
+        #             f"Path cartesiano incompleto (fraction={result.fraction if result else 0:.2f})."
+        #         )
+        #         return None, False
+        #     plan = result.solution
+
+        #     if plan is None:
+        #         self.get_logger().error("No se obtuvo trayectoria cartesiana.")
+        #         return None, False
+
+        #     all_plans.append(plan)
+
+        #     if joint_names is None:
+        #         joint_names = list(plan.joint_trajectory.joint_names)
+
+        #     # Avanzar start state al último punto del plan
+        #     last_pt = plan.joint_trajectory.points[-1]
+        #     self._moveit2.set_joint_goal(
+        #         joint_positions=list(last_pt.positions),
+        #         joint_names=joint_names,
+        #     )
+        #
         all_plans = []
         joint_names = None
 
-        for traj in waypoints_list:
-            # Construir lista de poses para pymoveit2
-            positions = [[p.position.x, p.position.y, p.position.z] for p in traj]
-            quats = [
-                [p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]
-                for p in traj
-            ]
+        # Estado inicial: posicion articular actual del robot
+        current_js = self._moveit2.joint_state
+        if current_js is None:
+            self.get_logger().error(
+                "No hay joint_state disponible para iniciar la planificación."
+            )
+            return None, False
 
-            self._moveit2.set_pose_goal(
-                position=positions[-1],
-                quat_xyzw=quats[-1],
-                frame_id=self.BASE_LINK,
+        # start_positions = list(current_js.position)
+        # start_names     = list(current_js.name)
+
+        try:
+            self.get_logger().info(
+                f"joint_state names: {list(current_js.name)} | "
+                f"positions: {list(current_js.position)}"
+            )
+            js_map = dict(zip(current_js.name, current_js.position))
+            start_names = list(self.JOINT_NAMES)
+            start_positions = [js_map[n] for n in self.JOINT_NAMES]
+        except KeyError as e:
+            self.get_logger().error(
+                f"Joint {e} no encontrado en joint_state. "
+                f"Nombres disponibles: {list(current_js.name)}"
+            )
+            return None, False
+
+        for traj in waypoints_list:
+            # traj es una lista de Pose — se pasan TODOS al servicio
+            plan, fraction = self._plan_cartesian_path_waypoints(
+                waypoints=list(traj),  # lista completa, no solo el último
+                start_joint_positions=start_positions,
+                joint_names=start_names,
+                # step=step,
+                step=0.0005, # para diagnositico, lo mejor es hacerlo como step por step, solo para analisis
             )
 
-            future = self._moveit2._plan_cartesian_path(max_step=step)
-            if future is None:
-                self.get_logger().error("_plan_cartesian_path devolvió None.")
-                return None, False
-            rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
-            # plan = self._moveit2.get_trajectory(future)
-
-            result = future.result()
-            if result is None or result.fraction < 0.5:
-                self.get_logger().error(
-                    f"Path cartesiano incompleto (fraction={result.fraction if result else 0:.2f})."
-                )
-                return None, False
-            plan = result.solution
-
             if plan is None:
-                self.get_logger().error("No se obtuvo trayectoria cartesiana.")
+                self.get_logger().error(
+                    f"Segmento cartesiano fallido (fraction={fraction:.2f})."
+                )
                 return None, False
 
             all_plans.append(plan)
@@ -787,12 +997,18 @@ class MoveGroupPythonIntefaceControl(Node):
             if joint_names is None:
                 joint_names = list(plan.joint_trajectory.joint_names)
 
-            # Avanzar start state al último punto del plan
+            if not self.verify_cartesian_path(plan, joint_names, tolerance_mm=1.0):
+                self.get_logger().warn(
+                    "El segmento no sigue una línea recta — revisa los waypoints."
+                )
+                # para los logs no hace falta retornar nada pero que quede que esta
+
+            # Encadenar: el inicio del siguiente segmento es el final de este
             last_pt = plan.joint_trajectory.points[-1]
-            self._moveit2.set_joint_goal(
-                joint_positions=list(last_pt.positions),
-                joint_names=joint_names,
-            )
+            start_positions = list(last_pt.positions)
+            start_names = list(joint_names)  # los nombres no cambian entre segmentos
+
+        # joint_names queda definido tras el primer plan
 
         # Resetear start state al estado actual real
         self._moveit2.clear_goal_constraints()
@@ -835,19 +1051,16 @@ class MoveGroupPythonIntefaceControl(Node):
             traj_mov_position.append(traj_mov_i_pos)
             traj_mov_angle.append(traj_mov_i_ang)
 
-        # ---- Límites de velocidad articular desde URDF (igual que ROS1) ----
+        # Limites de velocidad articular desde URDF
         try:
             robot_desc = (
-                self.get_parameter("/robot_description")
+                self.get_parameter("robot_description")
                 .get_parameter_value()
                 .string_value
             )
         except Exception:
             robot_desc = ""
-            self.get_logger().warn(
-                "Parámetro robot_description no encontrado; "
-                "no se aplicarán límites articulares."
-            )
+            self.get_logger().warn("robot_description no encontrado en este nodo")
 
         vel_limit = {}
         if robot_desc:
@@ -859,7 +1072,7 @@ class MoveGroupPythonIntefaceControl(Node):
                         if attrib.tag == "limit":
                             vel_limit[j_name] = float(attrib.get("velocity")) * 0.9
 
-        # ---- Recalcular tiempos con perfiles de velocidad ----
+        # Recalcular tiempos con perfiles de velocidad
         corrected_traj, success_lin = self.adjust_plan_speed(
             traj_poses,
             EE_speed_aux,
@@ -881,7 +1094,7 @@ class MoveGroupPythonIntefaceControl(Node):
         if not success_lin or not success_ang:
             success = False
 
-        # ---- Merge lineal + angular (tomar el dt mayor) ----
+        # ---- Merge lineal + angular, tomar el dt mayor
         first_accel = True
         t_accel = 0.0
         t_dec = 0.0
@@ -903,7 +1116,7 @@ class MoveGroupPythonIntefaceControl(Node):
                     if (i + 1) < (len(corrected_traj) - 1):
                         t_dec = full_corrected_traj[i + 1]["time"]
 
-        # ---- Enforcement de límites articulares ----
+        # Enforcement de limites articulares
         n_joints = len(all_plans[0].joint_trajectory.points[0].positions)
         zero_Jvel = [0.0] * n_joints
         full_corrected_traj_with_limits = copy.deepcopy(full_corrected_traj)
@@ -936,14 +1149,14 @@ class MoveGroupPythonIntefaceControl(Node):
                         + new_Jaccel * time_diff
                     )
 
-                # Lookup del límite articular usando joint_names (no rs.joint_state.name)
+                # Lookup del limite articular usando joint_names (no rs.joint_state.name)
                 j_name = (
                     joint_names[j] if (joint_names and j < len(joint_names)) else ""
                 )
                 limit = vel_limit.get(j_name, float("inf"))
 
-                if limit < new_Jspeed or time_diff == 0:
-                    new_Jspeed = limit
+                if abs(new_Jspeed) > limit or time_diff == 0:
+                    new_Jspeed = math.copysign(limit, new_Jspeed)
                     if angle_diff != 0:
                         new_Jaccel = (
                             2
@@ -1011,7 +1224,7 @@ class MoveGroupPythonIntefaceControl(Node):
 
         full_corrected_traj_with_limits[-1]["Jspeed"] = copy.deepcopy(zero_Jvel)
 
-        # ---- Construir el mensaje RobotTrajectory ----
+        # Construir el mensaje RobotTrajectory
         new_plan = RobotTrajectory()
         new_plan.joint_trajectory.header.frame_id = self.BASE_LINK
         new_plan.joint_trajectory.joint_names = list(joint_names) if joint_names else []
@@ -1057,7 +1270,7 @@ def main(args=None):
         target.orientation.z = quat[2] / q_norm
         target.orientation.w = quat[3] / q_norm
 
-        # Mover a pose de aproximación
+        # Mover a pose de aproximacion
         target.position.x = x0
         target.position.y = y0
         target.position.z = z0 + offset
@@ -1068,7 +1281,7 @@ def main(args=None):
         penetrations = [0.001, 0.003, 0.005, 0.007]  # m
         speeds = [70.0, 50.0, 30.0, 10.0]  # mm/s
 
-        # Test de histéresis
+        # Test de histeresis
         for p in penetrations:
             control.get_logger().info(f"Penetración: {p}")
 
@@ -1083,7 +1296,7 @@ def main(args=None):
                 target.position.z = z0 - p
                 control.go_to_pose_speed(target, s, accel=2000.0)
 
-                # Tiempo de penetración
+                # Tiempo de penetracion
                 control.get_clock().sleep_for(rclpy.duration.Duration(seconds=100))
 
                 target.position.x = x0
