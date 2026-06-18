@@ -742,6 +742,12 @@ class MoveGroupPythonIntefaceControl(Node):
         rs.joint_state.position = list(start_joint_positions)
         req.start_state = rs
 
+        self.get_logger().info(
+            f"GetCartesianPath request | waypoints={len(req.waypoints)} | "
+            f"max_step={req.max_step} | "
+            f"start_joints={list(req.start_state.joint_state.position)}"
+        )
+
         future = self._cartesian_client.call_async(req)
         rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
         result = future.result()
