@@ -730,6 +730,7 @@ class MoveGroupPythonIntefaceControl(Node):
         req.max_step = step
         req.jump_threshold = 0.0  # 0.0 deshabilita el jump check para los frames
         req.avoid_collisions = True
+        req.cartesian_speed_limit_speed = ""
 
         self.get_logger().info(
             f"GetCartesianPath request | waypoints={len(req.waypoints)} | "
@@ -974,7 +975,8 @@ class MoveGroupPythonIntefaceControl(Node):
                 waypoints=list(traj),  # lista completa, no solo el último
                 start_joint_positions=start_positions,
                 joint_names=start_names,
-                step=step,
+                # step=step,
+                step=0.0005, # para diagnositico, lo mejor es hacerlo como step por step, solo para analisis
             )
 
             if plan is None:
