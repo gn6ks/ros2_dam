@@ -99,7 +99,7 @@ class MoveGroupPythonIntefaceControl(Node):
     GROUP_NAME = "arm"
     # GROUP_NAME = "manipulator"
     # BASE_FRAME = "lbr_link_0"  # ajustar al frame base de tu robot
-    # EEF_LINK = robot_config.end_effector_name()  # o definir directamente como string
+    # EEF_LINK = robot_config.end_effector_name()  # definir directamente como string
 
     def __init__(self):
         super().__init__("move_group_control", namespace="/lbr")
@@ -133,12 +133,12 @@ class MoveGroupPythonIntefaceControl(Node):
         self.eef_link = self.EEF_LINK
 
         # Objeto de planning scene (para leer URDF y hacer FK)
-        # pymoveit2 expone el robot_model a través de MoveIt2.robot_model
+        # pymoveit2 expone el robot_model a traves de MoveIt2.robot_model
         self.box_name = ""
         self.get_logger().info("MoveGroupPythonIntefaceControl listo.")
 
     def go_to_joint_state(self):
-        """Mueve el robot a la configuración articular fija del benchmark."""
+        """Mueve el robot a la configuracion articular fija del benchmark."""
         joint_goal = [
             90.0 * math.pi / 180.0,
             0.0 * math.pi / 180.0,
@@ -209,6 +209,7 @@ class MoveGroupPythonIntefaceControl(Node):
             plan.joint_trajectory.header.frame_id = self.BASE_LINK
             goal.trajectory = plan.joint_trajectory
 
+            # logger para los puntos final despues de publicar y ejecutar la secuencia en RViz2
             self.get_logger().info(
                 f"Plan final | puntos={len(plan.joint_trajectory.points)} | "
                 f"duración={plan.joint_trajectory.points[-1].time_from_start.sec + plan.joint_trajectory.points[-1].time_from_start.nanosec * 1e-9:.2f}s"
@@ -232,7 +233,7 @@ class MoveGroupPythonIntefaceControl(Node):
             return Pose()
         pose = self._fk_from_joint_positions(list(js.name), list(js.position))
         if pose is None:
-            self.get_logger().error("FK falló para el estado actual.")
+            self.get_logger().error("FK fallido para el estado actual.")
             return Pose()
         return pose
 
@@ -243,8 +244,8 @@ class MoveGroupPythonIntefaceControl(Node):
         FK para un conjunto de posiciones articulares.
 
         pymoveit2 no expone FK directamente, pero podemos usar el servicio
-        /compute_fk de MoveIt2 a través de rclpy.
-        Este método reemplaza la llamada al servicio iiwa_fk_server del original.
+        /compute_fk de MoveIt2 a traves de rclpy.
+        Este metodo reemplaza la llamada al servicio iiwa_fk_server del original.
         """
         from moveit_msgs.srv import GetPositionFK
         from std_msgs.msg import Header as StdHeader
@@ -627,7 +628,7 @@ class MoveGroupPythonIntefaceControl(Node):
                             )
                             continue
 
-                        tA = trans_accel / 2
+                        tA = trans_accel / 2 # TODO: problemas de lintter por posible Unbound
                         tB = corrected_traj[-1]["EE_speed"]
                         tC = -self.compute_lin_or_ang_distance(
                             pose, corrected_traj[-1]["pose"], linear
@@ -737,6 +738,7 @@ class MoveGroupPythonIntefaceControl(Node):
         req.jump_threshold = 0.0  # 0.0 deshabilita el jump check para los frames
         req.avoid_collisions = True
 
+        # TODO: loggers para apuntar los waipoint desde los start_joints
         self.get_logger().info(
             f"GetCartesianPath request | waypoints={len(req.waypoints)} | "
             f"max_step={req.max_step} | start_joints={list(req.start_state.joint_state.position)}"
@@ -802,7 +804,7 @@ class MoveGroupPythonIntefaceControl(Node):
         f_start = self.pose_to_frame(pose_start)
         f_end = self.pose_to_frame(pose_end)
 
-        # Vector director de la línea recta ideal (en metros)
+        # Vector director de la linea recta ideal (en metros)
         p0 = f_start.p
         p1 = f_end.p
         line_vec = p1 - p0
@@ -838,7 +840,7 @@ class MoveGroupPythonIntefaceControl(Node):
                 max_deviation_mm = deviation
 
         ok = max_deviation_mm <= tolerance_mm
-        status = "✓ CORRECTO" if ok else "✗ DESVIACIÓN EXCESIVA"
+        status = "✓ CORRECTO" if ok else "✗ DESVIACION EXCESIVA"
         self.get_logger().info(
             f"[verify_cartesian_path] {status} | "
             f"Puntos: {n_points} | "
@@ -948,7 +950,7 @@ class MoveGroupPythonIntefaceControl(Node):
         all_plans = []
         joint_names = None
 
-        # Estado inicial: posición articular actual del robot
+        # Estado inicial: posicion articular actual del robot
         current_js = self._moveit2.joint_state
         if current_js is None:
             self.get_logger().error(
@@ -1049,7 +1051,7 @@ class MoveGroupPythonIntefaceControl(Node):
             traj_mov_position.append(traj_mov_i_pos)
             traj_mov_angle.append(traj_mov_i_ang)
 
-        # ---- Límites de velocidad articular desde URDF (igual que ROS1) ----
+        # Limites de velocidad articular desde URDF
         try:
             robot_desc = (
                 self.get_parameter("robot_description")
@@ -1070,7 +1072,7 @@ class MoveGroupPythonIntefaceControl(Node):
                         if attrib.tag == "limit":
                             vel_limit[j_name] = float(attrib.get("velocity")) * 0.9
 
-        # ---- Recalcular tiempos con perfiles de velocidad ----
+        # Recalcular tiempos con perfiles de velocidad
         corrected_traj, success_lin = self.adjust_plan_speed(
             traj_poses,
             EE_speed_aux,
@@ -1092,7 +1094,7 @@ class MoveGroupPythonIntefaceControl(Node):
         if not success_lin or not success_ang:
             success = False
 
-        # ---- Merge lineal + angular (tomar el dt mayor) ----
+        # ---- Merge lineal + angular, tomar el dt mayor
         first_accel = True
         t_accel = 0.0
         t_dec = 0.0
@@ -1114,7 +1116,7 @@ class MoveGroupPythonIntefaceControl(Node):
                     if (i + 1) < (len(corrected_traj) - 1):
                         t_dec = full_corrected_traj[i + 1]["time"]
 
-        # ---- Enforcement de límites articulares ----
+        # Enforcement de limites articulares
         n_joints = len(all_plans[0].joint_trajectory.points[0].positions)
         zero_Jvel = [0.0] * n_joints
         full_corrected_traj_with_limits = copy.deepcopy(full_corrected_traj)
@@ -1147,7 +1149,7 @@ class MoveGroupPythonIntefaceControl(Node):
                         + new_Jaccel * time_diff
                     )
 
-                # Lookup del límite articular usando joint_names (no rs.joint_state.name)
+                # Lookup del limite articular usando joint_names (no rs.joint_state.name)
                 j_name = (
                     joint_names[j] if (joint_names and j < len(joint_names)) else ""
                 )
@@ -1222,7 +1224,7 @@ class MoveGroupPythonIntefaceControl(Node):
 
         full_corrected_traj_with_limits[-1]["Jspeed"] = copy.deepcopy(zero_Jvel)
 
-        # ---- Construir el mensaje RobotTrajectory ----
+        # Construir el mensaje RobotTrajectory
         new_plan = RobotTrajectory()
         new_plan.joint_trajectory.header.frame_id = self.BASE_LINK
         new_plan.joint_trajectory.joint_names = list(joint_names) if joint_names else []
@@ -1268,7 +1270,7 @@ def main(args=None):
         target.orientation.z = quat[2] / q_norm
         target.orientation.w = quat[3] / q_norm
 
-        # Mover a pose de aproximación
+        # Mover a pose de aproximacion
         target.position.x = x0
         target.position.y = y0
         target.position.z = z0 + offset
@@ -1279,7 +1281,7 @@ def main(args=None):
         penetrations = [0.001, 0.003, 0.005, 0.007]  # m
         speeds = [70.0, 50.0, 30.0, 10.0]  # mm/s
 
-        # Test de histéresis
+        # Test de histeresis
         for p in penetrations:
             control.get_logger().info(f"Penetración: {p}")
 
@@ -1294,7 +1296,7 @@ def main(args=None):
                 target.position.z = z0 - p
                 control.go_to_pose_speed(target, s, accel=2000.0)
 
-                # Tiempo de penetración
+                # Tiempo de penetracion
                 control.get_clock().sleep_for(rclpy.duration.Duration(seconds=100))
 
                 target.position.x = x0
