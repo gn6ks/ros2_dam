@@ -728,10 +728,15 @@ class MoveGroupPythonIntefaceControl(Node):
         req.link_name = self.EEF_LINK
         req.waypoints = waypoints[1:] if len(waypoints) > 1 else waypoints
         req.max_step = step
-        req.jump_threshold = 0.0  # 0.0 deshabilita el jump check
+        req.jump_threshold = 0.0  # 0.0 deshabilita el jump check para los frames
         req.avoid_collisions = True
 
-        # Estado inicial — crítico para encadenar segmentos correctamente
+        self.get_logger().info(
+            f"GetCartesianPath request | waypoints={len(req.waypoints)} | "
+            f"max_step={req.max_step} | start_joints={list(req.start_state.joint_state.position)}"
+        )
+
+        # Estado inicial para encadenar segmentos
         rs = RobotState()
         rs.joint_state.name = list(joint_names)
         rs.joint_state.position = list(start_joint_positions)
@@ -751,6 +756,11 @@ class MoveGroupPythonIntefaceControl(Node):
                 "Revisa que los waypoints sean alcanzables."
             )
             return None, result.fraction
+
+        self.get_logger().info(
+            f"GetCartesianPath OK | fraction={result.fraction:.3f} | "
+            f"puntos={len(result.solution.joint_trajectory.points)}"
+        )
 
         return result.solution, result.fraction
 
