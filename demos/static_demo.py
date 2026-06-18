@@ -948,11 +948,18 @@ class MoveGroupPythonIntefaceControl(Node):
         # start_names     = list(current_js.name)
 
         try:
+            self.get_logger().info(
+                f"joint_state names: {list(current_js.name)} | "
+                f"positions: {list(current_js.position)}"
+            )
             js_map = dict(zip(current_js.name, current_js.position))
             start_names = list(self.JOINT_NAMES)
             start_positions = [js_map[n] for n in self.JOINT_NAMES]
         except KeyError as e:
-            self.get_logger().error(f"Joint {e} no encontrado en joint_state.")
+            self.get_logger().error(
+                f"Joint {e} no encontrado en joint_state. "
+                f"Nombres disponibles: {list(current_js.name)}"
+            )
             return None, False
 
         for traj in waypoints_list:
