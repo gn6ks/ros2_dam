@@ -113,6 +113,15 @@ class MoveGroupPythonIntefaceControl(Node):
             group_name=self.GROUP_NAME,
         )
 
+        from moveit_msgs.srv import GetCartesianPath
+        
+        self._cartesian_client = self.create_client(
+            GetCartesianPath,
+            '/lbr/compute_cartesian_path'   # ajustar namespace si cambia
+        )
+        if not self._cartesian_client.wait_for_service(timeout_sec=5.0):
+            self.get_logger().warn("Servicio /compute_cartesian_path no disponible aún.")
+
         # Publisher de trayectoria para RViz2
         self._display_traj_pub = self.create_publisher(
             DisplayTrajectory, "display_planned_path", 20
@@ -696,6 +705,53 @@ class MoveGroupPythonIntefaceControl(Node):
 
         return corrected_traj, success
 
+    def _plan_cartesian_path_waypoints(
+        self,
+        waypoints: list,          # lista de geometry_msgs/Pose
+        start_joint_positions: list,  # posiciones articulares de inicio
+        joint_names: list,
+        step: float = 0.002,
+    ):
+        """
+        Llama al servicio GetCartesianPath de MoveIt2 con todos los waypoints.
+        Devuelve (RobotTrajectory, fraction) o (None, 0.0) si falla.
+        """
+        from moveit_msgs.srv import GetCartesianPath
+        from moveit_msgs.msg import RobotState
+    
+        req = GetCartesianPath.Request()
+        req.header.frame_id = self.BASE_LINK
+        req.header.stamp = self.get_clock().now().to_msg()
+        req.group_name = self.GROUP_NAME
+        req.link_name = self.EEF_LINK
+        req.waypoints = waypoints          # ← TODOS los waypoints del segmento
+        req.max_step = step
+        req.jump_threshold = 0.0           # 0.0 deshabilita el jump check
+        req.avoid_collisions = True
+    
+        # Estado inicial — crítico para encadenar segmentos correctamente
+        rs = RobotState()
+        rs.joint_state.name = list(joint_names)
+        rs.joint_state.position = list(start_joint_positions)
+        req.start_state = rs
+    
+        future = self._cartesian_client.call_async(req)
+        rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
+        result = future.result()
+    
+        if result is None:
+            self.get_logger().error("GetCartesianPath: sin respuesta del servicio.")
+            return None, 0.0
+    
+        if result.fraction < 0.5:
+            self.get_logger().error(
+                f"GetCartesianPath: fraction demasiado baja ({result.fraction:.2f}). "
+                "Revisa que los waypoints sean alcanzables."
+            )
+            return None, result.fraction
+    
+        return result.solution, result.fraction
+
     def compute_cartesian_path_velocity_control(
         self,
         waypoints_list: list,
@@ -744,55 +800,94 @@ class MoveGroupPythonIntefaceControl(Node):
                 }
             )
 
-        # ---- Planificación Cartesiana via pymoveit2 ----
-        # pymoveit2 expone compute_cartesian_path() que devuelve RobotTrajectory | None
+        # # ---- Planificación Cartesiana via pymoveit2 ----
+        # # pymoveit2 expone compute_cartesian_path() que devuelve RobotTrajectory | None
+        # all_plans = []
+        # joint_names = None
+
+        # for traj in waypoints_list:
+        #     # Construir lista de poses para pymoveit2
+        #     positions = [[p.position.x, p.position.y, p.position.z] for p in traj]
+        #     quats = [
+        #         [p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]
+        #         for p in traj
+        #     ]
+
+        #     self._moveit2.set_pose_goal(
+        #         position=positions[-1],
+        #         quat_xyzw=quats[-1],
+        #         frame_id=self.BASE_LINK,
+        #     )
+
+        #     future = self._moveit2._plan_cartesian_path(max_step=step)
+        #     if future is None:
+        #         self.get_logger().error("_plan_cartesian_path devolvió None.")
+        #         return None, False
+        #     rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
+        #     # plan = self._moveit2.get_trajectory(future)
+
+        #     result = future.result()
+        #     if result is None or result.fraction < 0.5:
+        #         self.get_logger().error(
+        #             f"Path cartesiano incompleto (fraction={result.fraction if result else 0:.2f})."
+        #         )
+        #         return None, False
+        #     plan = result.solution
+
+        #     if plan is None:
+        #         self.get_logger().error("No se obtuvo trayectoria cartesiana.")
+        #         return None, False
+
+        #     all_plans.append(plan)
+
+        #     if joint_names is None:
+        #         joint_names = list(plan.joint_trajectory.joint_names)
+
+        #     # Avanzar start state al último punto del plan
+        #     last_pt = plan.joint_trajectory.points[-1]
+        #     self._moveit2.set_joint_goal(
+        #         joint_positions=list(last_pt.positions),
+        #         joint_names=joint_names,
+        #     )
+        # 
         all_plans = []
         joint_names = None
-
+        
+        # Estado inicial: posición articular actual del robot
+        current_js = self._moveit2.joint_state
+        if current_js is None:
+            self.get_logger().error("No hay joint_state disponible para iniciar la planificación.")
+            return None, False
+        
+        start_positions = list(current_js.position)
+        start_names     = list(current_js.name)
+        
         for traj in waypoints_list:
-            # Construir lista de poses para pymoveit2
-            positions = [[p.position.x, p.position.y, p.position.z] for p in traj]
-            quats = [
-                [p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]
-                for p in traj
-            ]
-
-            self._moveit2.set_pose_goal(
-                position=positions[-1],
-                quat_xyzw=quats[-1],
-                frame_id=self.BASE_LINK,
+            # traj es una lista de Pose — se pasan TODOS al servicio
+            plan, fraction = self._plan_cartesian_path_waypoints(
+                waypoints=list(traj),          # lista completa, no solo el último
+                start_joint_positions=start_positions,
+                joint_names=start_names,
+                step=step,
             )
-
-            future = self._moveit2._plan_cartesian_path(max_step=step)
-            if future is None:
-                self.get_logger().error("_plan_cartesian_path devolvió None.")
-                return None, False
-            rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
-            # plan = self._moveit2.get_trajectory(future)
-
-            result = future.result()
-            if result is None or result.fraction < 0.5:
+        
+            if plan is None:
                 self.get_logger().error(
-                    f"Path cartesiano incompleto (fraction={result.fraction if result else 0:.2f})."
+                    f"Segmento cartesiano fallido (fraction={fraction:.2f})."
                 )
                 return None, False
-            plan = result.solution
-
-            if plan is None:
-                self.get_logger().error("No se obtuvo trayectoria cartesiana.")
-                return None, False
-
+        
             all_plans.append(plan)
-
+        
             if joint_names is None:
                 joint_names = list(plan.joint_trajectory.joint_names)
-
-            # Avanzar start state al último punto del plan
-            last_pt = plan.joint_trajectory.points[-1]
-            self._moveit2.set_joint_goal(
-                joint_positions=list(last_pt.positions),
-                joint_names=joint_names,
-            )
+        
+            # Encadenar: el inicio del siguiente segmento es el final de este
+            last_pt      = plan.joint_trajectory.points[-1]
+            start_positions = list(last_pt.positions)
+            start_names     = list(joint_names)   # los nombres no cambian entre segmentos
+        
+        # joint_names queda definido tras el primer plan
 
         # Resetear start state al estado actual real
         self._moveit2.clear_goal_constraints()
