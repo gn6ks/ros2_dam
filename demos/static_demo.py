@@ -838,16 +838,13 @@ class MoveGroupPythonIntefaceControl(Node):
         # ---- Límites de velocidad articular desde URDF (igual que ROS1) ----
         try:
             robot_desc = (
-                self.get_parameter("/lbr/robot_description")
+                self.get_parameter("robot_description")
                 .get_parameter_value()
                 .string_value
             )
         except Exception:
             robot_desc = ""
-            self.get_logger().warn(
-                "Parámetro robot_description no encontrado; "
-                "no se aplicarán límites articulares."
-            )
+            self.get_logger().warn("robot_description no encontrado en este nodo")
 
         vel_limit = {}
         if robot_desc:
@@ -942,8 +939,8 @@ class MoveGroupPythonIntefaceControl(Node):
                 )
                 limit = vel_limit.get(j_name, float("inf"))
 
-                if limit < new_Jspeed or time_diff == 0:
-                    new_Jspeed = limit
+                if abs(new_Jspeed) > limit or time_diff == 0:
+                    new_Jspeed = math.copysign(limit, new_Jspeed)
                     if angle_diff != 0:
                         new_Jaccel = (
                             2
