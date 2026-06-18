@@ -838,7 +838,7 @@ class MoveGroupPythonIntefaceControl(Node):
         # ---- Límites de velocidad articular desde URDF (igual que ROS1) ----
         try:
             robot_desc = (
-                self.get_parameter("/robot_description")
+                self.get_parameter("/lbr/robot_description")
                 .get_parameter_value()
                 .string_value
             )
