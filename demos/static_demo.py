@@ -752,6 +752,75 @@ class MoveGroupPythonIntefaceControl(Node):
     
         return result.solution, result.fraction
 
+    def verify_cartesian_path(
+        self,
+        plan,
+        joint_names: list,
+        tolerance_mm: float = 1.0,
+    ) -> bool:
+        """
+        Verifica que los puntos FK del plan describen una trayectoria
+        aproximadamente rectilinea en el espacio cartesiano usando PyKDL
+        """
+        pts = plan.joint_trajectory.points
+        if len(pts) < 2:
+            self.get_logger().warn("Plan con menos de 2 puntos, no se puede verificar.")
+            return False
+    
+        # FK del primer y ultimo punto para definir la linea de referencia
+        pose_start = self._fk_from_joint_positions(joint_names, list(pts[0].positions))
+        pose_end   = self._fk_from_joint_positions(joint_names, list(pts[-1].positions))
+    
+        if pose_start is None or pose_end is None:
+            self.get_logger().error("FK falló al verificar el path cartesiano.")
+            return False
+    
+        f_start = self.pose_to_frame(pose_start)
+        f_end   = self.pose_to_frame(pose_end)
+    
+        # Vector director de la línea recta ideal (en metros)
+        p0 = f_start.p
+        p1 = f_end.p
+        line_vec = p1 - p0
+        line_len = line_vec.Norm()
+    
+        if line_len < 1e-6:
+            self.get_logger().warn("Inicio y fin son el mismo punto — trayectoria nula.")
+            return True
+    
+        line_dir = line_vec * (1.0 / line_len)  # vector unitario
+    
+        max_deviation_mm = 0.0
+        n_points = len(pts)
+    
+        for i, pt in enumerate(pts):
+            pose_i = self._fk_from_joint_positions(joint_names, list(pt.positions))
+            if pose_i is None:
+                continue
+            p_i = self.pose_to_frame(pose_i).p
+    
+            # Distancia del punto a la línea recta p0→p1
+            v = p_i - p0
+            # Proyección escalar sobre la dirección
+            proj_scalar = PyKDL.dot(v, line_dir)
+            # Punto proyectado sobre la línea
+            proj_point = p0 + line_dir * proj_scalar
+            # Distancia perpendicular (desviación del path recto)
+            deviation = (p_i - proj_point).Norm() * 1000.0  # a mm
+    
+            if deviation > max_deviation_mm:
+                max_deviation_mm = deviation
+    
+        ok = max_deviation_mm <= tolerance_mm
+        status = "✓ CORRECTO" if ok else "✗ DESVIACIÓN EXCESIVA"
+        self.get_logger().info(
+            f"[verify_cartesian_path] {status} | "
+            f"Puntos: {n_points} | "
+            f"Longitud: {line_len*1000:.2f} mm | "
+            f"Desviación máx: {max_deviation_mm:.3f} mm (límite: {tolerance_mm} mm)"
+        )
+        return ok
+
     def compute_cartesian_path_velocity_control(
         self,
         waypoints_list: list,
@@ -881,6 +950,12 @@ class MoveGroupPythonIntefaceControl(Node):
         
             if joint_names is None:
                 joint_names = list(plan.joint_trajectory.joint_names)
+
+            if not self.verify_cartesian_path(plan, joint_names, tolerance_mm=1.0):
+                    self.get_logger().warn(
+                        "El segmento no sigue una línea recta — revisa los waypoints."
+                    )
+                    # para los logs no hace falta retornar nada pero que quede que esta
         
             # Encadenar: el inicio del siguiente segmento es el final de este
             last_pt      = plan.joint_trajectory.points[-1]
