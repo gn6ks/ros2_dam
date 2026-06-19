@@ -179,6 +179,27 @@ class MoveGroupPythonIntefaceControl(Node):
         self.box_name = ""
         self.get_logger().info("MoveGroupPythonIntefaceControl listo.")
 
+    def wait_for_joint_state(self, timeout_sec: float = 10.0) -> bool:
+        """
+        Espera a que llegue al menos un mensaje de /joint_states.
+
+        Justo después de crear el nodo, rclpy todavía no ha hecho ningún
+        spin, por lo que la suscripción interna de pymoveit2 a /joint_states
+        no ha ejecutado ningún callback y self._moveit2.joint_state sigue
+        siendo None. Si se intenta planificar antes de esto, go_to_pose()/
+        go_to_pose_speed() fallan inmediatamente con "No hay joint_state
+        disponible", independientemente de la velocidad pedida. Este método
+        bombea spin_once() hasta que llega el primer mensaje o se agota el
+        timeout.
+        """
+        start = self.get_clock().now()
+        while self._moveit2.joint_state is None:
+            rclpy.spin_once(self, timeout_sec=0.1)
+            elapsed_sec = (self.get_clock().now() - start).nanoseconds * 1e-9
+            if elapsed_sec > timeout_sec:
+                return False
+        return True
+
     def go_to_joint_state(self):
         """Mueve el robot a la configuracion articular fija del benchmark."""
         joint_goal = [
@@ -402,7 +423,15 @@ class MoveGroupPythonIntefaceControl(Node):
         """Devuelve la pose actual del EEF via FK sobre el joint_state actual."""
         js = self._moveit2.joint_state
         if js is None:
-            self.get_logger().error("No hay joint_state disponible.")
+            # Reintento corto: si el topic se ha quedado sin mensajes un
+            # instante (p. ej. tras un movimiento largo), damos una segunda
+            # oportunidad antes de declarar el fallo.
+            self.wait_for_joint_state(timeout_sec=2.0)
+            js = self._moveit2.joint_state
+        if js is None:
+            self.get_logger().error(
+                "No hay joint_state disponible (sin mensajes en /joint_states)."
+            )
             return Pose()
         pose = self._fk_from_joint_positions(list(js.name), list(js.position))
         if pose is None:
@@ -1126,8 +1155,15 @@ class MoveGroupPythonIntefaceControl(Node):
         # Estado inicial: posicion articular actual del robot
         current_js = self._moveit2.joint_state
         if current_js is None:
+            # Igual que en _get_current_eef_pose: puede que aún no haya
+            # llegado ningún mensaje de /joint_states. Damos una segunda
+            # oportunidad antes de abortar la planificación.
+            self.wait_for_joint_state(timeout_sec=2.0)
+            current_js = self._moveit2.joint_state
+        if current_js is None:
             self.get_logger().error(
-                "No hay joint_state disponible para iniciar la planificación."
+                "No hay joint_state disponible para iniciar la planificación "
+                "(sin mensajes en /joint_states)."
             )
             return None, False
 
@@ -1419,7 +1455,6 @@ class MoveGroupPythonIntefaceControl(Node):
 
 
 def main(args=None):
-    print("=== Demo de penetración con velocidad cartesiana controlada (MoveIt2) ===")
     move_speed = ask_speed(default=50.0)
     print(
         f"-> Aproximación y retracción a {move_speed:.1f} mm/s cartesianos.\n"
@@ -1431,6 +1466,18 @@ def main(args=None):
         f"Velocidad cartesiana de desplazamiento (aproximación/retracción): "
         f"{move_speed:.1f} mm/s"
     )
+
+    control.get_logger().info("Esperando el primer mensaje de /joint_states…")
+    if not control.wait_for_joint_state(timeout_sec=10.0):
+        control.get_logger().error(
+            "No se recibió ningún mensaje en /joint_states tras 10s. "
+            "Comprueba que el driver/simulación del robot está publicando "
+            "ese topic y que el namespace ('/lbr') es correcto."
+        )
+        control.destroy_node()
+        rclpy.shutdown()
+        return
+    control.get_logger().info("joint_state recibido. Iniciando demo.")
 
     try:
         offset = 0.1
