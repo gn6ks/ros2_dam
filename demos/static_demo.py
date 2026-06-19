@@ -358,7 +358,11 @@ class MoveGroupPythonIntefaceControl(Node):
                 return False
 
             goal = FollowJointTrajectory.Goal()
-            plan.joint_trajectory.header.stamp = self.get_clock().now().to_msg()
+            # plan.joint_trajectory.header.stamp = self.get_clock().now().to_msg()
+            
+            from builtin_interfaces.msg import Time
+            plan.joint_trajectory.header.stamp = Time(sec=0, nanosec=0) 
+            
             plan.joint_trajectory.header.frame_id = self.BASE_LINK
             goal.trajectory = plan.joint_trajectory
 
