@@ -1191,8 +1191,8 @@ class MoveGroupPythonIntefaceControl(Node):
                 waypoints=list(traj),  # lista completa, no solo el último
                 start_joint_positions=start_positions,
                 joint_names=start_names,
-                # step=step,
-                step=0.0005, # para diagnositico, lo mejor es hacerlo como step por step, solo para analisis
+                step=step,
+                #step=0.0005, # para diagnositico, lo mejor es hacerlo como step por step, solo para analisis
             )
 
             if plan is None:
