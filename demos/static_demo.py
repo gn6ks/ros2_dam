@@ -64,6 +64,48 @@ def all_close(goal, actual, tolerance):
     return True
 
 
+def ask_speed(default: float = 50.0, max_recommended: float = 300.0) -> float:
+    """
+    Pide al usuario por consola la velocidad cartesiana (mm/s) para la demo.
+
+    Valida que el valor introducido sea numérico y positivo. Si es muy alto,
+    avisa de que MoveIt2 puede rechazar el plan (límites articulares excedidos,
+    Jacobiano cerca de singularidad, etc. — ver Sección 3.2 del paper) y pide
+    confirmación antes de continuar.
+    """
+    while True:
+        raw = input(
+            f"Velocidad cartesiana del EEF en mm/s [Enter = {default}]: "
+        ).strip()
+
+        if raw == "":
+            return default
+
+        try:
+            speed = float(raw)
+        except ValueError:
+            print("  -> Valor no numérico. Ejemplo válido: 50 o 70.5")
+            continue
+
+        if speed <= 0:
+            print("  -> La velocidad debe ser un número positivo.")
+            continue
+
+        if speed > max_recommended:
+            confirm = (
+                input(
+                    f"  -> {speed} mm/s es alta; MoveIt2 puede rechazar el plan por "
+                    "exceder los límites articulares del URDF. ¿Continuar? [s/N]: "
+                )
+                .strip()
+                .lower()
+            )
+            if confirm != "s":
+                continue
+
+        return speed
+
+
 class EEF:
     def __init__(
         self,
@@ -153,47 +195,130 @@ class MoveGroupPythonIntefaceControl(Node):
         return True
 
     def go_to_pose(self, pose: Pose) -> bool:
-        """Planifica y ejecuta movimiento a una pose Cartesiana."""
-        self._moveit2.move_to_pose(
-            position=[pose.position.x, pose.position.y, pose.position.z],
-            quat_xyzw=[
-                pose.orientation.x,
-                pose.orientation.y,
-                pose.orientation.z,
-                pose.orientation.w,
-            ],
-        )
-        self._moveit2.wait_until_executed()
+        """
+        Planifica y ejecuta un movimiento (sin control de velocidad) a una
+        pose Cartesiana usando pymoveit2. Captura cualquier excepción de
+        MoveIt2/ROS2 y la reporta sin propagarla, devolviendo False.
+        """
+        try:
+            self._moveit2.move_to_pose(
+                position=[pose.position.x, pose.position.y, pose.position.z],
+                quat_xyzw=[
+                    pose.orientation.x,
+                    pose.orientation.y,
+                    pose.orientation.z,
+                    pose.orientation.w,
+                ],
+            )
+            self._moveit2.wait_until_executed()
+        except Exception as exc:  # noqa: BLE001 - barrera ante fallos de MoveIt2/pymoveit2
+            self.get_logger().error(f"Excepción en go_to_pose: {exc!r}")
+            return False
         return True
 
-    def follow_trajectory_speed(self, waypoints, speeds, ang_speeds=[], accel=100.0):
-        plan, success = self.compute_cartesian_path_velocity_control(
-            waypoints, speeds, EE_ang_speed=ang_speeds, max_linear_accel=accel
-        )
-        self._publish_and_execute(plan, success)
-        time.sleep(0.5)
+    def follow_trajectory_speed(
+        self, waypoints, speeds, ang_speeds=[], accel=100.0
+    ) -> bool:
+        """
+        Calcula y ejecuta una trayectoria multi-sección con velocidad controlada.
+        Nunca lanza excepción: cualquier fallo se reporta por el logger y se
+        devuelve False para que el caller decida cómo continuar.
+        """
+        try:
+            plan, success = self.compute_cartesian_path_velocity_control(
+                waypoints, speeds, EE_ang_speed=ang_speeds, max_linear_accel=accel
+            )
+        except Exception as exc:  # noqa: BLE001 - barrera ante fallos de MoveIt2/servicios
+            self.get_logger().error(
+                f"Excepción calculando la trayectoria multi-sección: {exc!r}"
+            )
+            return False
 
-    def go_to_pose_speed(self, pose: Pose, speed=10.0, ang_speed=[], accel=100.0):
-        # Obtener pose actual del EEF
-        current_pose = self._get_current_eef_pose()
-        waypoints = [[copy.deepcopy(current_pose), copy.deepcopy(pose)]]
-        plan, success = self.compute_cartesian_path_velocity_control(
-            waypoints, [speed], EE_ang_speed=ang_speed, max_linear_accel=accel
-        )
-        self._publish_and_execute(plan, success)
-        time.sleep(0.5)
+        if plan is None:
+            self.get_logger().error(
+                "No se pudo planificar la trayectoria multi-sección "
+                "(revisa alcanzabilidad, colisiones o límites articulares)."
+            )
+            return False
 
-    def _publish_and_execute(self, plan, success: bool):
-        if plan:
-            display_trajectory = DisplayTrajectory()
-            display_trajectory.trajectory.append(plan)
-            self._display_traj_pub.publish(display_trajectory)
-            self.get_logger().info("Plan publicado en RViz2.")
-        else:
+        if not success:
+            self.get_logger().warn(
+                "El perfil de velocidad no se cumplió completamente; "
+                "se ejecuta el plan disponible."
+            )
+
+        executed = self._publish_and_execute(plan, success)
+        time.sleep(0.5)
+        return executed
+
+    def go_to_pose_speed(
+        self, pose: Pose, speed=10.0, ang_speed=[], accel=100.0
+    ) -> bool:
+        """
+        Planifica y ejecuta un movimiento cartesiano a una velocidad dada (mm/s).
+
+        Devuelve True si el plan se calculó y ejecutó con éxito, False en caso
+        contrario. No propaga excepciones: cualquier error de MoveIt2 (servicio
+        no disponible, plan nulo, goal rechazado, fallo del controlador...) se
+        captura, se registra y se devuelve como False, para que la demo pueda
+        seguir con el siguiente paso en vez de morir.
+        """
+        try:
+            current_pose = self._get_current_eef_pose()
+            waypoints = [[copy.deepcopy(current_pose), copy.deepcopy(pose)]]
+            plan, success = self.compute_cartesian_path_velocity_control(
+                waypoints, [speed], EE_ang_speed=ang_speed, max_linear_accel=accel
+            )
+        except Exception as exc:  # noqa: BLE001 - barrera ante fallos de MoveIt2/servicios
+            self.get_logger().error(
+                f"Excepción calculando la trayectoria a {speed} mm/s: {exc!r}"
+            )
+            return False
+
+        if plan is None:
+            self.get_logger().error(
+                f"No se pudo planificar el movimiento a {speed} mm/s "
+                "(revisa límites articulares, colisiones o alcanzabilidad)."
+            )
+            return False
+
+        if not success:
+            self.get_logger().warn(
+                f"El plan a {speed} mm/s presenta advertencias "
+                "(p. ej. velocidad objetivo no alcanzada por aceleración o "
+                "límites articulares). Se ejecuta de todas formas."
+            )
+
+        executed = self._publish_and_execute(plan, success)
+        time.sleep(0.5)
+        return executed
+
+    def _publish_and_execute(self, plan, success: bool) -> bool:
+        """
+        Publica el plan en RViz2 y lo ejecuta mediante la action
+        FollowJointTrajectory. Devuelve True solo si el controlador confirma
+        una ejecución correcta; en cualquier otro caso (servicio no
+        disponible, goal rechazado, timeout, error del controlador o
+        excepción) devuelve False y registra el motivo, sin propagar la
+        excepción al caller.
+        """
+        if plan is None:
             self.get_logger().error("No se pudo calcular o publicar el plan.")
-            return
+            return False
 
-        if success:
+        display_trajectory = DisplayTrajectory()
+        display_trajectory.trajectory.append(plan)
+        self._display_traj_pub.publish(display_trajectory)
+        self.get_logger().info("Plan publicado en RViz2.")
+
+        if not success:
+            self.get_logger().warn(
+                "El cálculo de velocidad no fue completamente exitoso "
+                "(ver advertencias previas); se intenta ejecutar igualmente."
+            )
+
+        try:
+            from action_msgs.msg import GoalStatus
             from control_msgs.action import FollowJointTrajectory
             from rclpy.action import ActionClient
 
@@ -203,27 +328,75 @@ class MoveGroupPythonIntefaceControl(Node):
                     FollowJointTrajectory,
                     "/lbr/joint_trajectory_controller/follow_joint_trajectory",
                 )
-                self._fjt_client.wait_for_server(timeout_sec=5.0)
+
+            if not self._fjt_client.wait_for_server(timeout_sec=5.0):
+                self.get_logger().error(
+                    "Action server follow_joint_trajectory no disponible "
+                    "(¿controller_manager arrancado? ¿namespace correcto?)."
+                )
+                return False
+
             goal = FollowJointTrajectory.Goal()
             plan.joint_trajectory.header.stamp = self.get_clock().now().to_msg()
             plan.joint_trajectory.header.frame_id = self.BASE_LINK
             goal.trajectory = plan.joint_trajectory
 
-            # logger para los puntos final despues de publicar y ejecutar la secuencia en RViz2
             self.get_logger().info(
                 f"Plan final | puntos={len(plan.joint_trajectory.points)} | "
                 f"duración={plan.joint_trajectory.points[-1].time_from_start.sec + plan.joint_trajectory.points[-1].time_from_start.nanosec * 1e-9:.2f}s"
             )
-            
+
             future = self._fjt_client.send_goal_async(goal)
             rclpy.spin_until_future_complete(self, future, timeout_sec=30.0)
             goal_handle = future.result()
-            if goal_handle and goal_handle.accepted:
-                result_future = goal_handle.get_result_async()
-                rclpy.spin_until_future_complete(self, result_future, timeout_sec=60.0)
-                self.get_logger().info("Trayectoria ejecutada.")
-            else:
-                self.get_logger().error("Goal rechazado por el controlador.")
+
+            if goal_handle is None:
+                self.get_logger().error(
+                    "Sin respuesta del action server al enviar el goal "
+                    "(timeout de 30s)."
+                )
+                return False
+
+            if not goal_handle.accepted:
+                self.get_logger().error(
+                    "Goal rechazado por el controlador "
+                    "(trayectoria fuera de límites, tiempos no monótonos, etc.)."
+                )
+                return False
+
+            result_future = goal_handle.get_result_async()
+            rclpy.spin_until_future_complete(self, result_future, timeout_sec=60.0)
+            wrapped_result = result_future.result()
+
+            if wrapped_result is None:
+                self.get_logger().error(
+                    "Sin resultado del controlador tras la ejecución "
+                    "(timeout de 60s)."
+                )
+                return False
+
+            if wrapped_result.status != GoalStatus.STATUS_SUCCEEDED:
+                self.get_logger().error(
+                    f"Ejecución no completada con éxito (status={wrapped_result.status})."
+                )
+                return False
+
+            error_code = wrapped_result.result.error_code
+            if error_code != FollowJointTrajectory.Result.SUCCESSFUL:
+                self.get_logger().error(
+                    f"El controlador devolvió un código de error ({error_code}): "
+                    f"{wrapped_result.result.error_string}"
+                )
+                return False
+
+            self.get_logger().info("Trayectoria ejecutada correctamente.")
+            return True
+
+        except Exception as exc:  # noqa: BLE001 - barrera ante fallos de ROS2/MoveIt2
+            self.get_logger().error(
+                f"Excepción durante la ejecución de la trayectoria: {exc!r}"
+            )
+            return False
 
     def _get_current_eef_pose(self) -> Pose:
         """Devuelve la pose actual del EEF via FK sobre el joint_state actual."""
@@ -1246,8 +1419,18 @@ class MoveGroupPythonIntefaceControl(Node):
 
 
 def main(args=None):
+    print("=== Demo de penetración con velocidad cartesiana controlada (MoveIt2) ===")
+    move_speed = ask_speed(default=50.0)
+    print(
+        f"-> Aproximación y retracción a {move_speed:.1f} mm/s cartesianos.\n"
+    )
+
     rclpy.init(args=args)
     control = MoveGroupPythonIntefaceControl()
+    control.get_logger().info(
+        f"Velocidad cartesiana de desplazamiento (aproximación/retracción): "
+        f"{move_speed:.1f} mm/s"
+    )
 
     try:
         offset = 0.1
@@ -1270,23 +1453,37 @@ def main(args=None):
         target.orientation.z = quat[2] / q_norm
         target.orientation.w = quat[3] / q_norm
 
-        # Mover a pose de aproximacion
+        # Mover a pose de aproximacion, ya con control de velocidad cartesiana
+        # (en vez de go_to_pose "libre", que deja a MoveIt elegir el timing)
         target.position.x = x0
         target.position.y = y0
         target.position.z = z0 + offset
-        control.go_to_pose(target)
+        if not control.go_to_pose_speed(target, move_speed, accel=100.0):
+            control.get_logger().error(
+                "No se pudo alcanzar la pose de aproximación inicial. "
+                "Abortando demo (revisa que move_group y los controladores "
+                "estén activos antes de reintentar)."
+            )
+            return
 
         control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
 
         penetrations = [0.001, 0.003, 0.005, 0.007]  # m
-        speeds = [70.0, 50.0, 30.0, 10.0]  # mm/s
+        # Velocidades del test de histéresis (Sección 4 del paper): esta es la
+        # variable propia del experimento, no la pide el usuario por consola.
+        hysteresis_speeds = [70.0, 50.0, 30.0, 10.0]  # mm/s
+
+        abort_demo = False
 
         # Test de histeresis
         for p in penetrations:
-            control.get_logger().info(f"Penetración: {p}")
+            if abort_demo:
+                break
 
-            for s in speeds:
-                control.get_logger().info(f"Velocidad: {s}")
+            control.get_logger().info(f"Penetración: {p} m")
+
+            for s in hysteresis_speeds:
+                control.get_logger().info(f"Velocidad de penetración (test): {s} mm/s")
 
                 # Reset sensor FT (descomentar cuando esté portado):
                 # reset(control, True)
@@ -1294,7 +1491,14 @@ def main(args=None):
                 target.position.x = x0
                 target.position.y = y0
                 target.position.z = z0 - p
-                control.go_to_pose_speed(target, s, accel=2000.0)
+                ok = control.go_to_pose_speed(target, s, accel=2000.0)
+                if not ok:
+                    control.get_logger().error(
+                        f"Movimiento de penetración a {s} mm/s falló "
+                        f"(p={p} m). Se omite esta combinación y se continúa "
+                        "con la siguiente velocidad del test."
+                    )
+                    continue
 
                 # Tiempo de penetracion
                 control.get_clock().sleep_for(rclpy.duration.Duration(seconds=100))
@@ -1302,7 +1506,16 @@ def main(args=None):
                 target.position.x = x0
                 target.position.y = y0
                 target.position.z = z0 + offset
-                control.go_to_pose_speed(target, 100.0, accel=100.0)
+                ok = control.go_to_pose_speed(target, move_speed, accel=100.0)
+                if not ok:
+                    control.get_logger().error(
+                        "No se pudo retraer el EEF tras la penetración "
+                        f"(p={p} m, s={s} mm/s). Se detiene la demo por "
+                        "seguridad: continuar podría intentar penetrar de "
+                        "nuevo desde una pose desconocida."
+                    )
+                    abort_demo = True
+                    break
 
                 # Tiempo de descanso
                 control.get_clock().sleep_for(rclpy.duration.Duration(seconds=400))
