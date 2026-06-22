@@ -13,11 +13,11 @@ from builtin_interfaces.msg import Duration
 from geometry_msgs.msg import Pose, PoseStamped, Quaternion
 from moveit_msgs.msg import DisplayTrajectory, RobotState, RobotTrajectory
 
-# pymoveit2: biblioteca que envuelve la API de MoveIt2 de forma estable
+# pymoveit2: stable wrapper around the MoveIt2 API
 from pymoveit2 import MoveIt2
 
 # from pymoveit2.robots import (
-#     iiwa7 as robot_config,  # cambia al módulo de tu robot si es otro
+#     iiwa7 as robot_config,  # change to your robot module if different
 # )
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
@@ -36,7 +36,7 @@ def reset(node: Node, req: bool) -> bool:
     # future = client.call_async(Reset.Request())
     # rclpy.spin_until_future_complete(node, future)
     # return future.result().res
-    raise NotImplementedError("Adaptar el tipo Reset del port ROS2 de ft17_publisher")
+    raise NotImplementedError("Adapt Reset type from ft17_publisher ROS2 port")
 
 
 def all_close(goal, actual, tolerance):
@@ -66,16 +66,16 @@ def all_close(goal, actual, tolerance):
 
 def ask_speed(default: float = 50.0, max_recommended: float = 300.0) -> float:
     """
-    Pide al usuario por consola la velocidad cartesiana (mm/s) para la demo.
+    Ask the user for the Cartesian EEF speed (mm/s) to use for the demo.
 
-    Valida que el valor introducido sea numérico y positivo. Si es muy alto,
-    avisa de que MoveIt2 puede rechazar el plan (límites articulares excedidos,
-    Jacobiano cerca de singularidad, etc. — ver Sección 3.2 del paper) y pide
-    confirmación antes de continuar.
+    Validates the input is numeric and positive.  If the value exceeds the
+    recommended maximum, warns that MoveIt2 may reject the plan (joint limits
+    exceeded, Jacobian near singularity) and requests
+    confirmation before continuing.
     """
     while True:
         raw = input(
-            f"Velocidad cartesiana del EEF en mm/s [Enter = {default}]: "
+            f"Cartesian EEF speed in mm/s [Enter = {default}]: "
         ).strip()
 
         if raw == "":
@@ -84,18 +84,18 @@ def ask_speed(default: float = 50.0, max_recommended: float = 300.0) -> float:
         try:
             speed = float(raw)
         except ValueError:
-            print("  -> Valor no numérico. Ejemplo válido: 50 o 70.5")
+            print("  -> Non-numeric value. Valid example: 50 or 70.5")
             continue
 
         if speed <= 0:
-            print("  -> La velocidad debe ser un número positivo.")
+            print("  -> Speed must be a positive number.")
             continue
 
         if speed > max_recommended:
             confirm = (
                 input(
-                    f"  -> {speed} mm/s es alta; MoveIt2 puede rechazar el plan por "
-                    "exceder los límites articulares del URDF. ¿Continuar? [s/N]: "
+                    f"  -> {speed} mm/s is high; MoveIt2 may reject the plan for "
+                    "exceed the URDF joint limits. Continue? [y/N]: "
                 )
                 .strip()
                 .lower()
@@ -139,14 +139,11 @@ class MoveGroupPythonIntefaceControl(Node):
     BASE_LINK = "lbr_link_0"
     EEF_LINK = "lbr_link_ee"
     GROUP_NAME = "arm"
-    # GROUP_NAME = "manipulator"
-    # BASE_FRAME = "lbr_link_0"  # ajustar al frame base de tu robot
-    # EEF_LINK = robot_config.end_effector_name()  # definir directamente como string
 
     def __init__(self):
         super().__init__("move_group_control", namespace="/lbr")
 
-        # llamada con pymoveit2
+        # call pymoveit2
         self._moveit2 = MoveIt2(
             node=self,
             joint_names=self.JOINT_NAMES,
@@ -159,38 +156,37 @@ class MoveGroupPythonIntefaceControl(Node):
 
         self._cartesian_client = self.create_client(
             GetCartesianPath,
-            "/lbr/compute_cartesian_path",  # ajustar namespace si cambia
+            "/lbr/compute_cartesian_path",  # adjust namespace if changed
         )
         if not self._cartesian_client.wait_for_service(timeout_sec=5.0):
             self.get_logger().warn(
-                "Servicio /compute_cartesian_path no disponible aún."
+                "Service /compute_cartesian_path not available yet."
             )
 
-        # Publisher de trayectoria para RViz2
+        # Trajectory publisher for RViz2
         self._display_traj_pub = self.create_publisher(
             DisplayTrajectory, "display_planned_path", 20
         )
 
-        # Nombre del link end-effector (para FK)
+        # End-effector link name (for FK)
         self.eef_link = self.EEF_LINK
 
-        # Objeto de planning scene (para leer URDF y hacer FK)
+        # Planning scene object (to read URDF and compute FK)
         # pymoveit2 expone el robot_model a traves de MoveIt2.robot_model
         self.box_name = ""
-        self.get_logger().info("MoveGroupPythonIntefaceControl listo.")
+        self.get_logger().info("MoveGroupPythonIntefaceControl ready.")
 
     def wait_for_joint_state(self, timeout_sec: float = 10.0) -> bool:
         """
-        Espera a que llegue al menos un mensaje de /joint_states.
+        Wait for at least one /joint_states message to arrive.
 
-        Justo después de crear el nodo, rclpy todavía no ha hecho ningún
-        spin, por lo que la suscripción interna de pymoveit2 a /joint_states
-        no ha ejecutado ningún callback y self._moveit2.joint_state sigue
-        siendo None. Si se intenta planificar antes de esto, go_to_pose()/
-        go_to_pose_speed() fallan inmediatamente con "No hay joint_state
-        disponible", independientemente de la velocidad pedida. Este método
-        bombea spin_once() hasta que llega el primer mensaje o se agota el
-        timeout.
+        Right after node creation, rclpy has not yet run any spin, so the
+        internal pymoveit2 subscription to /joint_states has not triggered
+        any callback and self._moveit2.joint_state is still None. If
+        planning is attempted before this, go_to_pose()/go_to_pose_speed()
+        fail immediately with "No joint_state available", regardless of the
+        requested speed. This method calls spin_once() until the first
+        message arrives or the timeout expires.
         """
         start = self.get_clock().now()
         while self._moveit2.joint_state is None:
@@ -201,7 +197,7 @@ class MoveGroupPythonIntefaceControl(Node):
         return True
 
     def go_to_joint_state(self):
-        """Mueve el robot a la configuracion articular fija del benchmark."""
+        """Moves the robot to the fixed joint configuration used in the benchmark."""
         joint_goal = [
             90.0 * math.pi / 180.0,
             0.0 * math.pi / 180.0,
@@ -217,9 +213,9 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def go_to_pose(self, pose: Pose) -> bool:
         """
-        Planifica y ejecuta un movimiento (sin control de velocidad) a una
-        pose Cartesiana usando pymoveit2. Captura cualquier excepción de
-        MoveIt2/ROS2 y la reporta sin propagarla, devolviendo False.
+        Plan and execute a move (without speed control) to a Cartesian pose
+        using pymoveit2. Catches any MoveIt2/ROS2 exception and reports it
+        without propagating, returning False.
         """
         try:
             self._moveit2.move_to_pose(
@@ -232,8 +228,8 @@ class MoveGroupPythonIntefaceControl(Node):
                 ],
             )
             self._moveit2.wait_until_executed()
-        except Exception as exc:  # noqa: BLE001 - barrera ante fallos de MoveIt2/pymoveit2
-            self.get_logger().error(f"Excepción en go_to_pose: {exc!r}")
+        except Exception as exc:
+            self.get_logger().error(f"Exception in go_to_pose: {exc!r}")
             return False
         return True
 
@@ -241,31 +237,31 @@ class MoveGroupPythonIntefaceControl(Node):
         self, waypoints, speeds, ang_speeds=[], accel=100.0
     ) -> bool:
         """
-        Calcula y ejecuta una trayectoria multi-sección con velocidad controlada.
-        Nunca lanza excepción: cualquier fallo se reporta por el logger y se
-        devuelve False para que el caller decida cómo continuar.
+        Compute and execute a multi-section trajectory with speed control.
+        Never raises an exception: any failure is reported via the logger and
+        False is returned so the caller can decide how to proceed.
         """
         try:
             plan, success = self.compute_cartesian_path_velocity_control(
                 waypoints, speeds, EE_ang_speed=ang_speeds, max_linear_accel=accel
             )
-        except Exception as exc:  # noqa: BLE001 - barrera ante fallos de MoveIt2/servicios
+        except Exception as exc:
             self.get_logger().error(
-                f"Excepción calculando la trayectoria multi-sección: {exc!r}"
+                f"Exception computing multi-section trajectory: {exc!r}"
             )
             return False
 
         if plan is None:
             self.get_logger().error(
-                "No se pudo planificar la trayectoria multi-sección "
-                "(revisa alcanzabilidad, colisiones o límites articulares)."
+                "Could not plan the multi-section trajectory "
+                "(check reachability, collisions, or joint limits)."
             )
             return False
 
         if not success:
             self.get_logger().warn(
-                "El perfil de velocidad no se cumplió completamente; "
-                "se ejecuta el plan disponible."
+                "The speed profile was not fully satisfied; "
+                "executing the available plan anyway."
             )
 
         executed = self._publish_and_execute(plan, success)
@@ -276,13 +272,13 @@ class MoveGroupPythonIntefaceControl(Node):
         self, pose: Pose, speed=10.0, ang_speed=[], accel=100.0
     ) -> bool:
         """
-        Planifica y ejecuta un movimiento cartesiano a una velocidad dada (mm/s).
+        Plan and execute a Cartesian move at a given speed (mm/s).
 
-        Devuelve True si el plan se calculó y ejecutó con éxito, False en caso
-        contrario. No propaga excepciones: cualquier error de MoveIt2 (servicio
-        no disponible, plan nulo, goal rechazado, fallo del controlador...) se
-        captura, se registra y se devuelve como False, para que la demo pueda
-        seguir con el siguiente paso en vez de morir.
+        Returns True if the plan was computed and executed successfully, False
+        otherwise. Does not propagate exceptions: any MoveIt2 error (service
+        unavailable, null plan, rejected goal, controller failure...) is caught,
+        logged and returned as False, so the demo can proceed with the next
+        step instead of crashing.
         """
         try:
             current_pose = self._get_current_eef_pose()
@@ -290,24 +286,24 @@ class MoveGroupPythonIntefaceControl(Node):
             plan, success = self.compute_cartesian_path_velocity_control(
                 waypoints, [speed], EE_ang_speed=ang_speed, max_linear_accel=accel
             )
-        except Exception as exc:  # noqa: BLE001 - barrera ante fallos de MoveIt2/servicios
+        except Exception as exc:
             self.get_logger().error(
-                f"Excepción calculando la trayectoria a {speed} mm/s: {exc!r}"
+                f"Exception computing trajectory at {speed} mm/s: {exc!r}"
             )
             return False
 
         if plan is None:
             self.get_logger().error(
-                f"No se pudo planificar el movimiento a {speed} mm/s "
-                "(revisa límites articulares, colisiones o alcanzabilidad)."
+                f"Could not plan move at {speed} mm/s "
+                "(check joint limits, collisions, or reachability)."
             )
             return False
 
         if not success:
             self.get_logger().warn(
                 f"El plan a {speed} mm/s presenta advertencias "
-                "(p. ej. velocidad objetivo no alcanzada por aceleración o "
-                "límites articulares). Se ejecuta de todas formas."
+                "(e.g. target speed not reached due to acceleration or "
+                "joint limits). Executing anyway."
             )
 
         executed = self._publish_and_execute(plan, success)
@@ -316,25 +312,24 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def _publish_and_execute(self, plan, success: bool) -> bool:
         """
-        Publica el plan en RViz2 y lo ejecuta mediante la action
-        FollowJointTrajectory. Devuelve True solo si el controlador confirma
-        una ejecución correcta; en cualquier otro caso (servicio no
-        disponible, goal rechazado, timeout, error del controlador o
-        excepción) devuelve False y registra el motivo, sin propagar la
-        excepción al caller.
+        Publish the plan to RViz2 and execute it via the FollowJointTrajectory
+        action. Returns True only if the controller confirms a successful
+        execution; in any other case (service unavailable, goal rejected,
+        timeout, controller error, or exception) returns False and logs the
+        reason, without propagating the exception to the caller.
         """
         if plan is None:
-            self.get_logger().error("No se pudo calcular o publicar el plan.")
+            self.get_logger().error("Could not compute or publish the plan.")
             return False
 
         display_trajectory = DisplayTrajectory()
         display_trajectory.trajectory.append(plan)
         self._display_traj_pub.publish(display_trajectory)
-        self.get_logger().info("Plan publicado en RViz2.")
+        self.get_logger().info("Plan published to RViz2.")
 
         if not success:
             self.get_logger().warn(
-                "El cálculo de velocidad no fue completamente exitoso "
+                "The speed calculation was not fully successful "
                 "(ver advertencias previas); se intenta ejecutar igualmente."
             )
 
@@ -352,8 +347,8 @@ class MoveGroupPythonIntefaceControl(Node):
 
             if not self._fjt_client.wait_for_server(timeout_sec=5.0):
                 self.get_logger().error(
-                    "Action server follow_joint_trajectory no disponible "
-                    "(¿controller_manager arrancado? ¿namespace correcto?)."
+                    "Action server follow_joint_trajectory not available "
+                    "(is controller_manager running? is namespace correct?)."
                 )
                 return False
 
@@ -366,18 +361,18 @@ class MoveGroupPythonIntefaceControl(Node):
             plan.joint_trajectory.header.frame_id = self.BASE_LINK
             goal.trajectory = plan.joint_trajectory
 
-            # Validar monotonicidad y valores antes de enviar al controlador
+            # Validate monotonicity and values before sending to controller
             valid, error_msg = self._validate_trajectory(plan)
             if not valid:
                 self.get_logger().error(
-                    f"Trayectoria inválida antes de enviar al controlador: "
+                    f"Invalid trajectory before sending to controller: "
                     f"{error_msg}. Se descarta este plan."
                 )
                 return False
 
             self.get_logger().info(
-                f"Plan final | puntos={len(plan.joint_trajectory.points)} | "
-                f"duración={plan.joint_trajectory.points[-1].time_from_start.sec + plan.joint_trajectory.points[-1].time_from_start.nanosec * 1e-9:.2f}s"
+                f"Plan final | waypoints={len(plan.joint_trajectory.points)} | "
+                f"duration={plan.joint_trajectory.points[-1].time_from_start.sec + plan.joint_trajectory.points[-1].time_from_start.nanosec * 1e-9:.2f}s"
             )
 
             future = self._fjt_client.send_goal_async(goal)
@@ -386,15 +381,15 @@ class MoveGroupPythonIntefaceControl(Node):
 
             if goal_handle is None:
                 self.get_logger().error(
-                    "Sin respuesta del action server al enviar el goal "
+                    "No response from action server when sending goal "
                     "(timeout de 30s)."
                 )
                 return False
 
             if not goal_handle.accepted:
                 self.get_logger().error(
-                    "Goal rechazado por el controlador "
-                    "(trayectoria fuera de límites, tiempos no monótonos, etc.)."
+                    "Goal rejected by the controller "
+                    "(trajectory out of limits, non-monotonic times, etc.)."
                 )
                 return False
 
@@ -404,53 +399,53 @@ class MoveGroupPythonIntefaceControl(Node):
 
             if wrapped_result is None:
                 self.get_logger().error(
-                    "Sin resultado del controlador tras la ejecución "
+                    "No result from controller after execution "
                     "(timeout de 60s)."
                 )
                 return False
 
             if wrapped_result.status != GoalStatus.STATUS_SUCCEEDED:
                 self.get_logger().error(
-                    f"Ejecución no completada con éxito (status={wrapped_result.status})."
+                    f"Execution did not complete successfully (status={wrapped_result.status})."
                 )
                 return False
 
             error_code = wrapped_result.result.error_code
             if error_code != FollowJointTrajectory.Result.SUCCESSFUL:
                 self.get_logger().error(
-                    f"El controlador devolvió un código de error ({error_code}): "
+                    f"Controller returned error code ({error_code}): "
                     f"{wrapped_result.result.error_string}"
                 )
                 return False
 
-            self.get_logger().info("Trayectoria ejecutada correctamente.")
+            self.get_logger().info("Trajectory executed successfully.")
             return True
 
-        except Exception as exc:  # noqa: BLE001 - barrera ante fallos de ROS2/MoveIt2
+        except Exception as exc:
             self.get_logger().error(
-                f"Excepción durante la ejecución de la trayectoria: {exc!r}"
+                f"Exception during trajectory execution: {exc!r}"
             )
             return False
 
     def _validate_trajectory(self, trajectory) -> tuple:
         """
-        Valida que una RobotTrajectory sea ejecutable por FollowJointTrajectory.
-        Devuelve (ok: bool, mensaje_de_error: str).
+        Validate that a RobotTrajectory can be executed by FollowJointTrajectory.
+        Returns (ok: bool, error_message: str).
 
-        Comprueba:
-            - Al menos 2 puntos
-            - El primer punto tiene time_from_start = 0
-            - time_from_start es estrictamente creciente
-            - No hay NaN ni inf en posiciones, velocidades ni aceleraciones
+        Checks:
+            - At least 2 waypoints
+            - First waypoint has time_from_start = 0
+            - time_from_start is strictly increasing
+            - No NaN or inf in positions, velocities, or accelerations
         """
         pts = trajectory.joint_trajectory.points
         if len(pts) < 2:
-            return False, "La trayectoria tiene menos de 2 puntos"
+            return False, "Trajectory has fewer than 2 waypoints"
 
         prev_time = pts[0].time_from_start
         if prev_time.sec != 0 or prev_time.nanosec != 0:
             return False, (
-                f"El primer punto no tiene time_from_start=0 "
+                f"First waypoint does not have time_from_start=0 "
                 f"(sec={prev_time.sec}, nanosec={prev_time.nanosec})"
             )
 
@@ -461,7 +456,7 @@ class MoveGroupPythonIntefaceControl(Node):
 
             if t_sec <= prev_sec:
                 return False, (
-                    f"Tiempos no monótonos en punto {i}: "
+                    f"Non-monotonic times at waypoint {i}: "
                     f"{prev_sec:.9f} -> {t_sec:.9f} "
                     f"(diff={t_sec - prev_sec:.9f}s)"
                 )
@@ -469,19 +464,19 @@ class MoveGroupPythonIntefaceControl(Node):
             for j, pos in enumerate(pt.positions):
                 if math.isnan(pos) or math.isinf(pos):
                     return False, (
-                        f"Posición {j} del punto {i} es {pos}"
+                        f"Position {j} of waypoint {i} is {pos}"
                     )
 
             for j, vel in enumerate(pt.velocities):
                 if math.isnan(vel) or math.isinf(vel):
                     return False, (
-                        f"Velocidad {j} del punto {i} es {vel}"
+                        f"Velocity {j} of waypoint {i} is {vel}"
                     )
 
             for j, acc in enumerate(pt.accelerations):
                 if math.isnan(acc) or math.isinf(acc):
                     return False, (
-                        f"Aceleración {j} del punto {i} es {acc}"
+                        f"Acceleration {j} of waypoint {i} is {acc}"
                     )
 
             prev_time = t
@@ -490,39 +485,12 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def _get_robot_description(self) -> str:
         """
-        Intenta obtener robot_description de múltiples fuentes.
+        Retrieve robot_description from the move_group node.
 
-        En ROS2 con lbr_fri_ros2_stack, el parámetro vive en el nodo
-        /lbr/move_group. Se prueba por orden:
-            1. Parámetro local del nodo (namespace /lbr)
-            2. Parámetros globales /lbr/robot_description, /robot_description
-            3. Servicio /lbr/move_group/get_parameters         ← el que funciona
-            4. Servicio /lbr/robot_state_publisher/get_parameters
-            5. (fallback) cadena vacía -> enforcement desactivado
+        In this ROS2 + lbr_fri_ros2_stack setup the parameter lives on
+        /lbr/move_group, not on robot_state_publisher nor locally.
+        Falls back to robot_state_publisher as a secondary source.
         """
-        # 1. Parámetro local (el nodo está en namespace /lbr)
-        try:
-            val = self.get_parameter("robot_description").value
-            if val:
-                self.get_logger().info("robot_description obtenido del nodo local.")
-                return val
-        except Exception:
-            pass
-
-        # 2. Parámetros globales con namespace explícito
-        for candidate in ("/lbr/robot_description", "/robot_description"):
-            try:
-                val = self.get_parameter(candidate).value
-                if val:
-                    self.get_logger().info(
-                        f"robot_description obtenido de {candidate}."
-                    )
-                    return val
-            except Exception:
-                continue
-
-        # 3. Servicio get_parameters — /lbr/move_group (donde realmente vive)
-        #    y /lbr/robot_state_publisher como respaldo.
         from rcl_interfaces.srv import GetParameters
 
         service_candidates = [
@@ -542,36 +510,36 @@ class MoveGroupPythonIntefaceControl(Node):
                     result = future.result()
                     if result and result.values:
                         self.get_logger().info(
-                            f"robot_description obtenido vía {srv_name}."
+                            f"robot_description retrieved via {srv_name}."
                         )
                         return result.values[0].string_value
             except Exception:
                 continue
 
         self.get_logger().warn(
-            "robot_description no encontrado en ninguna fuente. "
-            "Los límites de velocidad articular del URDF "
-            "no estarán disponibles para el enforcement."
+            "robot_description not found. "
+            "Joint velocity limits from URDF will not be available "
+            "for enforcement."
         )
         return ""
 
     def _get_current_eef_pose(self) -> Pose:
-        """Devuelve la pose actual del EEF via FK sobre el joint_state actual."""
+        """Return the current EEF pose via FK over the current joint_state."""
         js = self._moveit2.joint_state
         if js is None:
-            # Reintento corto: si el topic se ha quedado sin mensajes un
-            # instante (p. ej. tras un movimiento largo), damos una segunda
-            # oportunidad antes de declarar el fallo.
+            # Short retry: if the topic dropped messages for a moment
+            # (e.g. after a long movement), give a second chance before
+            # declaring failure.
             self.wait_for_joint_state(timeout_sec=2.0)
             js = self._moveit2.joint_state
         if js is None:
             self.get_logger().error(
-                "No hay joint_state disponible (sin mensajes en /joint_states)."
+                "No joint_state available (no /joint_states messages)."
             )
             return Pose()
         pose = self._fk_from_joint_positions(list(js.name), list(js.position))
         if pose is None:
-            self.get_logger().error("FK fallido para el estado actual.")
+            self.get_logger().error("FK failed for current state.")
             return Pose()
         return pose
 
@@ -579,11 +547,11 @@ class MoveGroupPythonIntefaceControl(Node):
         self, joint_names: list, joint_positions: list
     ) -> Pose | None:
         """
-        FK para un conjunto de posiciones articulares.
+        FK for a given set of joint positions.
 
-        pymoveit2 no expone FK directamente, pero podemos usar el servicio
-        /compute_fk de MoveIt2 a traves de rclpy.
-        Este metodo reemplaza la llamada al servicio iiwa_fk_server del original.
+        pymoveit2 does not expose FK directly, but we can use the MoveIt2
+        /compute_fk service via rclpy.
+        This method replaces the iiwa_fk_server call from the original.
         """
         from moveit_msgs.srv import GetPositionFK
         from std_msgs.msg import Header as StdHeader
@@ -591,7 +559,7 @@ class MoveGroupPythonIntefaceControl(Node):
         if not hasattr(self, "_fk_client"):
             self._fk_client = self.create_client(GetPositionFK, "/lbr/compute_fk")
             if not self._fk_client.wait_for_service(timeout_sec=5.0):
-                self.get_logger().error("Servicio /compute_fk no disponible.")
+                self.get_logger().error("Service /compute_fk not available.")
                 return None
 
         req = GetPositionFK.Request()
@@ -699,7 +667,7 @@ class MoveGroupPythonIntefaceControl(Node):
     ):
         waypoints = []
         if initial_pose == final_pose:
-            self.get_logger().warn("No se puede interpolar: misma pose.")
+            self.get_logger().warn("Cannot interpolate: same pose.")
             return False, waypoints
 
         step_pos_min = float(step_pos_min)
@@ -782,8 +750,8 @@ class MoveGroupPythonIntefaceControl(Node):
         v_chg_i = 0
         init_speed_change = False
         final_speed_change = False
-        speed_diff = 0.0  # inicializado al inicio de cada segmento del plan
-        trans_accel = 0.0  # ídem, usada en bloque final_speed_change
+        speed_diff = 0.0  # initialized at the start of each plan segment
+        trans_accel = 0.0  # used in final_speed_change block
 
         for plan_poses in traj_poses:
             if traj_mov[i] < thres:
@@ -967,7 +935,7 @@ class MoveGroupPythonIntefaceControl(Node):
                             )
                             continue
 
-                        tA = trans_accel / 2 # TODO: problemas de lintter por posible Unbound
+                        tA = trans_accel / 2
                         tB = corrected_traj[-1]["EE_speed"]
                         tC = -self.compute_lin_or_ang_distance(
                             pose, corrected_traj[-1]["pose"], linear
@@ -1055,14 +1023,14 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def _plan_cartesian_path_waypoints(
         self,
-        waypoints: list,  # lista de geometry_msgs/Pose
-        start_joint_positions: list,  # posiciones articulares de inicio
+        waypoints: list,  # list of geometry_msgs/Pose
+        start_joint_positions: list,  # starting joint positions
         joint_names: list,
         step: float = 0.002,
     ):
         """
-        Llama al servicio GetCartesianPath de MoveIt2 con todos los waypoints.
-        Devuelve (RobotTrajectory, fraction) o (None, 0.0) si falla.
+        Call the MoveIt2 GetCartesianPath service with all waypoints.
+        Returns (RobotTrajectory, fraction) or (None, 0.0) on failure.
         """
         from moveit_msgs.msg import RobotState
         from moveit_msgs.srv import GetCartesianPath
@@ -1074,16 +1042,15 @@ class MoveGroupPythonIntefaceControl(Node):
         req.link_name = self.EEF_LINK
         req.waypoints = waypoints[1:] if len(waypoints) > 1 else waypoints
         req.max_step = step
-        req.jump_threshold = 0.0  # 0.0 deshabilita el jump check para los frames
+        req.jump_threshold = 0.0  # 0.0 disables jump check for frames
         req.avoid_collisions = True
 
-        # TODO: loggers para apuntar los waipoint desde los start_joints
         self.get_logger().info(
             f"GetCartesianPath request | waypoints={len(req.waypoints)} | "
             f"max_step={req.max_step} | start_joints={list(req.start_state.joint_state.position)}"
         )
 
-        # Estado inicial para encadenar segmentos
+        # Start state for chaining segments
         rs = RobotState()
         rs.joint_state.name = list(joint_names)
         rs.joint_state.position = list(start_joint_positions)
@@ -1100,19 +1067,19 @@ class MoveGroupPythonIntefaceControl(Node):
         result = future.result()
 
         if result is None:
-            self.get_logger().error("GetCartesianPath: sin respuesta del servicio.")
+            self.get_logger().error("GetCartesianPath: no response from service.")
             return None, 0.0
 
         if result.fraction < 0.5:
             self.get_logger().error(
-                f"GetCartesianPath: fraction demasiado baja ({result.fraction:.2f}). "
-                "Revisa que los waypoints sean alcanzables."
+                f"GetCartesianPath: fraction too low ({result.fraction:.2f}). "
+                "Check that the waypoints are reachable."
             )
             return None, result.fraction
 
         self.get_logger().info(
             f"GetCartesianPath OK | fraction={result.fraction:.3f} | "
-            f"puntos={len(result.solution.joint_trajectory.points)}"
+            f"waypoints={len(result.solution.joint_trajectory.points)}"
         )
 
         return result.solution, result.fraction
@@ -1124,26 +1091,26 @@ class MoveGroupPythonIntefaceControl(Node):
         tolerance_mm: float = 1.0,
     ) -> bool:
         """
-        Verifica que los puntos FK del plan describen una trayectoria
-        aproximadamente rectilinea en el espacio cartesiano usando PyKDL
+        Verify that the FK waypoints of the plan describe an approximately
+        straight-line Cartesian trajectory using PyKDL.
         """
         pts = plan.joint_trajectory.points
         if len(pts) < 2:
-            self.get_logger().warn("Plan con menos de 2 puntos, no se puede verificar.")
+            self.get_logger().warn("Plan with fewer than 2 waypoints, cannot verify.")
             return False
 
-        # FK del primer y ultimo punto para definir la linea de referencia
+        # FK of the first and last waypoint to define the reference line
         pose_start = self._fk_from_joint_positions(joint_names, list(pts[0].positions))
         pose_end = self._fk_from_joint_positions(joint_names, list(pts[-1].positions))
 
         if pose_start is None or pose_end is None:
-            self.get_logger().error("FK falló al verificar el path cartesiano.")
+            self.get_logger().error("FK failed while verifying the Cartesian path.")
             return False
 
         f_start = self.pose_to_frame(pose_start)
         f_end = self.pose_to_frame(pose_end)
 
-        # Vector director de la linea recta ideal (en metros)
+        # Direction vector of the ideal straight line (in meters)
         p0 = f_start.p
         p1 = f_end.p
         line_vec = p1 - p0
@@ -1151,11 +1118,11 @@ class MoveGroupPythonIntefaceControl(Node):
 
         if line_len < 1e-6:
             self.get_logger().warn(
-                "Inicio y fin son el mismo punto — trayectoria nula."
+                "Start and end are the same point — null trajectory."
             )
             return True
 
-        line_dir = line_vec * (1.0 / line_len)  # vector unitario
+        line_dir = line_vec * (1.0 / line_len)
 
         max_deviation_mm = 0.0
         n_points = len(pts)
@@ -1166,25 +1133,25 @@ class MoveGroupPythonIntefaceControl(Node):
                 continue
             p_i = self.pose_to_frame(pose_i).p
 
-            # Distancia del punto a la línea recta p0→p1
+            # Distance from the point to the ideal line p0→p1
             v = p_i - p0
-            # Proyección escalar sobre la dirección
+            # Scalar projection onto the direction
             proj_scalar = PyKDL.dot(v, line_dir)
-            # Punto proyectado sobre la línea
+            # Projected point on the line
             proj_point = p0 + line_dir * proj_scalar
-            # Distancia perpendicular (desviación del path recto)
+            # Perpendicular distance (deviation from the straight path)
             deviation = (p_i - proj_point).Norm() * 1000.0  # a mm
 
             if deviation > max_deviation_mm:
                 max_deviation_mm = deviation
 
         ok = max_deviation_mm <= tolerance_mm
-        status = "✓ CORRECTO" if ok else "✗ DESVIACION EXCESIVA"
+        status = "✓ OK" if ok else "✗ EXCESSIVE DEVIATION"
         self.get_logger().info(
             f"[verify_cartesian_path] {status} | "
-            f"Puntos: {n_points} | "
+            f"Waypoints: {n_points} | "
             f"Longitud: {line_len * 1000:.2f} mm | "
-            f"Desviación máx: {max_deviation_mm:.3f} mm (límite: {tolerance_mm} mm)"
+            f"Max deviation: {max_deviation_mm:.3f} mm (limit: {tolerance_mm} mm)"
         )
         return ok
 
@@ -1200,7 +1167,7 @@ class MoveGroupPythonIntefaceControl(Node):
     ):
         success = True
 
-        # Velocidad angular por defecto si no se especifica
+        # Default angular speed if not specified
         if not EE_ang_speed:
             EE_ang_speed = [s * 0.7 for s in EE_speed]
 
@@ -1208,7 +1175,7 @@ class MoveGroupPythonIntefaceControl(Node):
         EE_ang_speed = [a * (math.pi / 180) for a in EE_ang_speed]
         max_ang_accel *= math.pi / 180
 
-        # Perfiles de velocidad
+        # Speed profiles
         EE_speed_aux = [0] + list(EE_speed) + [0]
         EE_ang_speed_aux = [0] + list(EE_ang_speed) + [0]
         v_change = []
@@ -1235,72 +1202,20 @@ class MoveGroupPythonIntefaceControl(Node):
                     "x_min_req": EE_ang_speed_aux[i] * t_ang + (a_ang * t_ang**2) / 2,
                 }
             )
-
-        # # ---- Planificación Cartesiana via pymoveit2 ----
-        # # pymoveit2 expone compute_cartesian_path() que devuelve RobotTrajectory | None
-        # all_plans = []
-        # joint_names = None
-
-        # for traj in waypoints_list:
-        #     # Construir lista de poses para pymoveit2
-        #     positions = [[p.position.x, p.position.y, p.position.z] for p in traj]
-        #     quats = [
-        #         [p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]
-        #         for p in traj
-        #     ]
-
-        #     self._moveit2.set_pose_goal(
-        #         position=positions[-1],
-        #         quat_xyzw=quats[-1],
-        #         frame_id=self.BASE_LINK,
-        #     )
-
-        #     future = self._moveit2._plan_cartesian_path(max_step=step)
-        #     if future is None:
-        #         self.get_logger().error("_plan_cartesian_path devolvió None.")
-        #         return None, False
-        #     rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
-        #     # plan = self._moveit2.get_trajectory(future)
-
-        #     result = future.result()
-        #     if result is None or result.fraction < 0.5:
-        #         self.get_logger().error(
-        #             f"Path cartesiano incompleto (fraction={result.fraction if result else 0:.2f})."
-        #         )
-        #         return None, False
-        #     plan = result.solution
-
-        #     if plan is None:
-        #         self.get_logger().error("No se obtuvo trayectoria cartesiana.")
-        #         return None, False
-
-        #     all_plans.append(plan)
-
-        #     if joint_names is None:
-        #         joint_names = list(plan.joint_trajectory.joint_names)
-
-        #     # Avanzar start state al último punto del plan
-        #     last_pt = plan.joint_trajectory.points[-1]
-        #     self._moveit2.set_joint_goal(
-        #         joint_positions=list(last_pt.positions),
-        #         joint_names=joint_names,
-        #     )
-        #
         all_plans = []
         joint_names = None
 
-        # Estado inicial: posicion articular actual del robot
+        # Initial state: current robot joint position
         current_js = self._moveit2.joint_state
         if current_js is None:
-            # Igual que en _get_current_eef_pose: puede que aún no haya
-            # llegado ningún mensaje de /joint_states. Damos una segunda
-            # oportunidad antes de abortar la planificación.
+            # Same as in _get_current_eef_pose: no /joint_states message may
+            # have arrived yet. Give a second chance before aborting planning.
             self.wait_for_joint_state(timeout_sec=2.0)
             current_js = self._moveit2.joint_state
         if current_js is None:
             self.get_logger().error(
-                "No hay joint_state disponible para iniciar la planificación "
-                "(sin mensajes en /joint_states)."
+                "No joint_state available to start planning "
+                "(no /joint_states messages)."
             )
             return None, False
 
@@ -1318,18 +1233,18 @@ class MoveGroupPythonIntefaceControl(Node):
         except KeyError as e:
             self.get_logger().error(
                 f"Joint {e} no encontrado en joint_state. "
-                f"Nombres disponibles: {list(current_js.name)}"
+                f"Available names: {list(current_js.name)}"
             )
             return None, False
 
         for traj in waypoints_list:
-            # traj es una lista de Pose — se pasan TODOS al servicio
+            # traj is a list of Pose — all of them are sent to the service
             plan, fraction = self._plan_cartesian_path_waypoints(
-                waypoints=list(traj),  # lista completa, no solo el último
+                waypoints=list(traj),  # full list, not just the last
                 start_joint_positions=start_positions,
                 joint_names=start_names,
                 step=step,
-                #step=0.0005, # para diagnositico, lo mejor es hacerlo como step por step, solo para analisis
+                #step=0.0005, # for diagnostics, step-by-step for analysis only
             )
 
             if plan is None:
@@ -1345,22 +1260,20 @@ class MoveGroupPythonIntefaceControl(Node):
 
             if not self.verify_cartesian_path(plan, joint_names, tolerance_mm=1.0):
                 self.get_logger().warn(
-                    "El segmento no sigue una línea recta — revisa los waypoints."
+                    "The segment does not follow a straight line — check the waypoints."
                 )
-                # para los logs no hace falta retornar nada pero que quede que esta
+                # no need to return anything, but keep it logged
 
             # Encadenar: el inicio del siguiente segmento es el final de este
             last_pt = plan.joint_trajectory.points[-1]
             start_positions = list(last_pt.positions)
-            start_names = list(joint_names)  # los nombres no cambian entre segmentos
+            start_names = list(joint_names)  # names don't change between segments
 
-        # joint_names queda definido tras el primer plan
-
-        # Resetear start state al estado actual real
+        # Reset start state to the actual current state
         self._moveit2.clear_goal_constraints()
 
-        # ---- FK para cada punto de todos los planes ----
-        # Usamos /compute_fk (servicio estándar de MoveIt2)
+        # ---- FK for each waypoint of all plans ----
+        # Uses /compute_fk (standard MoveIt2 service)
         traj_poses = []
         traj_mov_position = []
         traj_mov_angle = []
@@ -1375,10 +1288,9 @@ class MoveGroupPythonIntefaceControl(Node):
                     joint_names, list(joint_state_pt.positions)
                 )
                 if pose_m is None:
-                    self.get_logger().error("FK falló en un punto de la trayectoria.")
+                    self.get_logger().error("FK failed at a trajectory waypoint.")
                     return None, False
 
-                # Convertir a mm (igual que el original)
                 pose_mm = copy.deepcopy(pose_m)
                 pose_mm.position.x *= 1000
                 pose_mm.position.y *= 1000
@@ -1397,7 +1309,7 @@ class MoveGroupPythonIntefaceControl(Node):
             traj_mov_position.append(traj_mov_i_pos)
             traj_mov_angle.append(traj_mov_i_ang)
 
-        # Limites de velocidad articular desde URDF
+        # Joint velocity limits from URDF
         robot_desc = self._get_robot_description()
 
         vel_limit = {}
@@ -1410,7 +1322,7 @@ class MoveGroupPythonIntefaceControl(Node):
                         if attrib.tag == "limit":
                             vel_limit[j_name] = float(attrib.get("velocity")) * 0.9
 
-        # Recalcular tiempos con perfiles de velocidad
+        # Recalculate times with speed profiles
         corrected_traj, success_lin = self.adjust_plan_speed(
             traj_poses,
             EE_speed_aux,
@@ -1432,7 +1344,7 @@ class MoveGroupPythonIntefaceControl(Node):
         if not success_lin or not success_ang:
             success = False
 
-        # ---- Merge lineal + angular, tomar el dt mayor
+        # ---- Merge linear + angular, take the larger dt
         first_accel = True
         t_accel = 0.0
         t_dec = 0.0
@@ -1454,7 +1366,7 @@ class MoveGroupPythonIntefaceControl(Node):
                     if (i + 1) < (len(corrected_traj) - 1):
                         t_dec = full_corrected_traj[i + 1]["time"]
 
-        # Enforcement de limites articulares
+        # Enforcement of joint limits
         n_joints = len(all_plans[0].joint_trajectory.points[0].positions)
         zero_Jvel = [0.0] * n_joints
         full_corrected_traj_with_limits = copy.deepcopy(full_corrected_traj)
@@ -1464,13 +1376,13 @@ class MoveGroupPythonIntefaceControl(Node):
                 full_corrected_traj[i + 1]["time"] - full_corrected_traj[i]["time"]
             )
 
-            # Guarda: si time_diff es 0 o negativo, copiar estado del punto
-            # anterior y forzar un dt mínimo de 1ms para mantener la monotonicidad.
+            # Guard: if time_diff is 0 or negative, copy state from the
+            # previous waypoint and force a minimum dt of 1ms to preserve monotonicity.
             if time_diff <= 0:
                 if time_diff == 0:
                     self.get_logger().warn(
-                        f"Punto {i+1} y {i} tienen el mismo timestamp — "
-                        "se copia el estado del punto anterior."
+                        f"Waypoints {i+1} and {i} share the same timestamp — "
+                        "copying state from previous waypoint."
                     )
                 full_corrected_traj_with_limits[i + 1]["Jspeed"] = copy.deepcopy(
                     full_corrected_traj_with_limits[i]["Jspeed"]
@@ -1492,7 +1404,7 @@ class MoveGroupPythonIntefaceControl(Node):
                     - full_corrected_traj[i]["state"][j]
                 )
 
-                # Guarda: sin movimiento articular -> heredar velocidades
+                # Guard: no joint movement -> inherit velocities
                 if abs(angle_diff) < 1e-12:
                     full_corrected_traj_with_limits[i + 1]["Jspeed"][j] = (
                         full_corrected_traj_with_limits[i]["Jspeed"][j]
@@ -1509,7 +1421,7 @@ class MoveGroupPythonIntefaceControl(Node):
                     + new_Jaccel * time_diff
                 )
 
-                # Lookup del limite articular usando joint_names (no rs.joint_state.name)
+                # Lookup joint limit using joint_names (not rs.joint_state.name)
                 j_name = (
                     joint_names[j] if (joint_names and j < len(joint_names)) else ""
                 )
@@ -1555,7 +1467,7 @@ class MoveGroupPythonIntefaceControl(Node):
 
             if update_time and updated_new_times:
                 self.get_logger().warn(
-                    "Límite de velocidad articular excedido — reescalando."
+                    "Joint velocity limit exceeded — rescaling time."
                 )
                 new_time_diff = max(updated_new_times)
                 if new_time_diff <= 0:
@@ -1613,27 +1525,27 @@ class MoveGroupPythonIntefaceControl(Node):
 def main(args=None):
     move_speed = ask_speed(default=50.0)
     print(
-        f"-> Aproximación y retracción a {move_speed:.1f} mm/s cartesianos.\n"
+        f"-> Approach and retraction at {move_speed:.1f} Cartesian mm/s.\n"
     )
 
     rclpy.init(args=args)
     control = MoveGroupPythonIntefaceControl()
     control.get_logger().info(
-        f"Velocidad cartesiana de desplazamiento (aproximación/retracción): "
+        f"Cartesian speed (approach/retraction): "
         f"{move_speed:.1f} mm/s"
     )
 
-    control.get_logger().info("Esperando el primer mensaje de /joint_states…")
+    control.get_logger().info("Waiting for first /joint_states message…")
     if not control.wait_for_joint_state(timeout_sec=10.0):
         control.get_logger().error(
-            "No se recibió ningún mensaje en /joint_states tras 10s. "
-            "Comprueba que el driver/simulación del robot está publicando "
-            "ese topic y que el namespace ('/lbr') es correcto."
+            "No /joint_states message received after 10s. "
+            "Check that the robot driver/simulation is publishing "
+            "that topic and the namespace ('/lbr') is correct."
         )
         control.destroy_node()
         rclpy.shutdown()
         return
-    control.get_logger().info("joint_state recibido. Iniciando demo.")
+    control.get_logger().info("joint_state received. Starting demo.")
 
     try:
         offset = 0.1
@@ -1656,24 +1568,24 @@ def main(args=None):
         target.orientation.z = quat[2] / q_norm
         target.orientation.w = quat[3] / q_norm
 
-        # Mover a pose de aproximacion, ya con control de velocidad cartesiana
-        # (en vez de go_to_pose "libre", que deja a MoveIt elegir el timing)
+        # Move to approach pose, now with Cartesian speed control
+        # (instead of go_to_pose "free", which lets MoveIt choose the timing)
         target.position.x = x0
         target.position.y = y0
         target.position.z = z0 + offset
         if not control.go_to_pose_speed(target, move_speed, accel=100.0):
             control.get_logger().error(
-                "No se pudo alcanzar la pose de aproximación inicial. "
-                "Abortando demo (revisa que move_group y los controladores "
-                "estén activos antes de reintentar)."
+                "Could not reach initial approach pose. "
+                "Aborting demo (check that move_group and controllers "
+                "are running before retrying)."
             )
             return
 
         control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
 
         penetrations = [0.001, 0.003, 0.005, 0.007]  # m
-        # Velocidades del test de histéresis (Sección 4 del paper): esta es la
-        # variable propia del experimento, no la pide el usuario por consola.
+        # Hysteresis test speeds: this is the experiment's own
+        # variable, not asked from the user via console.
         hysteresis_speeds = [70.0, 50.0, 30.0, 10.0]  # mm/s
 
         abort_demo = False
@@ -1683,12 +1595,12 @@ def main(args=None):
             if abort_demo:
                 break
 
-            control.get_logger().info(f"Penetración: {p} m")
+            control.get_logger().info(f"Penetration: {p} m")
 
             for s in hysteresis_speeds:
-                control.get_logger().info(f"Velocidad de penetración (test): {s} mm/s")
+                control.get_logger().info(f"Penetration speed (test): {s} mm/s")
 
-                # Reset sensor FT (descomentar cuando esté portado):
+                # Reset FT sensor (uncomment when ported):
                 # reset(control, True)
 
                 target.position.x = x0
@@ -1697,13 +1609,13 @@ def main(args=None):
                 ok = control.go_to_pose_speed(target, s, accel=2000.0)
                 if not ok:
                     control.get_logger().error(
-                        f"Movimiento de penetración a {s} mm/s falló "
-                        f"(p={p} m). Se omite esta combinación y se continúa "
-                        "con la siguiente velocidad del test."
+                        f"Penetration move at {s} mm/s failed "
+                        f"(p={p} m). Skipping this combination and "
+                        "continuing with the next test speed."
                     )
                     continue
 
-                # Tiempo de penetracion
+                # Penetration time
                 # control.get_clock().sleep_for(rclpy.duration.Duration(seconds=100))
                 control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
 
@@ -1713,15 +1625,15 @@ def main(args=None):
                 ok = control.go_to_pose_speed(target, move_speed, accel=100.0)
                 if not ok:
                     control.get_logger().error(
-                        "No se pudo retraer el EEF tras la penetración "
-                        f"(p={p} m, s={s} mm/s). Se detiene la demo por "
-                        "seguridad: continuar podría intentar penetrar de "
-                        "nuevo desde una pose desconocida."
+                        "Failed to retract EEF after penetration "
+                        f"(p={p} m, s={s} mm/s). Stopping demo for "
+                        "safety: continuing could attempt another "
+                        "penetration from an unknown pose."
                     )
                     abort_demo = True
                     break
 
-                # Tiempo de descanso
+                # Rest time
                 # control.get_clock().sleep_for(rclpy.duration.Duration(seconds=400))
                 control.get_clock().sleep_for(rclpy.duration.Duration(seconds=2))
 
