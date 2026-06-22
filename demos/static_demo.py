@@ -266,14 +266,6 @@ class MoveGroupPythonIntefaceControl(Node):
     def wait_for_joint_state(self, timeout_sec: float = 10.0) -> bool:
         """
         Wait for at least one /joint_states message to arrive.
-
-        Right after node creation, rclpy has not yet run any spin, so the
-        internal pymoveit2 subscription to /joint_states has not triggered
-        any callback and self._moveit2.joint_state is still None. If
-        planning is attempted before this, go_to_pose()/go_to_pose_speed()
-        fail immediately with "No joint_state available", regardless of the
-        requested speed. This method calls spin_once() until the first
-        message arrives or the timeout expires.
         """
         start = self.get_clock().now()
         while self._moveit2.joint_state is None:
@@ -360,12 +352,6 @@ class MoveGroupPythonIntefaceControl(Node):
     ) -> bool:
         """
         Plan and execute a Cartesian move at a given speed (mm/s).
-
-        Returns True if the plan was computed and executed successfully, False
-        otherwise. Does not propagate exceptions: any MoveIt2 error (service
-        unavailable, null plan, rejected goal, controller failure...) is caught,
-        logged and returned as False, so the demo can proceed with the next
-        step instead of crashing.
         """
         try:
             current_pose = self._get_current_eef_pose()
@@ -400,10 +386,7 @@ class MoveGroupPythonIntefaceControl(Node):
     def _publish_and_execute(self, plan, success: bool) -> bool:
         """
         Publish the plan to RViz2 and execute it via the FollowJointTrajectory
-        action. Returns True only if the controller confirms a successful
-        execution; in any other case (service unavailable, goal rejected,
-        timeout, controller error, or exception) returns False and logs the
-        reason, without propagating the exception to the caller.
+        action.
         """
         if plan is None:
             self.get_logger().error("Could not compute or publish the plan.")
@@ -518,12 +501,6 @@ class MoveGroupPythonIntefaceControl(Node):
         """
         Validate that a RobotTrajectory can be executed by FollowJointTrajectory.
         Returns (ok: bool, error_message: str).
-
-        Checks:
-            - At least 2 waypoints
-            - First waypoint has time_from_start = 0
-            - time_from_start is strictly increasing
-            - No NaN or inf in positions, velocities, or accelerations
         """
         pts = trajectory.joint_trajectory.points
         if len(pts) < 2:
@@ -573,10 +550,6 @@ class MoveGroupPythonIntefaceControl(Node):
     def _get_robot_description(self) -> str:
         """
         Retrieve robot_description from the move_group node.
-
-        In this ROS2 + lbr_fri_ros2_stack setup the parameter lives on
-        /lbr/move_group, not on robot_state_publisher nor locally.
-        Falls back to robot_state_publisher as a secondary source.
         """
         from rcl_interfaces.srv import GetParameters
 
@@ -638,7 +611,6 @@ class MoveGroupPythonIntefaceControl(Node):
 
         pymoveit2 does not expose FK directly, but we can use the MoveIt2
         /compute_fk service via rclpy.
-        This method replaces the iiwa_fk_server call from the original.
         """
         from moveit_msgs.srv import GetPositionFK
         from std_msgs.msg import Header as StdHeader
