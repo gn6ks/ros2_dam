@@ -1552,7 +1552,8 @@ def main(args=None):
                     continue
 
                 # Tiempo de penetracion
-                control.get_clock().sleep_for(rclpy.duration.Duration(seconds=100))
+                # control.get_clock().sleep_for(rclpy.duration.Duration(seconds=100))
+                control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
 
                 target.position.x = x0
                 target.position.y = y0
@@ -1569,7 +1570,8 @@ def main(args=None):
                     break
 
                 # Tiempo de descanso
-                control.get_clock().sleep_for(rclpy.duration.Duration(seconds=400))
+                # control.get_clock().sleep_for(rclpy.duration.Duration(seconds=400))
+                control.get_clock().sleep_for(rclpy.duration.Duration(seconds=2))
 
     except KeyboardInterrupt:
         pass
