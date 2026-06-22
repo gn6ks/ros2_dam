@@ -366,6 +366,15 @@ class MoveGroupPythonIntefaceControl(Node):
             plan.joint_trajectory.header.frame_id = self.BASE_LINK
             goal.trajectory = plan.joint_trajectory
 
+            # Validar monotonicidad y valores antes de enviar al controlador
+            valid, error_msg = self._validate_trajectory(plan)
+            if not valid:
+                self.get_logger().error(
+                    f"Trayectoria inválida antes de enviar al controlador: "
+                    f"{error_msg}. Se descarta este plan."
+                )
+                return False
+
             self.get_logger().info(
                 f"Plan final | puntos={len(plan.joint_trajectory.points)} | "
                 f"duración={plan.joint_trajectory.points[-1].time_from_start.sec + plan.joint_trajectory.points[-1].time_from_start.nanosec * 1e-9:.2f}s"
@@ -422,6 +431,115 @@ class MoveGroupPythonIntefaceControl(Node):
                 f"Excepción durante la ejecución de la trayectoria: {exc!r}"
             )
             return False
+
+    def _validate_trajectory(self, trajectory) -> tuple:
+        """
+        Valida que una RobotTrajectory sea ejecutable por FollowJointTrajectory.
+        Devuelve (ok: bool, mensaje_de_error: str).
+
+        Comprueba:
+            - Al menos 2 puntos
+            - El primer punto tiene time_from_start = 0
+            - time_from_start es estrictamente creciente
+            - No hay NaN ni inf en posiciones, velocidades ni aceleraciones
+        """
+        pts = trajectory.joint_trajectory.points
+        if len(pts) < 2:
+            return False, "La trayectoria tiene menos de 2 puntos"
+
+        prev_time = pts[0].time_from_start
+        if prev_time.sec != 0 or prev_time.nanosec != 0:
+            return False, (
+                f"El primer punto no tiene time_from_start=0 "
+                f"(sec={prev_time.sec}, nanosec={prev_time.nanosec})"
+            )
+
+        for i, pt in enumerate(pts[1:], 1):
+            t = pt.time_from_start
+            t_sec = t.sec + t.nanosec * 1e-9
+            prev_sec = prev_time.sec + prev_time.nanosec * 1e-9
+
+            if t_sec <= prev_sec:
+                return False, (
+                    f"Tiempos no monótonos en punto {i}: "
+                    f"{prev_sec:.9f} -> {t_sec:.9f} "
+                    f"(diff={t_sec - prev_sec:.9f}s)"
+                )
+
+            for j, pos in enumerate(pt.positions):
+                if math.isnan(pos) or math.isinf(pos):
+                    return False, (
+                        f"Posición {j} del punto {i} es {pos}"
+                    )
+
+            for j, vel in enumerate(pt.velocities):
+                if math.isnan(vel) or math.isinf(vel):
+                    return False, (
+                        f"Velocidad {j} del punto {i} es {vel}"
+                    )
+
+            for j, acc in enumerate(pt.accelerations):
+                if math.isnan(acc) or math.isinf(acc):
+                    return False, (
+                        f"Aceleración {j} del punto {i} es {acc}"
+                    )
+
+            prev_time = t
+
+        return True, ""
+
+    def _get_robot_description(self) -> str:
+        """
+        Intenta obtener robot_description de múltiples fuentes.
+
+        En ROS2 este parámetro suele residir en el robot_state_publisher,
+        no en el nodo cliente. Se prueba:
+            1. Parámetro local del nodo
+            2. Parámetro global /robot_description
+            3. Servicio /robot_state_publisher/get_parameters
+            4. (fallback) cadena vacía -> enforcement de límites desactivado
+        """
+        # 1. Parámetro local
+        try:
+            val = self.get_parameter("robot_description").value
+            if val:
+                return val
+        except Exception:
+            pass
+
+        # 2. Parámetros globales
+        for candidate in ("/robot_description", "/robot_state_publisher/robot_description"):
+            try:
+                val = self.get_parameter(candidate).value
+                if val:
+                    return val
+            except Exception:
+                continue
+
+        # 3. Servicio get_parameters del robot_state_publisher
+        try:
+            from rcl_interfaces.srv import GetParameters
+
+            gp_client = self.create_client(
+                GetParameters, "/robot_state_publisher/get_parameters"
+            )
+            if gp_client.wait_for_service(timeout_sec=2.0):
+                req = GetParameters.Request()
+                req.names = ["robot_description"]
+                future = gp_client.call_async(req)
+                rclpy.spin_until_future_complete(self, future, timeout_sec=2.0)
+                result = future.result()
+                if result and result.values:
+                    return result.values[0].string_value
+        except Exception:
+            pass
+
+        self.get_logger().warn(
+            "robot_description no encontrado. "
+            "Los límites de velocidad articular del URDF "
+            "no estarán disponibles para el enforcement."
+        )
+        return ""
 
     def _get_current_eef_pose(self) -> Pose:
         """Devuelve la pose actual del EEF via FK sobre el joint_state actual."""
@@ -650,7 +768,8 @@ class MoveGroupPythonIntefaceControl(Node):
         v_chg_i = 0
         init_speed_change = False
         final_speed_change = False
-        speed_diff = 0  # FIX: inicializar para evitar UnboundLocalError
+        speed_diff = 0.0  # inicializado al inicio de cada segmento del plan
+        trans_accel = 0.0  # ídem, usada en bloque final_speed_change
 
         for plan_poses in traj_poses:
             if traj_mov[i] < thres:
@@ -1265,15 +1384,7 @@ class MoveGroupPythonIntefaceControl(Node):
             traj_mov_angle.append(traj_mov_i_ang)
 
         # Limites de velocidad articular desde URDF
-        try:
-            robot_desc = (
-                self.get_parameter("robot_description")
-                .get_parameter_value()
-                .string_value
-            )
-        except Exception:
-            robot_desc = ""
-            self.get_logger().warn("robot_description no encontrado en este nodo")
+        robot_desc = self._get_robot_description()
 
         vel_limit = {}
         if robot_desc:
@@ -1338,29 +1449,51 @@ class MoveGroupPythonIntefaceControl(Node):
             time_diff = (
                 full_corrected_traj[i + 1]["time"] - full_corrected_traj[i]["time"]
             )
+
+            # Guarda: si time_diff es 0 o negativo, copiar estado del punto
+            # anterior y forzar un dt mínimo de 1ms para mantener la monotonicidad.
+            if time_diff <= 0:
+                if time_diff == 0:
+                    self.get_logger().warn(
+                        f"Punto {i+1} y {i} tienen el mismo timestamp — "
+                        "se copia el estado del punto anterior."
+                    )
+                full_corrected_traj_with_limits[i + 1]["Jspeed"] = copy.deepcopy(
+                    full_corrected_traj_with_limits[i]["Jspeed"]
+                )
+                full_corrected_traj_with_limits[i + 1]["Jaccel"] = copy.deepcopy(
+                    full_corrected_traj_with_limits[i]["Jaccel"]
+                )
+                full_corrected_traj_with_limits[i + 1]["time"] = (
+                    full_corrected_traj_with_limits[i]["time"] + 0.001
+                )
+                continue
+
             updated_new_times = []
-            update_time = (
-                False  # FIX: resetear por punto, no arrastrar entre iteraciones
-            )
+            update_time = False
 
             for j in range(n_joints):
-                angle_diff = 0.0
-                new_Jaccel = 0.0
-                new_Jspeed = 0.0
+                angle_diff = (
+                    full_corrected_traj[i + 1]["state"][j]
+                    - full_corrected_traj[i]["state"][j]
+                )
 
-                if time_diff != 0:
-                    angle_diff = (
-                        full_corrected_traj[i + 1]["state"][j]
-                        - full_corrected_traj[i]["state"][j]
-                    )
-                    new_Jaccel = (
-                        angle_diff
-                        - full_corrected_traj_with_limits[i]["Jspeed"][j] * time_diff
-                    ) * (2 / time_diff**2)
-                    new_Jspeed = (
+                # Guarda: sin movimiento articular -> heredar velocidades
+                if abs(angle_diff) < 1e-12:
+                    full_corrected_traj_with_limits[i + 1]["Jspeed"][j] = (
                         full_corrected_traj_with_limits[i]["Jspeed"][j]
-                        + new_Jaccel * time_diff
                     )
+                    full_corrected_traj_with_limits[i + 1]["Jaccel"][j] = 0.0
+                    continue
+
+                new_Jaccel = (
+                    angle_diff
+                    - full_corrected_traj_with_limits[i]["Jspeed"][j] * time_diff
+                ) * (2 / time_diff**2)
+                new_Jspeed = (
+                    full_corrected_traj_with_limits[i]["Jspeed"][j]
+                    + new_Jaccel * time_diff
+                )
 
                 # Lookup del limite articular usando joint_names (no rs.joint_state.name)
                 j_name = (
@@ -1368,9 +1501,9 @@ class MoveGroupPythonIntefaceControl(Node):
                 )
                 limit = vel_limit.get(j_name, float("inf"))
 
-                if abs(new_Jspeed) > limit or time_diff == 0:
+                if abs(new_Jspeed) > limit:
                     new_Jspeed = math.copysign(limit, new_Jspeed)
-                    if angle_diff != 0:
+                    if abs(angle_diff) > 1e-12:
                         new_Jaccel = (
                             2
                             * full_corrected_traj_with_limits[i]["Jspeed"][j]
@@ -1390,12 +1523,14 @@ class MoveGroupPythonIntefaceControl(Node):
                         (angle_diff / new_Jspeed)
                         if abs(new_Jaccel) < 0.0001
                         else (
-                            new_Jspeed - full_corrected_traj_with_limits[i]["Jspeed"][j]
+                            new_Jspeed
+                            - full_corrected_traj_with_limits[i]["Jspeed"][j]
                         )
                         / new_Jaccel
                     )
-                    updated_new_times.append(new_time_step)
-                    update_time = True
+                    if new_time_step > 0:
+                        updated_new_times.append(new_time_step)
+                        update_time = True
 
                 full_corrected_traj_with_limits[i + 1]["Jaccel"][j] = new_Jaccel
                 full_corrected_traj_with_limits[i + 1]["Jspeed"][j] = new_Jspeed
@@ -1404,28 +1539,31 @@ class MoveGroupPythonIntefaceControl(Node):
                 full_corrected_traj_with_limits[i]["time"] + time_diff
             )
 
-            if update_time:
+            if update_time and updated_new_times:
                 self.get_logger().warn(
                     "Límite de velocidad articular excedido — reescalando."
                 )
-                time_diff = max(updated_new_times)
-                if time_diff == 0:  # problemas para computar los divisibles por frames
-                    continue  # nada que reescalar
+                new_time_diff = max(updated_new_times)
+                if new_time_diff <= 0:
+                    continue
                 full_corrected_traj_with_limits[i + 1]["time"] = (
-                    full_corrected_traj_with_limits[i]["time"] + time_diff
+                    full_corrected_traj_with_limits[i]["time"] + new_time_diff
                 )
                 for j in range(n_joints):
                     angle_diff = (
                         full_corrected_traj[i + 1]["state"][j]
                         - full_corrected_traj[i]["state"][j]
                     )
+                    if abs(angle_diff) < 1e-12:
+                        continue
                     new_Jaccel = (
                         angle_diff
-                        - full_corrected_traj_with_limits[i]["Jspeed"][j] * time_diff
-                    ) * (2 / time_diff**2)
+                        - full_corrected_traj_with_limits[i]["Jspeed"][j]
+                        * new_time_diff
+                    ) * (2 / new_time_diff**2)
                     new_Jspeed = (
                         full_corrected_traj_with_limits[i]["Jspeed"][j]
-                        + new_Jaccel * time_diff
+                        + new_Jaccel * new_time_diff
                     )
                     full_corrected_traj_with_limits[i + 1]["Jaccel"][j] = new_Jaccel
                     full_corrected_traj_with_limits[i + 1]["Jspeed"][j] = new_Jspeed
