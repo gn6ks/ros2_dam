@@ -492,50 +492,64 @@ class MoveGroupPythonIntefaceControl(Node):
         """
         Intenta obtener robot_description de múltiples fuentes.
 
-        En ROS2 este parámetro suele residir en el robot_state_publisher,
-        no en el nodo cliente. Se prueba:
-            1. Parámetro local del nodo
-            2. Parámetro global /robot_description
-            3. Servicio /robot_state_publisher/get_parameters
-            4. (fallback) cadena vacía -> enforcement de límites desactivado
+        En ROS2 con lbr_fri_ros2_stack, el parámetro vive en el nodo
+        /lbr/move_group. Se prueba por orden:
+            1. Parámetro local del nodo (namespace /lbr)
+            2. Parámetros globales /lbr/robot_description, /robot_description
+            3. Servicio /lbr/move_group/get_parameters         ← el que funciona
+            4. Servicio /lbr/robot_state_publisher/get_parameters
+            5. (fallback) cadena vacía -> enforcement desactivado
         """
-        # 1. Parámetro local
+        # 1. Parámetro local (el nodo está en namespace /lbr)
         try:
             val = self.get_parameter("robot_description").value
             if val:
+                self.get_logger().info("robot_description obtenido del nodo local.")
                 return val
         except Exception:
             pass
 
-        # 2. Parámetros globales
-        for candidate in ("/robot_description", "/robot_state_publisher/robot_description"):
+        # 2. Parámetros globales con namespace explícito
+        for candidate in ("/lbr/robot_description", "/robot_description"):
             try:
                 val = self.get_parameter(candidate).value
                 if val:
+                    self.get_logger().info(
+                        f"robot_description obtenido de {candidate}."
+                    )
                     return val
             except Exception:
                 continue
 
-        # 3. Servicio get_parameters del robot_state_publisher
-        try:
-            from rcl_interfaces.srv import GetParameters
+        # 3. Servicio get_parameters — /lbr/move_group (donde realmente vive)
+        #    y /lbr/robot_state_publisher como respaldo.
+        from rcl_interfaces.srv import GetParameters
 
-            gp_client = self.create_client(
-                GetParameters, "/robot_state_publisher/get_parameters"
-            )
-            if gp_client.wait_for_service(timeout_sec=2.0):
-                req = GetParameters.Request()
-                req.names = ["robot_description"]
-                future = gp_client.call_async(req)
-                rclpy.spin_until_future_complete(self, future, timeout_sec=2.0)
-                result = future.result()
-                if result and result.values:
-                    return result.values[0].string_value
-        except Exception:
-            pass
+        service_candidates = [
+            "/lbr/move_group/get_parameters",
+            "/lbr/robot_state_publisher/get_parameters",
+        ]
+        for srv_name in service_candidates:
+            try:
+                gp_client = self.create_client(GetParameters, srv_name)
+                if gp_client.wait_for_service(timeout_sec=2.0):
+                    req = GetParameters.Request()
+                    req.names = ["robot_description"]
+                    future = gp_client.call_async(req)
+                    rclpy.spin_until_future_complete(
+                        self, future, timeout_sec=2.0
+                    )
+                    result = future.result()
+                    if result and result.values:
+                        self.get_logger().info(
+                            f"robot_description obtenido vía {srv_name}."
+                        )
+                        return result.values[0].string_value
+            except Exception:
+                continue
 
         self.get_logger().warn(
-            "robot_description no encontrado. "
+            "robot_description no encontrado en ninguna fuente. "
             "Los límites de velocidad articular del URDF "
             "no estarán disponibles para el enforcement."
         )
