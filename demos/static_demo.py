@@ -171,6 +171,9 @@ class MoveGroupPythonIntefaceControl(Node):
         # End-effector link name (for FK)
         self.eef_link = self.EEF_LINK
 
+        # Cached joint velocity limits (parsed from URDF once)
+        self._vel_limit: dict | None = None
+
         # Planning scene object (to read URDF and compute FK)
         # pymoveit2 expone el robot_model a traves de MoveIt2.robot_model
         self.box_name = ""
@@ -676,6 +679,15 @@ class MoveGroupPythonIntefaceControl(Node):
         pose.orientation.w = ang[3]
         return pose
 
+    @staticmethod
+    def _pose_to_mm(pose: Pose) -> Pose:
+        """Return a copy of the pose with positions converted to mm."""
+        p = copy.deepcopy(pose)
+        p.position.x *= 1000
+        p.position.y *= 1000
+        p.position.z *= 1000
+        return p
+
     def pose_to_frame(self, pose: Pose) -> PyKDL.Frame:
         frame = PyKDL.Frame()
         frame.p = PyKDL.Vector(pose.position.x, pose.position.y, pose.position.z)
@@ -1110,7 +1122,7 @@ class MoveGroupPythonIntefaceControl(Node):
         waypoints: list,  # list of geometry_msgs/Pose
         start_joint_positions: list,  # starting joint positions
         joint_names: list,
-        step: float = 0.002,
+        step: float = 0.0005,
     ):
         """
         Call the MoveIt2 GetCartesianPath service with all waypoints.
@@ -1165,6 +1177,27 @@ class MoveGroupPythonIntefaceControl(Node):
             f"GetCartesianPath OK | fraction={result.fraction:.3f} | "
             f"waypoints={len(result.solution.joint_trajectory.points)}"
         )
+
+        # Diagnostic: compare requested max_step vs actual step size
+        n_pts = len(result.solution.joint_trajectory.points)
+        if n_pts >= 2:
+            pose_first = self._fk_from_joint_positions(
+                joint_names, list(result.solution.joint_trajectory.points[0].positions)
+            )
+            pose_last = self._fk_from_joint_positions(
+                joint_names, list(result.solution.joint_trajectory.points[-1].positions)
+            )
+            if pose_first and pose_last:
+                cart_dist_mm = self.compute_distance(
+                    self._pose_to_mm(pose_first), self._pose_to_mm(pose_last)
+                )
+                actual_step_mm = cart_dist_mm / (n_pts - 1) if n_pts > 1 else 0
+                ratio = actual_step_mm / step if step > 0 else float("inf")
+                self.get_logger().info(
+                    f"[diag] max_step requested={step*1000:.1f}mm | "
+                    f"actual avg step={actual_step_mm:.1f}mm | "
+                    f"ratio={ratio:.1f}x | cart_dist={cart_dist_mm:.1f}mm"
+                )
 
         return result.solution, result.fraction
 
@@ -1247,7 +1280,7 @@ class MoveGroupPythonIntefaceControl(Node):
         max_linear_accel: float = 200.0,
         max_ang_accel: float = 140.0,
         extra_info: bool = False,
-        step: float = 0.002,
+        step: float = 0.0005,
     ):
         success = True
 
@@ -1393,18 +1426,25 @@ class MoveGroupPythonIntefaceControl(Node):
             traj_mov_position.append(traj_mov_i_pos)
             traj_mov_angle.append(traj_mov_i_ang)
 
-        # Joint velocity limits from URDF
-        robot_desc = self._get_robot_description()
-
-        vel_limit = {}
-        if robot_desc:
-            root = ET.fromstring(robot_desc)
-            for child in root:
-                if child.tag == "joint" and child.get("type") == "revolute":
-                    j_name = child.get("name")
-                    for attrib in child:
-                        if attrib.tag == "limit":
-                            vel_limit[j_name] = float(attrib.get("velocity")) * 0.9
+        # Joint velocity limits from URDF (cached after first retrieval)
+        if self._vel_limit is None:
+            robot_desc = self._get_robot_description()
+            vel_limit = {}
+            if robot_desc:
+                root = ET.fromstring(robot_desc)
+                for child in root:
+                    if child.tag == "joint" and child.get("type") == "revolute":
+                        j_name = child.get("name")
+                        for attrib in child:
+                            if attrib.tag == "limit":
+                                vel_limit[j_name] = float(attrib.get("velocity")) * 0.9
+                self._vel_limit = vel_limit
+                self.get_logger().info(
+                    f"Joint velocity limits cached: {list(vel_limit.keys())}"
+                )
+            else:
+                self._vel_limit = {}  # empty dict = enforcement disabled
+        vel_limit = self._vel_limit
 
         # Recalculate times with speed profiles
         corrected_traj, success_lin = self.adjust_plan_speed(
