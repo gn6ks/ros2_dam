@@ -3,14 +3,16 @@
 import copy
 import math
 import sys
+import threading
 import time
 import xml.etree.ElementTree as ET
+from collections import deque
 
 import PyKDL
 import rclpy
 import rclpy.duration
 from builtin_interfaces.msg import Duration
-from geometry_msgs.msg import Pose, PoseStamped, Quaternion
+from geometry_msgs.msg import Pose, PoseStamped, Quaternion, WrenchStamped
 from moveit_msgs.msg import DisplayTrajectory, RobotState, RobotTrajectory
 
 # pymoveit2: stable wrapper around the MoveIt2 API
@@ -26,17 +28,15 @@ from tf_transformations import quaternion_from_euler
 from trajectory_msgs.msg import JointTrajectoryPoint
 
 
-def reset(node: Node, req: bool) -> bool:
-    node.get_logger().info("Calibrando sensor FT…")
-    # from ft17_publisher.srv import Reset
-    # client = node.create_client(Reset, 'FT_reset')
-    # if not client.wait_for_service(timeout_sec=5.0):
-    #     node.get_logger().error("FT_reset service not available")
-    #     return False
-    # future = client.call_async(Reset.Request())
-    # rclpy.spin_until_future_complete(node, future)
-    # return future.result().res
-    raise NotImplementedError("Adapt Reset type from ft17_publisher ROS2 port")
+# FT sensor: lista de topics candidatos a probar, en orden. Ajusta según
+# lo que confirmes con `ros2 topic list` en tu /lbr namespace (puede que
+# sea "/lbr/ft_sensor/wrench" en vez de "/ft_sensor/wrench" sin namespace).
+FT_TOPIC_CANDIDATES = [
+    "/ft_sensor/wrench",
+    "/lbr/ft_sensor/wrench",
+]
+
+WINDOW_SIZE = 5
 
 
 def all_close(goal, actual, tolerance):
@@ -174,7 +174,91 @@ class MoveGroupPythonIntefaceControl(Node):
         # Planning scene object (to read URDF and compute FK)
         # pymoveit2 expone el robot_model a traves de MoveIt2.robot_model
         self.box_name = ""
+
+        self._wrench_lock = threading.Lock()
+        self._active_ft_topic: str | None = None
+        self._ft_sub = None
+        self._fx_window: deque = deque(maxlen=WINDOW_SIZE)
+        self._fy_window: deque = deque(maxlen=WINDOW_SIZE)
+        self._fz_window: deque = deque(maxlen=WINDOW_SIZE)
+        self._discover_ft_topic()
+        if self._active_ft_topic is None:
+            self.get_logger().warn(
+                "no FT topic in activity "
+            )
+
         self.get_logger().info("MoveGroupPythonIntefaceControl ready.")
+
+    def _discover_ft_topic(self, timeout_per_topic: float = 2.0):
+        self.get_logger().info("searching FT active topic")
+
+        for topic in FT_TOPIC_CANDIDATES:
+            self.get_logger().info(f"  trying: {topic}")
+            found = threading.Event()
+
+            def _cb(msg: WrenchStamped, t=topic, ev=found):
+                with self._wrench_lock:
+                    self._active_ft_topic = t
+                ev.set()
+
+            sub = self.create_subscription(WrenchStamped, topic, _cb, 10)
+
+            deadline = time.time() + timeout_per_topic
+            while time.time() < deadline and not found.is_set():
+                rclpy.spin_once(self, timeout_sec=0.1)
+
+            if found.is_set():
+                self.get_logger().info(f"  -> topic FT active: {topic}")
+                self.destroy_subscription(sub)
+                self._ft_sub = self.create_subscription(
+                    WrenchStamped, topic, self._wrench_cb, 10
+                )
+                return
+            self.destroy_subscription(sub)
+
+        self.get_logger().warn("no FT with data published")
+
+    def _wrench_cb(self, msg: WrenchStamped):
+        with self._wrench_lock:
+            f = msg.wrench.force
+            self._fx_window.append(f.x)
+            self._fy_window.append(f.y)
+            self._fz_window.append(f.z)
+
+    def get_force(self) -> tuple[float, float, float]:
+        with self._wrench_lock:
+            if not self._fx_window:
+                return 0.0, 0.0, 0.0
+            fx = sum(self._fx_window) / len(self._fx_window)
+            fy = sum(self._fy_window) / len(self._fy_window)
+            fz = sum(self._fz_window) / len(self._fz_window)
+        return fx, fy, fz
+
+    def reset_force(self, settle_time: float = 0.3) -> bool:
+        if self._active_ft_topic is None:
+            self.get_logger().warn(
+                "reset_force: no hay topic FT activo, no se puede resetear."
+            )
+            return False
+
+        with self._wrench_lock:
+            self._fx_window.clear()
+            self._fy_window.clear()
+            self._fz_window.clear()
+
+        deadline = time.time() + max(settle_time, 0.05)
+        while time.time() < deadline:
+            rclpy.spin_once(self, timeout_sec=0.05)
+
+        with self._wrench_lock:
+            filled = len(self._fx_window) >= self._fx_window.maxlen
+
+        if not filled:
+            self.get_logger().warn(
+                "reset_force: window not entitled "
+                f"{settle_time:.2f}s — no Mhz correct"
+            )
+        return filled
 
     def wait_for_joint_state(self, timeout_sec: float = 10.0) -> bool:
         """
@@ -1645,9 +1729,7 @@ def main(args=None):
                     control.get_logger().info(
                         f"Sponge '{sponge['name']}' | Penetration speed (test): {s} mm/s"
                     )
-
-                    # Reset FT sensor (uncomment when ported):
-                    # reset(control, True)
+                    control.reset_force(settle_time=0.5)
 
                     target.position.x = x0
                     target.position.y = y0
