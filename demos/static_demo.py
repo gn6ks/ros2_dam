@@ -1550,92 +1550,143 @@ def main(args=None):
     try:
         offset = 0.1
 
-        # Esponja verde
-        R = -math.pi
-        P = -4.15 * math.pi / 180.0
-        Y = math.pi / 2.0
-        z0 = 0.3651
+        # All known sponges — each has its own Z offset and slight
+        # orientation adjustments (roll/pitch) for the experiment setup.
+        SPONGES = [
+            {"name": "green",  "R": -math.pi,              "P": -4.15,  "z0": 0.3651},
+            {"name": "yellow", "R": -math.pi - 0.2,         "P": -4.10,  "z0": 0.3644},
+            {"name": "orange", "R": -math.pi + 0.2,         "P": -4.25,  "z0": 0.3642},
+            {"name": "blue",   "R": -math.pi + 0.2,         "P": -3.95,  "z0": 0.3645},
+            {"name": "red",    "R": -math.pi,              "P": -4.30,  "z0": 0.3648},
+        ]
+        # Convert P from degrees to radians
+        for s in SPONGES:
+            s["P"] *= math.pi / 180.0
+            # Y is always pi/2 for all sponges
+            s["Y"] = math.pi / 2.0
+
+        print("\nAvailable sponges:")
+        for i, s in enumerate(SPONGES):
+            print(f"  [{i + 1}] {s['name']}  (z0={s['z0']:.4f} m, P={s['P'] * 180.0 / math.pi:.2f}°)")
+        print(f"  [a] all")
+
+        choice = input("Select sponge [Enter = green]: ").strip().lower()
+        if choice == "a":
+            selected_sponges = SPONGES
+        elif choice == "":
+            selected_sponges = [SPONGES[0]]  # default: green
+        else:
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(SPONGES):
+                    selected_sponges = [SPONGES[idx]]
+                else:
+                    print(f"  -> Invalid index, using green.")
+                    selected_sponges = [SPONGES[0]]
+            except ValueError:
+                print(f"  -> Invalid choice, using green.")
+                selected_sponges = [SPONGES[0]]
 
         x0 = 0.0
         y0 = 0.543
 
-        quat = quaternion_from_euler(R, P, Y)
-        q_norm = math.sqrt(sum(q**2 for q in quat))
+        for sponge in selected_sponges:
+            R = sponge["R"]
+            P = sponge["P"]
+            Y = sponge["Y"]
+            z0 = sponge["z0"]
 
-        target = Pose()
-        target.orientation.x = quat[0] / q_norm
-        target.orientation.y = quat[1] / q_norm
-        target.orientation.z = quat[2] / q_norm
-        target.orientation.w = quat[3] / q_norm
-
-        # Move to approach pose, now with Cartesian speed control
-        # (instead of go_to_pose "free", which lets MoveIt choose the timing)
-        target.position.x = x0
-        target.position.y = y0
-        target.position.z = z0 + offset
-        if not control.go_to_pose_speed(target, move_speed, accel=100.0):
-            control.get_logger().error(
-                "Could not reach initial approach pose. "
-                "Aborting demo (check that move_group and controllers "
-                "are running before retrying)."
+            control.get_logger().info(
+                f"Selected sponge: {sponge['name']} "
+                f"(z0={z0:.4f} m, R={R:.4f} rad, P={P * 180.0 / math.pi:.2f}°)"
             )
-            return
 
-        control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
+            quat = quaternion_from_euler(R, P, Y)
+            q_norm = math.sqrt(sum(q**2 for q in quat))
 
-        penetrations = [0.001, 0.003, 0.005, 0.007]  # m
-        # Hysteresis test speeds: this is the experiment's own
-        # variable, not asked from the user via console.
-        hysteresis_speeds = [70.0, 50.0, 30.0, 10.0]  # mm/s
+            target = Pose()
+            target.orientation.x = quat[0] / q_norm
+            target.orientation.y = quat[1] / q_norm
+            target.orientation.z = quat[2] / q_norm
+            target.orientation.w = quat[3] / q_norm
 
-        abort_demo = False
+            # Move to approach pose, now with Cartesian speed control
+            # (instead of go_to_pose "free", which lets MoveIt choose the timing)
+            target.position.x = x0
+            target.position.y = y0
+            target.position.z = z0 + offset
+            if not control.go_to_pose_speed(target, move_speed, accel=100.0):
+                control.get_logger().error(
+                    "Could not reach initial approach pose "
+                    f"for sponge '{sponge['name']}'. "
+                    "Skipping to next sponge."
+                )
+                continue
 
-        # Test de histeresis
-        for p in penetrations:
-            if abort_demo:
-                break
+            control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
 
-            control.get_logger().info(f"Penetration: {p} m")
+            penetrations = [0.001, 0.003, 0.005, 0.007]  # m
+            # Hysteresis test speeds: this is the experiment's own
+            # variable, not asked from the user via console.
+            hysteresis_speeds = [70.0, 50.0, 30.0, 10.0]  # mm/s
 
-            for s in hysteresis_speeds:
-                control.get_logger().info(f"Penetration speed (test): {s} mm/s")
+            abort_demo = False
 
-                # Reset FT sensor (uncomment when ported):
-                # reset(control, True)
-
-                target.position.x = x0
-                target.position.y = y0
-                target.position.z = z0 - p
-                ok = control.go_to_pose_speed(target, s, accel=2000.0)
-                if not ok:
-                    control.get_logger().error(
-                        f"Penetration move at {s} mm/s failed "
-                        f"(p={p} m). Skipping this combination and "
-                        "continuing with the next test speed."
-                    )
-                    continue
-
-                # Penetration time
-                # control.get_clock().sleep_for(rclpy.duration.Duration(seconds=100))
-                control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
-
-                target.position.x = x0
-                target.position.y = y0
-                target.position.z = z0 + offset
-                ok = control.go_to_pose_speed(target, move_speed, accel=100.0)
-                if not ok:
-                    control.get_logger().error(
-                        "Failed to retract EEF after penetration "
-                        f"(p={p} m, s={s} mm/s). Stopping demo for "
-                        "safety: continuing could attempt another "
-                        "penetration from an unknown pose."
-                    )
-                    abort_demo = True
+            # Hysteresis test
+            for p in penetrations:
+                if abort_demo:
                     break
 
-                # Rest time
-                # control.get_clock().sleep_for(rclpy.duration.Duration(seconds=400))
-                control.get_clock().sleep_for(rclpy.duration.Duration(seconds=2))
+                control.get_logger().info(
+                    f"Sponge '{sponge['name']}' | Penetration: {p} m"
+                )
+
+                for s in hysteresis_speeds:
+                    control.get_logger().info(
+                        f"Sponge '{sponge['name']}' | Penetration speed (test): {s} mm/s"
+                    )
+
+                    # Reset FT sensor (uncomment when ported):
+                    # reset(control, True)
+
+                    target.position.x = x0
+                    target.position.y = y0
+                    target.position.z = z0 - p
+                    ok = control.go_to_pose_speed(target, s, accel=2000.0)
+                    if not ok:
+                        control.get_logger().error(
+                            f"Penetration move at {s} mm/s failed "
+                            f"(sponge '{sponge['name']}', p={p} m). "
+                            "Skipping this combination and "
+                            "continuing with the next test speed."
+                        )
+                        continue
+
+                    # Penetration time
+                    # control.get_clock().sleep_for(rclpy.duration.Duration(seconds=100))
+                    control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
+
+                    target.position.x = x0
+                    target.position.y = y0
+                    target.position.z = z0 + offset
+                    ok = control.go_to_pose_speed(target, move_speed, accel=100.0)
+                    if not ok:
+                        control.get_logger().error(
+                            "Failed to retract EEF after penetration "
+                            f"(sponge '{sponge['name']}', p={p} m, "
+                            f"s={s} mm/s). Stopping demo for "
+                            "safety: continuing could attempt another "
+                            "penetration from an unknown pose."
+                        )
+                        abort_demo = True
+                        break
+
+                    # Rest time
+                    # control.get_clock().sleep_for(rclpy.duration.Duration(seconds=400))
+                    control.get_clock().sleep_for(rclpy.duration.Duration(seconds=2))
+
+            if abort_demo:
+                break
 
     except KeyboardInterrupt:
         pass
