@@ -893,6 +893,7 @@ class MoveGroupPythonIntefaceControl(Node):
                         target.orientation.w,
                     ],
                     cartesian=True,
+                    max_step=step,
                 )
             except Exception as exc:
                 self.get_logger().error(f"Cartesian planning failed: {exc!r}")
