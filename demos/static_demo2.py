@@ -13,6 +13,7 @@ import rclpy.duration
 from builtin_interfaces.msg import Duration
 from geometry_msgs.msg import Pose, PoseStamped, Quaternion, WrenchStamped
 from moveit_msgs.msg import DisplayTrajectory, RobotTrajectory
+from sensor_msgs.msg import JointState
 
 # pymoveit2: stable wrapper around the MoveIt2 API
 from pymoveit2 import MoveIt2
@@ -230,13 +231,12 @@ class MoveGroupPythonIntefaceControl(Node):
         if js is None:
             self.get_logger().error("No joint_state available.")
             return Pose()
-        pose = self._moveit2.compute_fk(joint_positions=list(js.position))
-        if pose is None:
+        # compute_fk espera JointState; si se omite usa el estado actual
+        fk_result = self._moveit2.compute_fk(joint_state=js)
+        if fk_result is None:
             self.get_logger().error("FK failed for current state.")
             return Pose()
-        if hasattr(pose, "pose"):
-            pose = pose.pose
-        return pose
+        return fk_result.pose
 
     def go_to_joint_state(self):
         """Mueve a la configuración articular fija del benchmark."""
@@ -907,18 +907,16 @@ class MoveGroupPythonIntefaceControl(Node):
             traj_mov_i_ang = 0.0
 
             for joint_state_pt in plan.joint_trajectory.points:
+                js_msg = JointState()
+                js_msg.name = list(joint_names) if joint_names else self.JOINT_NAMES
+                js_msg.position = list(joint_state_pt.positions)
                 fk_result = self._moveit2.compute_fk(
-                    joint_positions=list(joint_state_pt.positions)
+                    joint_state=js_msg
                 )
                 if fk_result is None:
                     self.get_logger().error("FK failed at a trajectory waypoint.")
                     return None, False
-
-                # compute_fk devuelve PoseStamped; extraer la pose
-                if hasattr(fk_result, "pose"):
-                    pose_m = fk_result.pose
-                else:
-                    pose_m = fk_result
+                pose_m = fk_result.pose
 
                 pose_mm = copy.deepcopy(pose_m)
                 pose_mm.position.x *= 1000
