@@ -293,7 +293,9 @@ class MoveGroupPythonIntefaceControl(Node):
 
         # pymoveit2.execute() gestiona FollowJointTrajectory internamente
         try:
-            self._moveit2.execute(trajectory)
+            # execute() espera JointTrajectory, no RobotTrajectory
+            jt = trajectory.joint_trajectory if hasattr(trajectory, 'joint_trajectory') else trajectory
+            self._moveit2.execute(jt)
             self._moveit2.wait_until_executed()
             self.get_logger().info("Trajectory executed successfully.")
             return True
@@ -873,10 +875,13 @@ class MoveGroupPythonIntefaceControl(Node):
                 self.get_logger().error("Cartesian plan returned None.")
                 return None, False
 
-            all_plans.append(trajectory)
+            # pymoveit2.plan() devuelve JointTrajectory; envolver en RobotTrajectory
+            rt = RobotTrajectory()
+            rt.joint_trajectory = trajectory
+            all_plans.append(rt)
 
             if joint_names is None:
-                joint_names = list(trajectory.joint_trajectory.joint_names)
+                joint_names = list(trajectory.joint_names)
 
         self._moveit2.clear_goal_constraints()
 
