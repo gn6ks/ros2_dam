@@ -823,7 +823,7 @@ class MoveGroupPythonIntefaceControl(Node):
         max_linear_accel: float = 200.0,
         max_ang_accel: float = 140.0,
         extra_info: bool = False,
-        step: float = 0.0005,
+        step: float = 0.002,
     ):
         """
         Planifica una trayectoria cartesiana multi-segmento con control de
