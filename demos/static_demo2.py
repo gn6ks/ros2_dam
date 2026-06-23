@@ -851,17 +851,6 @@ class MoveGroupPythonIntefaceControl(Node):
             self.get_logger().error("No joint_state available for planning.")
             return None, False
 
-        try:
-            js_map = dict(zip(current_js.name, current_js.position))
-            start_names = list(self.JOINT_NAMES)
-            start_positions = [js_map[n] for n in self.JOINT_NAMES]
-        except KeyError as e:
-            self.get_logger().error(
-                f"Joint {e} not found in joint_state. "
-                f"Available: {list(current_js.name)}"
-            )
-            return None, False
-
         for traj in waypoints_list:
             # traj es una lista de Poses; el último elemento es el objetivo
             target = traj[-1]
@@ -875,7 +864,6 @@ class MoveGroupPythonIntefaceControl(Node):
                         target.orientation.w,
                     ],
                     cartesian=True,
-                    start_joint_positions=start_positions,
                 )
             except Exception as exc:
                 self.get_logger().error(f"Cartesian planning failed: {exc!r}")
@@ -889,10 +877,6 @@ class MoveGroupPythonIntefaceControl(Node):
 
             if joint_names is None:
                 joint_names = list(trajectory.joint_trajectory.joint_names)
-
-            # Encadenar: el siguiente segmento empieza donde termina este
-            last_pt = trajectory.joint_trajectory.points[-1]
-            start_positions = list(last_pt.positions)
 
         self._moveit2.clear_goal_constraints()
 
