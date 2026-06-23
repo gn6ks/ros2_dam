@@ -133,6 +133,9 @@ class MoveGroupPythonIntefaceControl(Node):
             DisplayTrajectory, "display_planned_path", 20
         )
 
+        # ── Esperar a que los servicios de MoveIt2 estén disponibles ──
+        self._wait_for_moveit_services()
+
         self.eef_link = self.EEF_LINK
 
         # ── Caché de límites de velocidad articular (se llena bajo demanda) ──
@@ -150,6 +153,30 @@ class MoveGroupPythonIntefaceControl(Node):
             self.get_logger().warn("No FT sensor topic found.")
 
         self.get_logger().info("MoveGroupPythonIntefaceControl ready.")
+
+    def _wait_for_moveit_services(self, timeout: float = 15.0):
+        """Espera a que compute_fk y compute_cartesian_path estén listos."""
+        from moveit_msgs.srv import GetPositionFK, GetCartesianPath
+
+        deadline = time.time() + timeout
+        for srv_type, srv_name in [
+            (GetPositionFK, "compute_fk"),
+            (GetCartesianPath, "compute_cartesian_path"),
+        ]:
+            client = self.create_client(srv_type, srv_name)
+            self.get_logger().info(f"Waiting for service '{srv_name}'…")
+            while time.time() < deadline:
+                if client.wait_for_service(timeout_sec=2.0):
+                    self.get_logger().info(f"  '{srv_name}' ready.")
+                    break
+                self.get_logger().info(
+                    f"  '{srv_name}' not available yet, retrying…"
+                )
+            else:
+                self.get_logger().warn(
+                    f"Service '{srv_name}' not available after {timeout}s."
+                )
+            self.destroy_client(client)
 
     def _discover_ft_topic(self, timeout_per_topic: float = 2.0):
         self.get_logger().info("Searching FT sensor topic…")
