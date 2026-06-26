@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import copy
 import math
 import sys
@@ -13,24 +12,15 @@ import rclpy
 import rclpy.duration
 from builtin_interfaces.msg import Duration
 from geometry_msgs.msg import Pose, PoseStamped, Quaternion, WrenchStamped
-from moveit_msgs.msg import DisplayTrajectory, RobotState, RobotTrajectory
+from moveit_msgs.msg import DisplayTrajectory, RobotTrajectory
 
 # pymoveit2: stable wrapper around the MoveIt2 API
 from pymoveit2 import MoveIt2
-
-# from pymoveit2.robots import (
-#     iiwa7 as robot_config,  # change to your robot module if different
-# )
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
-from std_msgs.msg import Float64MultiArray, Header
 from tf_transformations import quaternion_from_euler
 from trajectory_msgs.msg import JointTrajectoryPoint
 
-
-# FT sensor: lista de topics candidatos a probar, en orden. Ajusta según
-# lo que confirmes con `ros2 topic list` en tu /lbr namespace (puede que
-# sea "/lbr/ft_sensor/wrench" en vez de "/ft_sensor/wrench" sin namespace).
 FT_TOPIC_CANDIDATES = [
     "/ft_sensor/wrench",
     "/lbr/ft_sensor/wrench",
@@ -39,7 +29,28 @@ FT_TOPIC_CANDIDATES = [
 WINDOW_SIZE = 5
 
 
+class EEF:
+    def __init__(
+        self,
+        EE_end_frame=PyKDL.Frame(),
+        x=0,
+        y=0,
+        z=0,
+        ATC_frame=PyKDL.Frame(),
+        name="",
+        path="",
+    ):
+        self.EE_end_frame = EE_end_frame
+        self.x = x
+        self.y = y
+        self.z = z
+        self.ATC_frame = ATC_frame
+        self.name = name
+        self.path = path
+
+
 def all_close(goal, actual, tolerance):
+    """Compara dos poses o listas con tolerancia."""
     if isinstance(goal, list):
         for i in range(len(goal)):
             if abs(actual[i] - goal[i]) > tolerance:
@@ -65,65 +76,30 @@ def all_close(goal, actual, tolerance):
 
 
 def ask_speed(default: float = 50.0, max_recommended: float = 300.0) -> float:
-    """
-    Ask the user for the Cartesian EEF speed (mm/s) to use for the demo.
-
-    Validates the input is numeric and positive.  If the value exceeds the
-    recommended maximum, warns that MoveIt2 may reject the plan (joint limits
-    exceeded, Jacobian near singularity) and requests
-    confirmation before continuing.
-    """
+    """Pregunta al usuario la velocidad cartesiana del EEF (mm/s)."""
     while True:
-        raw = input(
-            f"Cartesian EEF speed in mm/s [Enter = {default}]: "
-        ).strip()
-
+        raw = input(f"Cartesian EEF speed in mm/s [Enter = {default}]: ").strip()
         if raw == "":
             return default
-
         try:
             speed = float(raw)
         except ValueError:
             print("  -> Non-numeric value. Valid example: 50 or 70.5")
             continue
-
         if speed <= 0:
             print("  -> Speed must be a positive number.")
             continue
-
         if speed > max_recommended:
             confirm = (
                 input(
-                    f"  -> {speed} mm/s is high; MoveIt2 may reject the plan for "
-                    "exceed the URDF joint limits. Continue? [y/N]: "
+                    f"  -> {speed} mm/s is high; MoveIt2 may reject the plan. Continue? [y/N]: "
                 )
                 .strip()
                 .lower()
             )
             if confirm != "s":
                 continue
-
         return speed
-
-
-class EEF:
-    def __init__(
-        self,
-        EE_end_frame=PyKDL.Frame(),
-        x=0,
-        y=0,
-        z=0,
-        ATC_frame=PyKDL.Frame(),
-        name="",
-        path="",
-    ):
-        self.EE_end_frame = EE_end_frame
-        self.x = x
-        self.y = y
-        self.z = z
-        self.ATC_frame = ATC_frame
-        self.name = name
-        self.path = path
 
 
 class MoveGroupPythonIntefaceControl(Node):
@@ -143,7 +119,7 @@ class MoveGroupPythonIntefaceControl(Node):
     def __init__(self):
         super().__init__("move_group_control", namespace="/lbr")
 
-        # call pymoveit2
+        # ── pymoveit2: wrapper fino sobre MoveIt2 ──
         self._moveit2 = MoveIt2(
             node=self,
             joint_names=self.JOINT_NAMES,
@@ -152,49 +128,60 @@ class MoveGroupPythonIntefaceControl(Node):
             group_name=self.GROUP_NAME,
         )
 
-        from moveit_msgs.srv import GetCartesianPath
-
-        self._cartesian_client = self.create_client(
-            GetCartesianPath,
-            "/lbr/compute_cartesian_path",  # adjust namespace if changed
-        )
-        if not self._cartesian_client.wait_for_service(timeout_sec=5.0):
-            self.get_logger().warn(
-                "Service /compute_cartesian_path not available yet."
-            )
-
-        # Trajectory publisher for RViz2
+        # Publicador para RViz2
         self._display_traj_pub = self.create_publisher(
             DisplayTrajectory, "display_planned_path", 20
         )
 
-        # End-effector link name (for FK)
+        # ── Esperar a que los servicios de MoveIt2 estén disponibles ──
+        self._wait_for_moveit_services()
+
         self.eef_link = self.EEF_LINK
 
-        # Cached joint velocity limits (parsed from URDF once)
+        # ── Caché de límites de velocidad articular (se llena bajo demanda) ──
         self._vel_limit: dict | None = None
 
-        # Planning scene object (to read URDF and compute FK)
-        # pymoveit2 expone el robot_model a traves de MoveIt2.robot_model
-        self.box_name = ""
-
+        # ── FT sensor ──
         self._wrench_lock = threading.Lock()
         self._active_ft_topic: str | None = None
         self._ft_sub = None
         self._fx_window: deque = deque(maxlen=WINDOW_SIZE)
         self._fy_window: deque = deque(maxlen=WINDOW_SIZE)
         self._fz_window: deque = deque(maxlen=WINDOW_SIZE)
+        self._force_log: list = []  # Para debugging
+        self._baseline_fx: float = 0.0
+        self._baseline_fy: float = 0.0
+        self._baseline_fz: float = 0.0
         self._discover_ft_topic()
         if self._active_ft_topic is None:
-            self.get_logger().warn(
-                "no FT topic in activity "
-            )
+            self.get_logger().warn("No FT sensor topic found.")
 
         self.get_logger().info("MoveGroupPythonIntefaceControl ready.")
 
-    def _discover_ft_topic(self, timeout_per_topic: float = 2.0):
-        self.get_logger().info("searching FT active topic")
+    def _wait_for_moveit_services(self, timeout: float = 15.0):
+        """Espera a que compute_fk y compute_cartesian_path estén listos."""
+        from moveit_msgs.srv import GetCartesianPath, GetPositionFK
 
+        deadline = time.time() + timeout
+        for srv_type, srv_name in [
+            (GetPositionFK, "compute_fk"),
+            (GetCartesianPath, "compute_cartesian_path"),
+        ]:
+            client = self.create_client(srv_type, srv_name)
+            self.get_logger().info(f"Waiting for service '{srv_name}'…")
+            while time.time() < deadline:
+                if client.wait_for_service(timeout_sec=2.0):
+                    self.get_logger().info(f"  '{srv_name}' ready.")
+                    break
+                self.get_logger().info(f"  '{srv_name}' not available yet, retrying…")
+            else:
+                self.get_logger().warn(
+                    f"Service '{srv_name}' not available after {timeout}s."
+                )
+            self.destroy_client(client)
+
+    def _discover_ft_topic(self, timeout_per_topic: float = 2.0):
+        self.get_logger().info("Searching FT sensor topic…")
         for topic in FT_TOPIC_CANDIDATES:
             self.get_logger().info(f"  trying: {topic}")
             found = threading.Event()
@@ -205,21 +192,19 @@ class MoveGroupPythonIntefaceControl(Node):
                 ev.set()
 
             sub = self.create_subscription(WrenchStamped, topic, _cb, 10)
-
             deadline = time.time() + timeout_per_topic
             while time.time() < deadline and not found.is_set():
                 rclpy.spin_once(self, timeout_sec=0.1)
 
             if found.is_set():
-                self.get_logger().info(f"  -> topic FT active: {topic}")
+                self.get_logger().info(f"  -> FT topic active: {topic}")
                 self.destroy_subscription(sub)
                 self._ft_sub = self.create_subscription(
                     WrenchStamped, topic, self._wrench_cb, 10
                 )
                 return
             self.destroy_subscription(sub)
-
-        self.get_logger().warn("no FT with data published")
+        self.get_logger().warn("No FT sensor publishing data.")
 
     def _wrench_cb(self, msg: WrenchStamped):
         with self._wrench_lock:
@@ -228,7 +213,8 @@ class MoveGroupPythonIntefaceControl(Node):
             self._fy_window.append(f.y)
             self._fz_window.append(f.z)
 
-    def get_force(self) -> tuple[float, float, float]:
+    def get_force_raw(self) -> tuple[float, float, float]:
+        """Retorna la fuerza RAW (sin compensar baseline)."""
         with self._wrench_lock:
             if not self._fx_window:
                 return 0.0, 0.0, 0.0
@@ -237,46 +223,134 @@ class MoveGroupPythonIntefaceControl(Node):
             fz = sum(self._fz_window) / len(self._fz_window)
         return fx, fy, fz
 
+    def get_force(self) -> tuple[float, float, float]:
+        """Retorna la fuerza compensada (delta respecto al baseline)."""
+        fx, fy, fz = self.get_force_raw()
+        return (
+            fx - self._baseline_fx,
+            fy - self._baseline_fy,
+            fz - self._baseline_fz,
+        )
+
+    def get_force_magnitude(self) -> float:
+        """Retorna |delta_Fz| — la fuerza de contacto en el eje Z."""
+        _, _, dfz = self.get_force()
+        return abs(dfz)
+
+    def tare_force(self, settle_time: float = 0.5) -> bool:
+        """Captura la fuerza actual como baseline (tareo).
+
+        Debe llamarse cuando el robot está quieto en el aire (sin
+        contacto), para que el peso del tool quede como offset y la
+        fuerza de contacto se mida como delta.
+        """
+        ok = self.reset_force(settle_time=settle_time)
+        if not ok:
+            self.get_logger().warn("tare_force: reset_force failed.")
+            return False
+        fx, fy, fz = self.get_force_raw()
+        self._baseline_fx = fx
+        self._baseline_fy = fy
+        self._baseline_fz = fz
+        self.get_logger().info(
+            f"Force tareado: baseline=({fx:.3f}, {fy:.3f}, {fz:.3f}) N"
+        )
+        return True
+
+    def log_force(self, label: str = ""):
+        """Registra la fuerza actual (raw + delta) y la posición Z del EEF."""
+        fx_r, fy_r, fz_r = self.get_force_raw()
+        fx_d, fy_d, fz_d = self.get_force()
+        # Posición actual del EEF
+        eef_pose = self._get_current_eef_pose()
+        z_mm = eef_pose.position.z * 1000.0 if eef_pose else float("nan")
+        timestamp = time.time()
+        entry = {
+            "time": timestamp,
+            "fx_raw": fx_r, "fy_raw": fy_r, "fz_raw": fz_r,
+            "fx_delta": fx_d, "fy_delta": fy_d, "fz_delta": fz_d,
+            "z_mm": z_mm,
+            "label": label,
+        }
+        self._force_log.append(entry)
+        self.get_logger().info(
+            f"[FORCE {label}]\n"
+            f"  raw   : Fx={fx_r:+.3f}  Fy={fy_r:+.3f}  Fz={fz_r:+.3f} N\n"
+            f"  delta : Fx={fx_d:+.3f}  Fy={fy_d:+.3f}  Fz={fz_d:+.3f} N\n"
+            f"  Z_EEF : {z_mm:.2f} mm"
+        )
+
+    def reset_force_log(self):
+        """Limpia el log de fuerzas."""
+        self._force_log.clear()
+
+    def dump_force_log(self):
+        """Imprime todo el log de fuerzas."""
+        self.get_logger().info("=" * 70)
+        self.get_logger().info("FORCE LOG SUMMARY")
+        self.get_logger().info(
+            f"  baseline: ({self._baseline_fx:.3f}, "
+            f"{self._baseline_fy:.3f}, {self._baseline_fz:.3f}) N"
+        )
+        self.get_logger().info("-" * 70)
+        for entry in self._force_log:
+            self.get_logger().info(
+                f"  [{entry['label']}] "
+                f"raw=({entry['fx_raw']:+.3f}, {entry['fy_raw']:+.3f}, "
+                f"{entry['fz_raw']:+.3f}) "
+                f"delta=({entry['fx_delta']:+.3f}, {entry['fy_delta']:+.3f}, "
+                f"{entry['fz_delta']:+.3f}) "
+                f"Z={entry['z_mm']:.2f}mm"
+            )
+        self.get_logger().info("=" * 70)
+
     def reset_force(self, settle_time: float = 0.3) -> bool:
         if self._active_ft_topic is None:
-            self.get_logger().warn(
-                "reset_force: no hay topic FT activo, no se puede resetear."
-            )
+            self.get_logger().warn("reset_force: no FT topic available.")
             return False
-
         with self._wrench_lock:
             self._fx_window.clear()
             self._fy_window.clear()
             self._fz_window.clear()
-
         deadline = time.time() + max(settle_time, 0.05)
         while time.time() < deadline:
             rclpy.spin_once(self, timeout_sec=0.05)
-
         with self._wrench_lock:
             filled = len(self._fx_window) >= self._fx_window.maxlen
-
         if not filled:
             self.get_logger().warn(
-                "reset_force: window not entitled "
-                f"{settle_time:.2f}s — no Mhz correct"
+                f"reset_force: window not filled after {settle_time:.2f}s"
             )
         return filled
 
     def wait_for_joint_state(self, timeout_sec: float = 10.0) -> bool:
-        """
-        Wait for at least one /joint_states message to arrive.
-        """
+        """Espera hasta que llegue al menos un mensaje de /joint_states."""
         start = self.get_clock().now()
         while self._moveit2.joint_state is None:
             rclpy.spin_once(self, timeout_sec=0.1)
-            elapsed_sec = (self.get_clock().now() - start).nanoseconds * 1e-9
-            if elapsed_sec > timeout_sec:
+            elapsed = (self.get_clock().now() - start).nanoseconds * 1e-9
+            if elapsed > timeout_sec:
                 return False
         return True
 
+    def _get_current_eef_pose(self) -> Pose:
+        """Devuelve la pose actual del EEF via FK."""
+        js = self._moveit2.joint_state
+        if js is None:
+            self.wait_for_joint_state(timeout_sec=2.0)
+            js = self._moveit2.joint_state
+        if js is None:
+            self.get_logger().error("No joint_state available.")
+            return Pose()
+        # compute_fk espera JointState; si se omite usa el estado actual
+        fk_result = self._moveit2.compute_fk(joint_state=js)
+        if fk_result is None:
+            self.get_logger().error("FK failed for current state.")
+            return Pose()
+        return fk_result.pose
+
     def go_to_joint_state(self):
-        """Moves the robot to the fixed joint configuration used in the benchmark."""
+        """Mueve a la configuración articular fija del benchmark."""
         joint_goal = [
             90.0 * math.pi / 180.0,
             0.0 * math.pi / 180.0,
@@ -291,11 +365,7 @@ class MoveGroupPythonIntefaceControl(Node):
         return True
 
     def go_to_pose(self, pose: Pose) -> bool:
-        """
-        Plan and execute a move (without speed control) to a Cartesian pose
-        using pymoveit2. Catches any MoveIt2/ROS2 exception and reports it
-        without propagating, returning False.
-        """
+        """Planifica y ejecuta un movimiento cartesiano sin control de velocidad."""
         try:
             self._moveit2.move_to_pose(
                 position=[pose.position.x, pose.position.y, pose.position.z],
@@ -308,336 +378,363 @@ class MoveGroupPythonIntefaceControl(Node):
             )
             self._moveit2.wait_until_executed()
         except Exception as exc:
-            self.get_logger().error(f"Exception in go_to_pose: {exc!r}")
+            self.get_logger().error(f"go_to_pose failed: {exc!r}")
             return False
         return True
 
-    def follow_trajectory_speed(
-        self, waypoints, speeds, ang_speeds=[], accel=100.0
-    ) -> bool:
-        """
-        Compute and execute a multi-section trajectory with speed control.
-        Never raises an exception: any failure is reported via the logger and
-        False is returned so the caller can decide how to proceed.
-        """
+    def _plan_and_execute(self, trajectory, success: bool = True) -> bool:
+        """Publica el plan en RViz2 y lo ejecuta via pymoveit2.execute()."""
+        if trajectory is None:
+            self.get_logger().error("Null trajectory — cannot execute.")
+            return False
+
+        # Publicar en RViz2
         try:
-            plan, success = self.compute_cartesian_path_velocity_control(
+            display_traj = DisplayTrajectory()
+            display_traj.trajectory.append(trajectory)
+            self._display_traj_pub.publish(display_traj)
+            self.get_logger().info("Plan published to RViz2.")
+        except Exception as exc:
+            self.get_logger().warn(f"Could not publish to RViz: {exc}")
+
+        if not success:
+            self.get_logger().warn("Speed calculation had warnings; executing anyway.")
+
+        # pymoveit2.execute() gestiona FollowJointTrajectory internamente
+        try:
+            # execute() espera JointTrajectory, no RobotTrajectory
+            jt = (
+                trajectory.joint_trajectory
+                if hasattr(trajectory, "joint_trajectory")
+                else trajectory
+            )
+            self._moveit2.execute(jt)
+            self._moveit2.wait_until_executed()
+            self.get_logger().info("Trajectory executed successfully.")
+            return True
+        except Exception as exc:
+            self.get_logger().error(f"Execution error: {exc!r}")
+            return False
+
+    def follow_trajectory_speed(
+        self, waypoints, speeds, ang_speeds=None, accel=100.0
+    ) -> bool:
+        """Ejecuta una trayectoria multi-segmento con control de velocidad."""
+        if ang_speeds is None:
+            ang_speeds = []
+        try:
+            trajectory, success = self.compute_cartesian_path_velocity_control(
                 waypoints, speeds, EE_ang_speed=ang_speeds, max_linear_accel=accel
             )
         except Exception as exc:
-            self.get_logger().error(
-                f"Exception computing multi-section trajectory: {exc!r}"
-            )
+            self.get_logger().error(f"Error planning multi-section trajectory: {exc!r}")
             return False
 
-        if plan is None:
-            self.get_logger().error(
-                "Could not plan the multi-section trajectory "
-                "(check reachability, collisions, or joint limits)."
-            )
+        if trajectory is None:
+            self.get_logger().error("Could not plan multi-section trajectory.")
             return False
 
-        if not success:
-            self.get_logger().warn(
-                "The speed profile was not fully satisfied; "
-                "executing the available plan anyway."
-            )
-
-        executed = self._publish_and_execute(plan, success)
+        executed = self._plan_and_execute(trajectory, success)
         time.sleep(0.5)
         return executed
 
     def go_to_pose_speed(
-        self, pose: Pose, speed=10.0, ang_speed=[], accel=100.0
+        self, pose: Pose, speed=10.0, ang_speed=None, accel=100.0
     ) -> bool:
-        """
-        Plan and execute a Cartesian move at a given speed (mm/s).
-        """
+        """Movimiento cartesiano a una velocidad dada (mm/s)."""
+        if ang_speed is None:
+            ang_speed = []
         try:
             current_pose = self._get_current_eef_pose()
             waypoints = [[copy.deepcopy(current_pose), copy.deepcopy(pose)]]
-            plan, success = self.compute_cartesian_path_velocity_control(
+            trajectory, success = self.compute_cartesian_path_velocity_control(
                 waypoints, [speed], EE_ang_speed=ang_speed, max_linear_accel=accel
             )
         except Exception as exc:
-            self.get_logger().error(
-                f"Exception computing trajectory at {speed} mm/s: {exc!r}"
-            )
+            self.get_logger().error(f"Error planning at {speed} mm/s: {exc!r}")
             return False
 
-        if plan is None:
-            self.get_logger().error(
-                f"Could not plan move at {speed} mm/s "
-                "(check joint limits, collisions, or reachability)."
-            )
+        if trajectory is None:
+            self.get_logger().error(f"Could not plan move at {speed} mm/s.")
             return False
 
         if not success:
             self.get_logger().warn(
-                f"El plan a {speed} mm/s presenta advertencias "
-                "(e.g. target speed not reached due to acceleration or "
-                "joint limits). Executing anyway."
+                f"Plan at {speed} mm/s has warnings; executing anyway."
             )
 
-        executed = self._publish_and_execute(plan, success)
+        executed = self._plan_and_execute(trajectory, success)
         time.sleep(0.5)
         return executed
 
-    def _publish_and_execute(self, plan, success: bool) -> bool:
+    def go_to_pose_with_force_limit(
+        self,
+        pose: Pose,
+        speed: float = 10.0,
+        force_threshold: float = 5.0,
+        check_interval: float = 0.02,
+        accel: float = 100.0,
+    ) -> tuple[bool, float]:
         """
-        Publish the plan to RViz2 and execute it via the FollowJointTrajectory
-        action.
+        Movimiento cartesiano con límite de fuerza.
+
+        La trayectoria se ejecuta en el hilo principal (donde pymoveit2
+        hace spin internamente).  Un hilo secundario **solo lee** el
+        buffer de fuerza (protegido por lock) y, si se supera el umbral,
+        llama a self._moveit2.stop() para cancelar el movimiento.
+
+        Args:
+            pose: Pose objetivo
+            speed: Velocidad en mm/s
+            force_threshold: Fuerza máxima permitida (N) en el eje Z
+            check_interval: Intervalo de muestreo del hilo monitor (s)
+            accel: Aceleración en mm/s²
+
+        Returns:
+            (success, max_force_reached): Éxito del movimiento y máxima
+            fuerza registrada durante el movimiento.
         """
-        if plan is None:
-            self.get_logger().error("Could not compute or publish the plan.")
-            return False
-
-        display_trajectory = DisplayTrajectory()
-        display_trajectory.trajectory.append(plan)
-        self._display_traj_pub.publish(display_trajectory)
-        self.get_logger().info("Plan published to RViz2.")
-
-        if not success:
-            self.get_logger().warn(
-                "The speed calculation was not fully successful "
-                "(ver advertencias previas); se intenta ejecutar igualmente."
-            )
-
-        try:
-            from action_msgs.msg import GoalStatus
-            from control_msgs.action import FollowJointTrajectory
-            from rclpy.action import ActionClient
-
-            if not hasattr(self, "_fjt_client"):
-                self._fjt_client = ActionClient(
-                    self,
-                    FollowJointTrajectory,
-                    "/lbr/joint_trajectory_controller/follow_joint_trajectory",
-                )
-
-            if not self._fjt_client.wait_for_server(timeout_sec=5.0):
-                self.get_logger().error(
-                    "Action server follow_joint_trajectory not available "
-                    "(is controller_manager running? is namespace correct?)."
-                )
-                return False
-
-            goal = FollowJointTrajectory.Goal()
-            # plan.joint_trajectory.header.stamp = self.get_clock().now().to_msg()
-            
-            from builtin_interfaces.msg import Time
-            plan.joint_trajectory.header.stamp = Time(sec=0, nanosec=0) 
-            
-            plan.joint_trajectory.header.frame_id = self.BASE_LINK
-            goal.trajectory = plan.joint_trajectory
-
-            # Validate monotonicity and values before sending to controller
-            valid, error_msg = self._validate_trajectory(plan)
-            if not valid:
-                self.get_logger().error(
-                    f"Invalid trajectory before sending to controller: "
-                    f"{error_msg}. Se descarta este plan."
-                )
-                return False
-
-            self.get_logger().info(
-                f"Plan final | waypoints={len(plan.joint_trajectory.points)} | "
-                f"duration={plan.joint_trajectory.points[-1].time_from_start.sec + plan.joint_trajectory.points[-1].time_from_start.nanosec * 1e-9:.2f}s"
-            )
-
-            future = self._fjt_client.send_goal_async(goal)
-            rclpy.spin_until_future_complete(self, future, timeout_sec=30.0)
-            goal_handle = future.result()
-
-            if goal_handle is None:
-                self.get_logger().error(
-                    "No response from action server when sending goal "
-                    "(timeout de 30s)."
-                )
-                return False
-
-            if not goal_handle.accepted:
-                self.get_logger().error(
-                    "Goal rejected by the controller "
-                    "(trajectory out of limits, non-monotonic times, etc.)."
-                )
-                return False
-
-            result_future = goal_handle.get_result_async()
-            rclpy.spin_until_future_complete(self, result_future, timeout_sec=60.0)
-            wrapped_result = result_future.result()
-
-            if wrapped_result is None:
-                self.get_logger().error(
-                    "No result from controller after execution "
-                    "(timeout de 60s)."
-                )
-                return False
-
-            if wrapped_result.status != GoalStatus.STATUS_SUCCEEDED:
-                self.get_logger().error(
-                    f"Execution did not complete successfully (status={wrapped_result.status})."
-                )
-                return False
-
-            error_code = wrapped_result.result.error_code
-            if error_code != FollowJointTrajectory.Result.SUCCESSFUL:
-                self.get_logger().error(
-                    f"Controller returned error code ({error_code}): "
-                    f"{wrapped_result.result.error_string}"
-                )
-                return False
-
-            self.get_logger().info("Trajectory executed successfully.")
-            return True
-
-        except Exception as exc:
-            self.get_logger().error(
-                f"Exception during trajectory execution: {exc!r}"
-            )
-            return False
-
-    def _validate_trajectory(self, trajectory) -> tuple:
-        """
-        Validate that a RobotTrajectory can be executed by FollowJointTrajectory.
-        Returns (ok: bool, error_message: str).
-        """
-        pts = trajectory.joint_trajectory.points
-        if len(pts) < 2:
-            return False, "Trajectory has fewer than 2 waypoints"
-
-        prev_time = pts[0].time_from_start
-        if prev_time.sec != 0 or prev_time.nanosec != 0:
-            return False, (
-                f"First waypoint does not have time_from_start=0 "
-                f"(sec={prev_time.sec}, nanosec={prev_time.nanosec})"
-            )
-
-        for i, pt in enumerate(pts[1:], 1):
-            t = pt.time_from_start
-            t_sec = t.sec + t.nanosec * 1e-9
-            prev_sec = prev_time.sec + prev_time.nanosec * 1e-9
-
-            if t_sec <= prev_sec:
-                return False, (
-                    f"Non-monotonic times at waypoint {i}: "
-                    f"{prev_sec:.9f} -> {t_sec:.9f} "
-                    f"(diff={t_sec - prev_sec:.9f}s)"
-                )
-
-            for j, pos in enumerate(pt.positions):
-                if math.isnan(pos) or math.isinf(pos):
-                    return False, (
-                        f"Position {j} of waypoint {i} is {pos}"
-                    )
-
-            for j, vel in enumerate(pt.velocities):
-                if math.isnan(vel) or math.isinf(vel):
-                    return False, (
-                        f"Velocity {j} of waypoint {i} is {vel}"
-                    )
-
-            for j, acc in enumerate(pt.accelerations):
-                if math.isnan(acc) or math.isinf(acc):
-                    return False, (
-                        f"Acceleration {j} of waypoint {i} is {acc}"
-                    )
-
-            prev_time = t
-
-        return True, ""
-
-    def _get_robot_description(self) -> str:
-        """
-        Retrieve robot_description from the move_group node.
-        """
-        from rcl_interfaces.srv import GetParameters
-
-        service_candidates = [
-            "/lbr/move_group/get_parameters",
-            "/lbr/robot_state_publisher/get_parameters",
-        ]
-        for srv_name in service_candidates:
-            try:
-                gp_client = self.create_client(GetParameters, srv_name)
-                if gp_client.wait_for_service(timeout_sec=2.0):
-                    req = GetParameters.Request()
-                    req.names = ["robot_description"]
-                    future = gp_client.call_async(req)
-                    rclpy.spin_until_future_complete(
-                        self, future, timeout_sec=2.0
-                    )
-                    result = future.result()
-                    if result and result.values:
-                        self.get_logger().info(
-                            f"robot_description retrieved via {srv_name}."
-                        )
-                        return result.values[0].string_value
-            except Exception:
-                continue
-
-        self.get_logger().warn(
-            "robot_description not found. "
-            "Joint velocity limits from URDF will not be available "
-            "for enforcement."
+        self.get_logger().info(
+            f"Moving with force limit: threshold={force_threshold:.2f}N, "
+            f"speed={speed:.1f}mm/s"
         )
-        return ""
 
-    def _get_current_eef_pose(self) -> Pose:
-        """Return the current EEF pose via FK over the current joint_state."""
-        js = self._moveit2.joint_state
-        if js is None:
-            # Short retry: if the topic dropped messages for a moment
-            # (e.g. after a long movement), give a second chance before
-            # declaring failure.
-            self.wait_for_joint_state(timeout_sec=2.0)
-            js = self._moveit2.joint_state
-        if js is None:
-            self.get_logger().error(
-                "No joint_state available (no /joint_states messages)."
+        # ── Planificar trayectoria ──
+        try:
+            current_pose = self._get_current_eef_pose()
+            waypoints = [[copy.deepcopy(current_pose), copy.deepcopy(pose)]]
+            trajectory, success = self.compute_cartesian_path_velocity_control(
+                waypoints, [speed], EE_ang_speed=[], max_linear_accel=accel
             )
-            return Pose()
-        pose = self._fk_from_joint_positions(list(js.name), list(js.position))
-        if pose is None:
-            self.get_logger().error("FK failed for current state.")
-            return Pose()
-        return pose
+        except Exception as exc:
+            self.get_logger().error(f"Error planning with force limit: {exc!r}")
+            return False, 0.0
 
-    def _fk_from_joint_positions(
-        self, joint_names: list, joint_positions: list
-    ) -> Pose | None:
+        if trajectory is None:
+            self.get_logger().error("Could not plan move with force limit.")
+            return False, 0.0
+
+        # Publicar en RViz2
+        try:
+            display_traj = DisplayTrajectory()
+            display_traj.trajectory.append(trajectory)
+            self._display_traj_pub.publish(display_traj)
+        except Exception as exc:
+            self.get_logger().warn(f"Could not publish to RViz: {exc}")
+
+        jt = (
+            trajectory.joint_trajectory
+            if hasattr(trajectory, "joint_trajectory")
+            else trajectory
+        )
+
+        # ── Hilo monitor de fuerza (SOLO lee el buffer, NO hace spin) ──
+        stop_event = threading.Event()
+        monitor_data = {
+            "max_force": 0.0,
+            "force_limit_reached": False,
+            "samples": [],
+        }
+
+        monitor = threading.Thread(
+            target=self._force_monitor_loop,
+            args=(force_threshold, check_interval, stop_event, monitor_data),
+            daemon=True,
+        )
+
+        # ── Ejecutar trayectoria en el hilo principal ──
+        monitor.start()
+
+        exec_ok = True
+        try:
+            self._moveit2.execute(jt)
+            self._moveit2.wait_until_executed()
+        except Exception as exc:
+            self.get_logger().warn(f"Execution interrupted: {exc!r}")
+            exec_ok = False
+
+        # ── Detener hilo monitor ──
+        stop_event.set()
+        monitor.join(timeout=2.0)
+
+        max_force = monitor_data["max_force"]
+        force_limit_reached = monitor_data["force_limit_reached"]
+        samples = monitor_data["samples"]
+
+        # Log resumen de la muestra de fuerzas
+        if samples:
+            avg_f = sum(samples) / len(samples)
+            self.get_logger().info(
+                f"Force during move: samples={len(samples)}, "
+                f"avg|Fz|={avg_f:.3f}N, max|Fz|={max_force:.3f}N, "
+                f"threshold_reached={force_limit_reached}"
+            )
+        else:
+            self.get_logger().warn(
+                "No force samples captured during move "
+                "(FT callback may not have fired)."
+            )
+
+        self.get_logger().info(
+            f"Force-limited move completed (exec_ok={exec_ok}). "
+            f"Max force: {max_force:.2f}N"
+        )
+
+        return exec_ok, max_force
+
+    def _force_monitor_loop(
+        self,
+        threshold: float,
+        interval: float,
+        stop_event: threading.Event,
+        data: dict,
+    ):
         """
-        FK for a given set of joint positions.
-
-        pymoveit2 does not expose FK directly, but we can use the MoveIt2
-        /compute_fk service via rclpy.
+        Hilo secundario que lee el buffer de fuerza periódicamente.
+        **No** llama a rclpy.spin_once — los callbacks FT se procesan
+        dentro del execute() del hilo principal.
         """
-        from moveit_msgs.srv import GetPositionFK
-        from std_msgs.msg import Header as StdHeader
+        while not stop_event.is_set():
+            fz_mag = self.get_force_magnitude()
+            data["samples"].append(fz_mag)
+            data["max_force"] = max(data["max_force"], fz_mag)
 
-        if not hasattr(self, "_fk_client"):
-            self._fk_client = self.create_client(GetPositionFK, "/lbr/compute_fk")
-            if not self._fk_client.wait_for_service(timeout_sec=5.0):
-                self.get_logger().error("Service /compute_fk not available.")
+            if fz_mag >= threshold and not data["force_limit_reached"]:
+                data["force_limit_reached"] = True
+                self.get_logger().warn(
+                    f"[FORCE MONITOR] Threshold reached! |Fz|={fz_mag:.2f}N >= "
+                    f"{threshold:.2f}N — requesting stop."
+                )
+                try:
+                    self._moveit2.stop()
+                except Exception as e:
+                    self.get_logger().warn(
+                        f"[FORCE MONITOR] Could not call stop(): {e}"
+                    )
+
+            stop_event.wait(interval)
+
+    def find_contact_surface(
+        self,
+        start_z: float,
+        search_speed: float = 5.0,
+        step_size: float = 0.002,
+        contact_threshold: float = 1.0,
+        max_descent: float = 0.1,
+    ) -> float | None:
+        """Búsqueda automática de la superficie de contacto.
+
+        Se mueve hacia abajo en incrementos pequeños hasta detectar
+        contacto (delta_Fz > contact_threshold).
+
+        Args:
+            start_z: Altura inicial (m) - debe estar por encima de la superficie
+            search_speed: Velocidad de búsqueda (mm/s)
+            step_size: Tamaño del paso de descenso (m)
+            contact_threshold: Umbral de fuerza para detectar contacto (N)
+            max_descent: Descenso máximo permitido (m)
+
+        Returns:
+            Z position where contact was detected (m), or None if not found
+        """
+        self.get_logger().info("=" * 60)
+        self.get_logger().info("CONTACT SURFACE SEARCH")
+        self.get_logger().info("=" * 60)
+        self.get_logger().info(
+            f"Starting from z={start_z*1000:.1f}mm, "
+            f"step={step_size*1000:.1f}mm, "
+            f"threshold={contact_threshold:.2f}N"
+        )
+
+        current_pose = self._get_current_eef_pose()
+        target = copy.deepcopy(current_pose)
+        initial_z = start_z
+        target.position.z = initial_z
+
+        # Ir a la posición inicial
+        self.get_logger().info(f"Moving to start position z={initial_z*1000:.1f}mm...")
+        if not self.go_to_pose_speed(target, speed=20.0, accel=100.0):
+            self.get_logger().error("Failed to reach start position")
+            return None
+
+        time.sleep(0.5)
+
+        # Tarear el sensor en la posición inicial
+        self.tare_force(settle_time=0.5)
+        self.log_force("SEARCH_START")
+
+        # Búsqueda incremental
+        total_descent = 0.0
+        step_num = 0
+
+        while total_descent < max_descent:
+            step_num += 1
+            current_z = initial_z - total_descent
+
+            # Mover hacia abajo un paso
+            target.position.z = current_z - step_size
+            self.get_logger().info(
+                f"Step {step_num}: moving to z={target.position.z*1000:.1f}mm..."
+            )
+
+            ok, max_force = self.go_to_pose_with_force_limit(
+                target,
+                speed=search_speed,
+                force_threshold=contact_threshold,
+                accel=500.0,
+            )
+
+            if not ok:
+                self.get_logger().error(
+                    f"Movement failed at step {step_num}, z={current_z*1000:.1f}mm"
+                )
                 return None
 
-        req = GetPositionFK.Request()
-        req.header.frame_id = self.BASE_LINK
-        req.header.stamp = self.get_clock().now().to_msg()
-        req.fk_link_names = [self.eef_link]
+            # Verificar si se detectó contacto
+            actual_pose = self._get_current_eef_pose()
+            actual_z = actual_pose.position.z
+            delta_fz = abs(self.get_force()[2])
 
-        rs = RobotState()
-        rs.joint_state.name = list(joint_names)
-        rs.joint_state.position = list(joint_positions)
-        req.robot_state = rs
+            self.get_logger().info(
+                f"  -> z_actual={actual_z*1000:.1f}mm, delta_Fz={delta_fz:.3f}N"
+            )
 
-        future = self._fk_client.call_async(req)
-        rclpy.spin_until_future_complete(self, future, timeout_sec=2.0)
-        result = future.result()
+            if delta_fz >= contact_threshold:
+                self.get_logger().info("=" * 60)
+                self.get_logger().info(
+                    f"✓ CONTACT DETECTED at z={actual_z:.4f}m "
+                    f"({actual_z*1000:.1f}mm)"
+                )
+                self.get_logger().info(
+                    f"  delta_Fz={delta_fz:.3f}N >= {contact_threshold:.2f}N"
+                )
+                self.get_logger().info(
+                    f"  Suggested z0 for this sponge: {actual_z:.4f}m"
+                )
+                self.get_logger().info("=" * 60)
+                self.log_force("CONTACT_FOUND")
 
-        if result is None or not result.pose_stamped:
-            return None
-        return result.pose_stamped[0].pose
+                # Retraer un poco para liberar presión
+                self.get_logger().info("Retracting 5mm to release pressure...")
+                target.position.z = actual_z + 0.005
+                self.go_to_pose_speed(target, speed=10.0, accel=100.0)
+                time.sleep(0.5)
+
+                return actual_z
+
+            total_descent += step_size
+
+        self.get_logger().warn(
+            f"✗ No contact detected after descending {max_descent*1000:.1f}mm. "
+            f"The sponge surface may be higher than expected."
+        )
+        self.log_force("SEARCH_END_NO_CONTACT")
+
+        # Retraer a posición segura
+        target.position.z = initial_z
+        self.go_to_pose_speed(target, speed=20.0, accel=100.0)
+
+        return None
 
     def frame_to_pose(self, frame: PyKDL.Frame) -> Pose:
         pose = Pose()
@@ -653,7 +750,6 @@ class MoveGroupPythonIntefaceControl(Node):
 
     @staticmethod
     def _pose_to_mm(pose: Pose) -> Pose:
-        """Return a copy of the pose with positions converted to mm."""
         p = copy.deepcopy(pose)
         p.position.x *= 1000
         p.position.y *= 1000
@@ -709,11 +805,9 @@ class MoveGroupPythonIntefaceControl(Node):
     def compute_lin_or_ang_distance(
         self, pose1: Pose, pose2: Pose, linear=True
     ) -> float:
-        return (
-            self.compute_distance(pose1, pose2)
-            if linear
-            else self.compute_angle_distance(pose1, pose2)
-        )
+        if linear:
+            return self.compute_distance(pose1, pose2)
+        return self.compute_angle_distance(pose1, pose2)
 
     def get_shifted_pose(self, origin_pose: Pose, shift: list) -> Pose:
         tf_origin = self.pose_to_frame(origin_pose)
@@ -758,25 +852,23 @@ class MoveGroupPythonIntefaceControl(Node):
         waypoints.append(initial_pose)
         for point in range(n_points):
             if point > 0:
-                x = initial_pose.position.x + (
-                    (final_pose.position.x - initial_pose.position.x)
-                    * float(point)
-                    / float(n_points)
+                frac = float(point) / float(n_points)
+                x = (
+                    initial_pose.position.x
+                    + (final_pose.position.x - initial_pose.position.x) * frac
                 )
-                y = initial_pose.position.y + (
-                    (final_pose.position.y - initial_pose.position.y)
-                    * float(point)
-                    / float(n_points)
+                y = (
+                    initial_pose.position.y
+                    + (final_pose.position.y - initial_pose.position.y) * frac
                 )
-                z = initial_pose.position.z + (
-                    (final_pose.position.z - initial_pose.position.z)
-                    * float(point)
-                    / float(n_points)
+                z = (
+                    initial_pose.position.z
+                    + (final_pose.position.z - initial_pose.position.z) * frac
                 )
                 rotation = self.pose_to_frame(initial_pose).M
-                rotation.DoRotX(rad_dif[0] * float(point) / float(n_points))
-                rotation.DoRotY(rad_dif[1] * float(point) / float(n_points))
-                rotation.DoRotZ(rad_dif[2] * float(point) / float(n_points))
+                rotation.DoRotX(rad_dif[0] * frac)
+                rotation.DoRotY(rad_dif[1] * frac)
+                rotation.DoRotZ(rad_dif[2] * frac)
                 new_frame = PyKDL.Frame()
                 new_frame.p = PyKDL.Vector(x, y, z)
                 new_frame.M = rotation
@@ -818,8 +910,8 @@ class MoveGroupPythonIntefaceControl(Node):
         v_chg_i = 0
         init_speed_change = False
         final_speed_change = False
-        speed_diff = 0.0  # initialized at the start of each plan segment
-        trans_accel = 0.0  # used in final_speed_change block
+        speed_diff = 0.0
+        trans_accel = 0.0
 
         for plan_poses in traj_poses:
             if traj_mov[i] < thres:
@@ -875,6 +967,7 @@ class MoveGroupPythonIntefaceControl(Node):
                     )
                     continue
 
+                # ── aceleración al inicio del segmento ──
                 if init_speed_change:
                     if final_speed_change:
                         if (
@@ -965,6 +1058,7 @@ class MoveGroupPythonIntefaceControl(Node):
                         v_chg_i += 1
                         init_speed_change = False
 
+                # ── deceleración al final del segmento ──
                 elif final_speed_change:
                     x_plan += self.compute_lin_or_ang_distance(
                         pose, corrected_traj[-1]["pose"], linear
@@ -1067,6 +1161,8 @@ class MoveGroupPythonIntefaceControl(Node):
                                 "Jaccel": copy.deepcopy(zero_Jvel),
                             }
                         )
+
+                # ── sin cambio de velocidad ──
                 else:
                     corrected_traj.append(
                         {
@@ -1089,174 +1185,28 @@ class MoveGroupPythonIntefaceControl(Node):
 
         return corrected_traj, success
 
-    def _plan_cartesian_path_waypoints(
-        self,
-        waypoints: list,  # list of geometry_msgs/Pose
-        start_joint_positions: list,  # starting joint positions
-        joint_names: list,
-        step: float = 0.0005,
-    ):
-        """
-        Call the MoveIt2 GetCartesianPath service with all waypoints.
-        Returns (RobotTrajectory, fraction) or (None, 0.0) on failure.
-        """
-        from moveit_msgs.msg import RobotState
-        from moveit_msgs.srv import GetCartesianPath
-
-        req = GetCartesianPath.Request()
-        req.header.frame_id = self.BASE_LINK
-        req.header.stamp = self.get_clock().now().to_msg()
-        req.group_name = self.GROUP_NAME
-        req.link_name = self.EEF_LINK
-        req.waypoints = waypoints[1:] if len(waypoints) > 1 else waypoints
-        req.max_step = step
-        req.jump_threshold = 0.0  # 0.0 disables jump check for frames
-        req.avoid_collisions = True
-
-        self.get_logger().info(
-            f"GetCartesianPath request | waypoints={len(req.waypoints)} | "
-            f"max_step={req.max_step} | start_joints={list(req.start_state.joint_state.position)}"
-        )
-
-        # Start state for chaining segments
-        rs = RobotState()
-        rs.joint_state.name = list(joint_names)
-        rs.joint_state.position = list(start_joint_positions)
-        req.start_state = rs
-
-        self.get_logger().info(
-            f"GetCartesianPath request | waypoints={len(req.waypoints)} | "
-            f"max_step={req.max_step} | "
-            f"start_joints={list(req.start_state.joint_state.position)}"
-        )
-
-        future = self._cartesian_client.call_async(req)
-        rclpy.spin_until_future_complete(self, future, timeout_sec=10.0)
-        result = future.result()
-
-        if result is None:
-            self.get_logger().error("GetCartesianPath: no response from service.")
-            return None, 0.0
-
-        if result.fraction < 0.5:
-            self.get_logger().error(
-                f"GetCartesianPath: fraction too low ({result.fraction:.2f}). "
-                "Check that the waypoints are reachable."
-            )
-            return None, result.fraction
-
-        self.get_logger().info(
-            f"GetCartesianPath OK | fraction={result.fraction:.3f} | "
-            f"waypoints={len(result.solution.joint_trajectory.points)}"
-        )
-
-        # Diagnostic: compare requested max_step vs actual step size
-        n_pts = len(result.solution.joint_trajectory.points)
-        if n_pts >= 2:
-            pose_first = self._fk_from_joint_positions(
-                joint_names, list(result.solution.joint_trajectory.points[0].positions)
-            )
-            pose_last = self._fk_from_joint_positions(
-                joint_names, list(result.solution.joint_trajectory.points[-1].positions)
-            )
-            if pose_first and pose_last:
-                cart_dist_mm = self.compute_distance(
-                    self._pose_to_mm(pose_first), self._pose_to_mm(pose_last)
-                )
-                actual_step_mm = cart_dist_mm / (n_pts - 1) if n_pts > 1 else 0
-                ratio = actual_step_mm / step if step > 0 else float("inf")
-                self.get_logger().info(
-                    f"[diag] max_step requested={step*1000:.1f}mm | "
-                    f"actual avg step={actual_step_mm:.1f}mm | "
-                    f"ratio={ratio:.1f}x | cart_dist={cart_dist_mm:.1f}mm"
-                )
-
-        return result.solution, result.fraction
-
-    def verify_cartesian_path(
-        self,
-        plan,
-        joint_names: list,
-        tolerance_mm: float = 1.0,
-    ) -> bool:
-        """
-        Verify that the FK waypoints of the plan describe an approximately
-        straight-line Cartesian trajectory using PyKDL.
-        """
-        pts = plan.joint_trajectory.points
-        if len(pts) < 2:
-            self.get_logger().warn("Plan with fewer than 2 waypoints, cannot verify.")
-            return False
-
-        # FK of the first and last waypoint to define the reference line
-        pose_start = self._fk_from_joint_positions(joint_names, list(pts[0].positions))
-        pose_end = self._fk_from_joint_positions(joint_names, list(pts[-1].positions))
-
-        if pose_start is None or pose_end is None:
-            self.get_logger().error("FK failed while verifying the Cartesian path.")
-            return False
-
-        f_start = self.pose_to_frame(pose_start)
-        f_end = self.pose_to_frame(pose_end)
-
-        # Direction vector of the ideal straight line (in meters)
-        p0 = f_start.p
-        p1 = f_end.p
-        line_vec = p1 - p0
-        line_len = line_vec.Norm()
-
-        if line_len < 1e-6:
-            self.get_logger().warn(
-                "Start and end are the same point — null trajectory."
-            )
-            return True
-
-        line_dir = line_vec * (1.0 / line_len)
-
-        max_deviation_mm = 0.0
-        n_points = len(pts)
-
-        for i, pt in enumerate(pts):
-            pose_i = self._fk_from_joint_positions(joint_names, list(pt.positions))
-            if pose_i is None:
-                continue
-            p_i = self.pose_to_frame(pose_i).p
-
-            # Distance from the point to the ideal line p0→p1
-            v = p_i - p0
-            # Scalar projection onto the direction
-            proj_scalar = PyKDL.dot(v, line_dir)
-            # Projected point on the line
-            proj_point = p0 + line_dir * proj_scalar
-            # Perpendicular distance (deviation from the straight path)
-            deviation = (p_i - proj_point).Norm() * 1000.0  # a mm
-
-            if deviation > max_deviation_mm:
-                max_deviation_mm = deviation
-
-        ok = max_deviation_mm <= tolerance_mm
-        status = "✓ OK" if ok else "✗ EXCESSIVE DEVIATION"
-        self.get_logger().info(
-            f"[verify_cartesian_path] {status} | "
-            f"Waypoints: {n_points} | "
-            f"Longitud: {line_len * 1000:.2f} mm | "
-            f"Max deviation: {max_deviation_mm:.3f} mm (limit: {tolerance_mm} mm)"
-        )
-        return ok
-
     def compute_cartesian_path_velocity_control(
         self,
         waypoints_list: list,
         EE_speed: list,
-        EE_ang_speed: list = [],
+        EE_ang_speed: list = None,
         max_linear_accel: float = 200.0,
         max_ang_accel: float = 140.0,
         extra_info: bool = False,
-        step: float = 0.0005,
+        step: float = 0.002,
     ):
+        """
+        Planifica una trayectoria cartesiana multi-segmento con control de
+        velocidad del EEF.
+
+        Usa pymoveit2.plan(cartesian=True) para los segmentos y
+        pymoveit2.compute_fk() para la cinemática directa.
+        """
+        if EE_ang_speed is None:
+            EE_ang_speed = []
         success = True
 
-        # Default angular speed if not specified
+        # Velocidades angulares por defecto
         if not EE_ang_speed:
             EE_ang_speed = [s * 0.7 for s in EE_speed]
 
@@ -1264,7 +1214,7 @@ class MoveGroupPythonIntefaceControl(Node):
         EE_ang_speed = [a * (math.pi / 180) for a in EE_ang_speed]
         max_ang_accel *= math.pi / 180
 
-        # Speed profiles
+        # Perfiles de velocidad con aceleración nula en extremos
         EE_speed_aux = [0] + list(EE_speed) + [0]
         EE_ang_speed_aux = [0] + list(EE_ang_speed) + [0]
         v_change = []
@@ -1291,78 +1241,53 @@ class MoveGroupPythonIntefaceControl(Node):
                     "x_min_req": EE_ang_speed_aux[i] * t_ang + (a_ang * t_ang**2) / 2,
                 }
             )
+
+        # ── 1. Planificar segmentos cartesianos con pymoveit2.plan(cartesian=True) ──
         all_plans = []
         joint_names = None
 
-        # Initial state: current robot joint position
         current_js = self._moveit2.joint_state
         if current_js is None:
-            # Same as in _get_current_eef_pose: no /joint_states message may
-            # have arrived yet. Give a second chance before aborting planning.
             self.wait_for_joint_state(timeout_sec=2.0)
             current_js = self._moveit2.joint_state
         if current_js is None:
-            self.get_logger().error(
-                "No joint_state available to start planning "
-                "(no /joint_states messages)."
-            )
-            return None, False
-
-        # start_positions = list(current_js.position)
-        # start_names     = list(current_js.name)
-
-        try:
-            self.get_logger().info(
-                f"joint_state names: {list(current_js.name)} | "
-                f"positions: {list(current_js.position)}"
-            )
-            js_map = dict(zip(current_js.name, current_js.position))
-            start_names = list(self.JOINT_NAMES)
-            start_positions = [js_map[n] for n in self.JOINT_NAMES]
-        except KeyError as e:
-            self.get_logger().error(
-                f"Joint {e} no encontrado en joint_state. "
-                f"Available names: {list(current_js.name)}"
-            )
+            self.get_logger().error("No joint_state available for planning.")
             return None, False
 
         for traj in waypoints_list:
-            # traj is a list of Pose — all of them are sent to the service
-            plan, fraction = self._plan_cartesian_path_waypoints(
-                waypoints=list(traj),  # full list, not just the last
-                start_joint_positions=start_positions,
-                joint_names=start_names,
-                step=step,
-                #step=0.0005, # for diagnostics, step-by-step for analysis only
-            )
-
-            if plan is None:
-                self.get_logger().error(
-                    f"Segmento cartesiano fallido (fraction={fraction:.2f})."
+            # traj es una lista de Poses; el último elemento es el objetivo
+            target = traj[-1]
+            try:
+                trajectory = self._moveit2.plan(
+                    position=[target.position.x, target.position.y, target.position.z],
+                    quat_xyzw=[
+                        target.orientation.x,
+                        target.orientation.y,
+                        target.orientation.z,
+                        target.orientation.w,
+                    ],
+                    cartesian=True,
+                    max_step=step,
                 )
+            except Exception as exc:
+                self.get_logger().error(f"Cartesian planning failed: {exc!r}")
                 return None, False
 
-            all_plans.append(plan)
+            if trajectory is None:
+                self.get_logger().error("Cartesian plan returned None.")
+                return None, False
+
+            # pymoveit2.plan() devuelve JointTrajectory; envolver en RobotTrajectory
+            rt = RobotTrajectory()
+            rt.joint_trajectory = trajectory
+            all_plans.append(rt)
 
             if joint_names is None:
-                joint_names = list(plan.joint_trajectory.joint_names)
+                joint_names = list(trajectory.joint_names)
 
-            if not self.verify_cartesian_path(plan, joint_names, tolerance_mm=1.0):
-                self.get_logger().warn(
-                    "The segment does not follow a straight line — check the waypoints."
-                )
-                # no need to return anything, but keep it logged
-
-            # Encadenar: el inicio del siguiente segmento es el final de este
-            last_pt = plan.joint_trajectory.points[-1]
-            start_positions = list(last_pt.positions)
-            start_names = list(joint_names)  # names don't change between segments
-
-        # Reset start state to the actual current state
         self._moveit2.clear_goal_constraints()
 
-        # ---- FK for each waypoint of all plans ----
-        # Uses /compute_fk (standard MoveIt2 service)
+        # ── 2. FK para cada waypoint con pymoveit2.compute_fk() ──
         traj_poses = []
         traj_mov_position = []
         traj_mov_angle = []
@@ -1373,12 +1298,14 @@ class MoveGroupPythonIntefaceControl(Node):
             traj_mov_i_ang = 0.0
 
             for joint_state_pt in plan.joint_trajectory.points:
-                pose_m = self._fk_from_joint_positions(
-                    joint_names, list(joint_state_pt.positions)
-                )
-                if pose_m is None:
+                js_msg = JointState()
+                js_msg.name = list(joint_names) if joint_names else self.JOINT_NAMES
+                js_msg.position = list(joint_state_pt.positions)
+                fk_result = self._moveit2.compute_fk(joint_state=js_msg)
+                if fk_result is None:
                     self.get_logger().error("FK failed at a trajectory waypoint.")
                     return None, False
+                pose_m = fk_result.pose
 
                 pose_mm = copy.deepcopy(pose_m)
                 pose_mm.position.x *= 1000
@@ -1398,27 +1325,14 @@ class MoveGroupPythonIntefaceControl(Node):
             traj_mov_position.append(traj_mov_i_pos)
             traj_mov_angle.append(traj_mov_i_ang)
 
-        # Joint velocity limits from URDF (cached after first retrieval)
+        # ── 3. Límites de velocidad articular (desde URDF, bajo demanda) ──
         if self._vel_limit is None:
-            robot_desc = self._get_robot_description()
-            vel_limit = {}
-            if robot_desc:
-                root = ET.fromstring(robot_desc)
-                for child in root:
-                    if child.tag == "joint" and child.get("type") == "revolute":
-                        j_name = child.get("name")
-                        for attrib in child:
-                            if attrib.tag == "limit":
-                                vel_limit[j_name] = float(attrib.get("velocity")) * 0.9
-                self._vel_limit = vel_limit
-                self.get_logger().info(
-                    f"Joint velocity limits cached: {list(vel_limit.keys())}"
-                )
-            else:
-                self._vel_limit = {}  # empty dict = enforcement disabled
+            self._vel_limit = self._load_vel_limits(
+                joint_names if joint_names else self.JOINT_NAMES
+            )
         vel_limit = self._vel_limit
 
-        # Recalculate times with speed profiles
+        # ── 4. Ajustar velocidades (linear + angular) ──
         corrected_traj, success_lin = self.adjust_plan_speed(
             traj_poses,
             EE_speed_aux,
@@ -1440,7 +1354,7 @@ class MoveGroupPythonIntefaceControl(Node):
         if not success_lin or not success_ang:
             success = False
 
-        # ---- Merge linear + angular, take the larger dt
+        # ── 5. Fusionar correcciones lineales + angulares (tomar el dt mayor) ──
         first_accel = True
         t_accel = 0.0
         t_dec = 0.0
@@ -1462,7 +1376,7 @@ class MoveGroupPythonIntefaceControl(Node):
                     if (i + 1) < (len(corrected_traj) - 1):
                         t_dec = full_corrected_traj[i + 1]["time"]
 
-        # Enforcement of joint limits
+        # ── 6. Aplicar límites articulares ──
         n_joints = len(all_plans[0].joint_trajectory.points[0].positions)
         zero_Jvel = [0.0] * n_joints
         full_corrected_traj_with_limits = copy.deepcopy(full_corrected_traj)
@@ -1472,13 +1386,10 @@ class MoveGroupPythonIntefaceControl(Node):
                 full_corrected_traj[i + 1]["time"] - full_corrected_traj[i]["time"]
             )
 
-            # Guard: if time_diff is 0 or negative, copy state from the
-            # previous waypoint and force a minimum dt of 1ms to preserve monotonicity.
             if time_diff <= 0:
                 if time_diff == 0:
                     self.get_logger().warn(
-                        f"Waypoints {i+1} and {i} share the same timestamp — "
-                        "copying state from previous waypoint."
+                        f"Waypoints {i + 1} and {i} share timestamp — copying state."
                     )
                 full_corrected_traj_with_limits[i + 1]["Jspeed"] = copy.deepcopy(
                     full_corrected_traj_with_limits[i]["Jspeed"]
@@ -1500,7 +1411,6 @@ class MoveGroupPythonIntefaceControl(Node):
                     - full_corrected_traj[i]["state"][j]
                 )
 
-                # Guard: no joint movement -> inherit velocities
                 if abs(angle_diff) < 1e-12:
                     full_corrected_traj_with_limits[i + 1]["Jspeed"][j] = (
                         full_corrected_traj_with_limits[i]["Jspeed"][j]
@@ -1517,7 +1427,6 @@ class MoveGroupPythonIntefaceControl(Node):
                     + new_Jaccel * time_diff
                 )
 
-                # Lookup joint limit using joint_names (not rs.joint_state.name)
                 j_name = (
                     joint_names[j] if (joint_names and j < len(joint_names)) else ""
                 )
@@ -1545,8 +1454,7 @@ class MoveGroupPythonIntefaceControl(Node):
                         (angle_diff / new_Jspeed)
                         if abs(new_Jaccel) < 0.0001
                         else (
-                            new_Jspeed
-                            - full_corrected_traj_with_limits[i]["Jspeed"][j]
+                            new_Jspeed - full_corrected_traj_with_limits[i]["Jspeed"][j]
                         )
                         / new_Jaccel
                     )
@@ -1597,7 +1505,7 @@ class MoveGroupPythonIntefaceControl(Node):
 
         full_corrected_traj_with_limits[-1]["Jspeed"] = copy.deepcopy(zero_Jvel)
 
-        # Construir el mensaje RobotTrajectory
+        # ── 7. Construir RobotTrajectory final ──
         new_plan = RobotTrajectory()
         new_plan.joint_trajectory.header.frame_id = self.BASE_LINK
         new_plan.joint_trajectory.joint_names = list(joint_names) if joint_names else []
@@ -1617,18 +1525,83 @@ class MoveGroupPythonIntefaceControl(Node):
             return new_plan, success, t_accel, t_dec
         return new_plan, success
 
+    def _load_vel_limits(self, joint_names: list) -> dict:
+        """
+        Carga los límites de velocidad articular (90 % del URDF).
+        Intenta varias fuentes en orden: parámetro local, servicio de
+        parámetros de move_group, robot_state_publisher. Si ninguna
+        funciona, devuelve dict vacío (sin enforce de límites).
+        """
+        # 1. Intentar parámetro declarado localmente
+        try:
+            self.declare_parameter("robot_description", "")
+            desc = self.get_parameter("robot_description").value
+            if desc:
+                return self._parse_vel_limits(desc, joint_names)
+        except Exception:
+            pass
+
+        # 2. Intentar servicio GetParameters de move_group
+        from rcl_interfaces.srv import GetParameters
+
+        for srv_name in [
+            "/lbr/move_group/get_parameters",
+            "/lbr/robot_state_publisher/get_parameters",
+        ]:
+            try:
+                client = self.create_client(GetParameters, srv_name)
+                if not client.wait_for_service(timeout_sec=1.0):
+                    continue
+                req = GetParameters.Request()
+                req.names = ["robot_description"]
+                future = client.call_async(req)
+                rclpy.spin_until_future_complete(self, future, timeout_sec=2.0)
+                result = future.result()
+                if result and result.values:
+                    desc = result.values[0].string_value
+                    if desc:
+                        self.get_logger().info(
+                            f"robot_description retrieved via {srv_name}."
+                        )
+                        return self._parse_vel_limits(desc, joint_names)
+            except Exception:
+                continue
+
+        self.get_logger().warn(
+            "Could not retrieve robot_description; "
+            "joint velocity limits will NOT be enforced."
+        )
+        return {}
+
+    @staticmethod
+    def _parse_vel_limits(urdf_string: str, joint_names: list) -> dict:
+        """Extrae los límites de velocidad de un URDF como string."""
+        vel_limit = {}
+        try:
+            root = ET.fromstring(urdf_string)
+            for child in root:
+                if child.tag == "joint" and child.get("type") == "revolute":
+                    j_name = child.get("name")
+                    if j_name not in joint_names:
+                        continue
+                    for attrib in child:
+                        if attrib.tag == "limit":
+                            vel = float(attrib.get("velocity", 1.0))
+                            vel_limit[j_name] = vel * 0.9
+                            break
+        except ET.ParseError:
+            pass
+        return vel_limit
+
 
 def main(args=None):
     move_speed = ask_speed(default=50.0)
-    print(
-        f"-> Approach and retraction at {move_speed:.1f} Cartesian mm/s.\n"
-    )
+    print(f"-> Approach and retraction at {move_speed:.1f} Cartesian mm/s.\n")
 
     rclpy.init(args=args)
     control = MoveGroupPythonIntefaceControl()
     control.get_logger().info(
-        f"Cartesian speed (approach/retraction): "
-        f"{move_speed:.1f} mm/s"
+        f"Cartesian speed (approach/retraction): {move_speed:.1f} mm/s"
     )
 
     control.get_logger().info("Waiting for first /joint_states message…")
@@ -1644,44 +1617,66 @@ def main(args=None):
     control.get_logger().info("joint_state received. Starting demo.")
 
     try:
-        offset = 0.1
+        offset = 0.1  # 10cm above sponge
 
-        # All known sponges — each has its own Z offset and slight
-        # orientation adjustments (roll/pitch) for the experiment setup.
         SPONGES = [
-            {"name": "green",  "R": -math.pi,              "P": -4.15,  "z0": 0.3651},
-            {"name": "yellow", "R": -math.pi - 0.2,         "P": -4.10,  "z0": 0.3644},
-            {"name": "orange", "R": -math.pi + 0.2,         "P": -4.25,  "z0": 0.3642},
-            {"name": "blue",   "R": -math.pi + 0.2,         "P": -3.95,  "z0": 0.3645},
-            {"name": "red",    "R": -math.pi,              "P": -4.30,  "z0": 0.3648},
+            {"name": "green", "R": -math.pi, "P": 0.00, "z0": 0.3},
+            {"name": "yellow", "R": -math.pi, "P": 0.00, "z0": 0.3},
+            {"name": "orange", "R": -math.pi, "P": 0.00, "z0": 0.3},
+            {"name": "blue", "R": -math.pi, "P": 0.00, "z0": 0.3},
+            {"name": "red", "R": -math.pi, "P": 0.00, "z0": 0.3},
         ]
-        # Convert P from degrees to radians
         for s in SPONGES:
             s["P"] *= math.pi / 180.0
-            # Y is always pi/2 for all sponges
             s["Y"] = math.pi / 2.0
 
         print("\nAvailable sponges:")
         for i, s in enumerate(SPONGES):
-            print(f"  [{i + 1}] {s['name']}  (z0={s['z0']:.4f} m, P={s['P'] * 180.0 / math.pi:.2f}°)")
-        print(f"  [a] all")
+            print(
+                f"  [{i + 1}] {s['name']}  "
+                f"(z0={s['z0']:.4f} m, P={s['P'] * 180.0 / math.pi:.2f}°)"
+            )
+        print("  [a] all")
 
         choice = input("Select sponge [Enter = green]: ").strip().lower()
         if choice == "a":
             selected_sponges = SPONGES
         elif choice == "":
-            selected_sponges = [SPONGES[0]]  # default: green
+            selected_sponges = [SPONGES[0]]
         else:
             try:
                 idx = int(choice) - 1
                 if 0 <= idx < len(SPONGES):
                     selected_sponges = [SPONGES[idx]]
                 else:
-                    print(f"  -> Invalid index, using green.")
+                    print("  -> Invalid index, using green.")
                     selected_sponges = [SPONGES[0]]
             except ValueError:
-                print(f"  -> Invalid choice, using green.")
+                print("  -> Invalid choice, using green.")
                 selected_sponges = [SPONGES[0]]
+
+        # Preguntar umbral de fuerza
+        force_threshold_str = input(
+            "Force threshold for penetration in N [Enter = 10.0]: "
+        ).strip()
+        if force_threshold_str == "":
+            force_threshold = 10.0
+        else:
+            try:
+                force_threshold = float(force_threshold_str)
+                if force_threshold <= 0:
+                    print("  -> Force must be positive. Using 10.0N.")
+                    force_threshold = 10.0
+            except ValueError:
+                print("  -> Invalid value. Using 10.0N.")
+                force_threshold = 10.0
+
+        print(f"-> Force threshold: {force_threshold:.2f}N\n")
+
+        # Opción para buscar superficie de contacto
+        search_contact = input(
+            "Run contact surface search before test? [y/N]: "
+        ).strip().lower()
 
         x0 = 0.0
         y0 = 0.543
@@ -1696,6 +1691,12 @@ def main(args=None):
                 f"Selected sponge: {sponge['name']} "
                 f"(z0={z0:.4f} m, R={R:.4f} rad, P={P * 180.0 / math.pi:.2f}°)"
             )
+            control.get_logger().info(
+                f"  -> Approach height: {z0 + offset:.4f} m ({(z0 + offset)*1000:.1f} mm)"
+            )
+            control.get_logger().info(
+                f"  -> Surface assumed at: {z0:.4f} m ({z0*1000:.1f} mm)"
+            )
 
             quat = quaternion_from_euler(R, P, Y)
             q_norm = math.sqrt(sum(q**2 for q in quat))
@@ -1706,60 +1707,192 @@ def main(args=None):
             target.orientation.z = quat[2] / q_norm
             target.orientation.w = quat[3] / q_norm
 
-            # Move to approach pose, now with Cartesian speed control
-            # (instead of go_to_pose "free", which lets MoveIt choose the timing)
+            # Approach pose con control de velocidad
             target.position.x = x0
             target.position.y = y0
             target.position.z = z0 + offset
             if not control.go_to_pose_speed(target, move_speed, accel=100.0):
                 control.get_logger().error(
-                    "Could not reach initial approach pose "
-                    f"for sponge '{sponge['name']}'. "
-                    "Skipping to next sponge."
+                    f"Could not reach initial approach pose "
+                    f"for sponge '{sponge['name']}'. Skipping."
                 )
                 continue
 
             control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
 
+            # ── Búsqueda de superficie de contacto (opcional) ──
+            if search_contact == "y":
+                control.get_logger().info(
+                    f"Running contact search for sponge '{sponge['name']}'..."
+                )
+                # Empezar desde la altura de approach y buscar hacia abajo
+                search_start_z = z0 + offset
+                contact_z = control.find_contact_surface(
+                    start_z=search_start_z,
+                    search_speed=5.0,
+                    step_size=0.002,  # 2mm steps
+                    contact_threshold=1.0,  # 1N threshold
+                    max_descent=0.15,  # máximo 15cm de descenso
+                )
+
+                if contact_z is not None:
+                    control.get_logger().info(
+                        f"Contact found at z={contact_z:.4f}m. "
+                        f"Using this as z0 for subsequent tests."
+                    )
+                    z0 = contact_z
+                    sponge["z0"] = z0  # Actualizar para esta esponja
+                else:
+                    control.get_logger().warn(
+                        "Contact search failed. Using original z0 value."
+                    )
+
+                # Volver a la posición de approach
+                target.position.z = z0 + offset
+                if not control.go_to_pose_speed(target, move_speed, accel=100.0):
+                    control.get_logger().error(
+                        "Failed to return to approach position after search."
+                    )
+                    continue
+                control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
+
+            # ── Tareo del sensor FT (captura baseline en el aire) ──
+            control.get_logger().info(
+                f"Taring FT sensor at approach position (z={z0 + offset:.3f}m)..."
+            )
+            if not control.tare_force(settle_time=0.5):
+                control.get_logger().warn(
+                    "Force tare failed. Delta forces will be inaccurate."
+                )
+            control.log_force("TARE_BASELINE")
+
             penetrations = [0.001, 0.003, 0.005, 0.007]  # m
-            # Hysteresis test speeds: this is the experiment's own
-            # variable, not asked from the user via console.
             hysteresis_speeds = [70.0, 50.0, 30.0, 10.0]  # mm/s
 
             abort_demo = False
 
-            # Hysteresis test
+            # Hysteresis test con control de fuerza
             for p in penetrations:
                 if abort_demo:
                     break
 
                 control.get_logger().info(
-                    f"Sponge '{sponge['name']}' | Penetration: {p} m"
+                    f"\n{'='*60}\n"
+                    f"Sponge '{sponge['name']}' | Penetration: {p*1000:.1f} mm\n"
+                    f"{'='*60}"
                 )
 
                 for s in hysteresis_speeds:
                     control.get_logger().info(
-                        f"Sponge '{sponge['name']}' | Penetration speed (test): {s} mm/s"
+                        f"\n--- Test: speed={s:.1f}mm/s, penetration={p*1000:.1f}mm ---"
                     )
-                    control.reset_force(settle_time=0.5)
 
+                    # Reset force buffers y dejar que el sensor se estabilice
+                    control.reset_force(settle_time=0.5)
+                    control.reset_force_log()
+
+                    # Log inicial (antes de mover)
+                    control.log_force(f"BEFORE_PENETRATION_p{p*1000:.0f}mm_s{s:.0f}")
+
+                    # ── Penetración con control de fuerza ──
                     target.position.x = x0
                     target.position.y = y0
                     target.position.z = z0 - p
-                    ok = control.go_to_pose_speed(target, s, accel=2000.0)
+
+                    control.get_logger().info(
+                        f"Moving to z={target.position.z:.4f}m with force limit "
+                        f"{force_threshold:.2f}N..."
+                    )
+
+                    ok, max_force = control.go_to_pose_with_force_limit(
+                        target,
+                        speed=s,
+                        force_threshold=force_threshold,
+                        accel=2000.0,
+                    )
+
+                    # Log posición alcanzada
+                    actual_pose = control._get_current_eef_pose()
+                    actual_z_mm = actual_pose.position.z * 1000.0
+                    target_z_mm = (z0 - p) * 1000.0
+                    control.get_logger().info(
+                        f"Position check: target_z={target_z_mm:.2f}mm, "
+                        f"actual_z={actual_z_mm:.2f}mm, "
+                        f"error={abs(actual_z_mm - target_z_mm):.2f}mm"
+                    )
+
+                    # Breve pausa para que pymoveit2 libere el executor
+                    # (importante si se llamó stop() durante el movimiento)
+                    time.sleep(0.3)
+
                     if not ok:
                         control.get_logger().error(
                             f"Penetration move at {s} mm/s failed "
                             f"(sponge '{sponge['name']}', p={p} m). "
-                            "Skipping this combination and "
-                            "continuing with the next test speed."
+                            "Skipping this combination."
                         )
+                        # Intentar retraer a posición segura igualmente
+                        control.get_logger().info(
+                            "Attempting safe retraction after failed move..."
+                        )
+                        target.position.x = x0
+                        target.position.y = y0
+                        target.position.z = z0 + offset
+                        retract_ok = control.go_to_pose_speed(
+                            target, move_speed, accel=100.0
+                        )
+                        if not retract_ok:
+                            control.get_logger().error(
+                                "Safe retraction also failed. Aborting demo."
+                            )
+                            abort_demo = True
+                            break
                         continue
 
-                    # Penetration time
-                    # control.get_clock().sleep_for(rclpy.duration.Duration(seconds=100))
-                    control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
+                    # Log en posición de penetración
+                    control.log_force(f"AT_PENETRATION_p{p*1000:.0f}mm_s{s:.0f}")
 
+                    # ── Verificar si hubo contacto ──
+                    if max_force < 0.5:  # Menos de 0.5N de cambio
+                        control.get_logger().warn(
+                            f"⚠️  WARNING: Very low contact force detected "
+                            f"(max_delta_Fz={max_force:.2f}N). "
+                            f"Robot may not be touching the sponge. "
+                            f"Check if z0={z0:.4f}m is correct."
+                        )
+
+                    # ── Dwell: monitorear fuerza durante 1s ──
+                    control.get_logger().info("Dwelling for 1 second...")
+                    dwell_start = time.time()
+                    dwell_forces = []
+                    while (time.time() - dwell_start) < 1.0:
+                        fz = control.get_force_magnitude()
+                        dwell_forces.append(fz)
+                        rclpy.spin_once(control, timeout_sec=0.05)
+
+                    if dwell_forces:
+                        avg_dwell_force = sum(dwell_forces) / len(dwell_forces)
+                        max_dwell_force = max(dwell_forces)
+                        min_dwell_force = min(dwell_forces)
+                        control.get_logger().info(
+                            f"Dwell force stats (delta_Fz): "
+                            f"avg={avg_dwell_force:.3f}N, "
+                            f"max={max_dwell_force:.3f}N, "
+                            f"min={min_dwell_force:.3f}N, "
+                            f"samples={len(dwell_forces)}"
+                        )
+                        # Log posición durante dwell
+                        dwell_pose = control._get_current_eef_pose()
+                        dwell_z_mm = dwell_pose.position.z * 1000.0
+                        control.get_logger().info(
+                            f"Dwell position: z={dwell_z_mm:.2f}mm "
+                            f"(target was {target_z_mm:.2f}mm)"
+                        )
+
+                    control.log_force(f"AFTER_DWELL_p{p*1000:.0f}mm_s{s:.0f}")
+
+                    # ── Retraction ──
+                    control.get_logger().info("Retracting...")
                     target.position.x = x0
                     target.position.y = y0
                     target.position.z = z0 + offset
@@ -1768,16 +1901,27 @@ def main(args=None):
                         control.get_logger().error(
                             "Failed to retract EEF after penetration "
                             f"(sponge '{sponge['name']}', p={p} m, "
-                            f"s={s} mm/s). Stopping demo for "
-                            "safety: continuing could attempt another "
-                            "penetration from an unknown pose."
+                            f"s={s} mm/s). Stopping demo for safety."
                         )
                         abort_demo = True
                         break
 
-                    # Rest time
-                    # control.get_clock().sleep_for(rclpy.duration.Duration(seconds=400))
-                    control.get_clock().sleep_for(rclpy.duration.Duration(seconds=2))
+                    # Log después de retracción
+                    control.log_force(
+                        f"AFTER_RETRACTION_p{p*1000:.0f}mm_s{s:.0f}"
+                    )
+
+                    # Dump force log para este test
+                    control.get_logger().info(
+                        f"Force log for p={p*1000:.0f}mm, s={s:.0f}mm/s:"
+                    )
+                    control.dump_force_log()
+
+                    # ── Rest time ──
+                    control.get_logger().info("Resting for 2 seconds...\n")
+                    control.get_clock().sleep_for(
+                        rclpy.duration.Duration(seconds=2)
+                    )
 
             if abort_demo:
                 break

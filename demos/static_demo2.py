@@ -13,12 +13,11 @@ import rclpy.duration
 from builtin_interfaces.msg import Duration
 from geometry_msgs.msg import Pose, PoseStamped, Quaternion, WrenchStamped
 from moveit_msgs.msg import DisplayTrajectory, RobotTrajectory
-from sensor_msgs.msg import JointState
 
 # pymoveit2: stable wrapper around the MoveIt2 API
 from pymoveit2 import MoveIt2
-
 from rclpy.node import Node
+from sensor_msgs.msg import JointState
 from tf_transformations import quaternion_from_euler
 from trajectory_msgs.msg import JointTrajectoryPoint
 
@@ -102,6 +101,7 @@ def ask_speed(default: float = 50.0, max_recommended: float = 300.0) -> float:
                 continue
         return speed
 
+
 class MoveGroupPythonIntefaceControl(Node):
     JOINT_NAMES = [
         "lbr_A1",
@@ -156,7 +156,7 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def _wait_for_moveit_services(self, timeout: float = 15.0):
         """Espera a que compute_fk y compute_cartesian_path estén listos."""
-        from moveit_msgs.srv import GetPositionFK, GetCartesianPath
+        from moveit_msgs.srv import GetCartesianPath, GetPositionFK
 
         deadline = time.time() + timeout
         for srv_type, srv_name in [
@@ -169,9 +169,7 @@ class MoveGroupPythonIntefaceControl(Node):
                 if client.wait_for_service(timeout_sec=2.0):
                     self.get_logger().info(f"  '{srv_name}' ready.")
                     break
-                self.get_logger().info(
-                    f"  '{srv_name}' not available yet, retrying…"
-                )
+                self.get_logger().info(f"  '{srv_name}' not available yet, retrying…")
             else:
                 self.get_logger().warn(
                     f"Service '{srv_name}' not available after {timeout}s."
@@ -314,14 +312,16 @@ class MoveGroupPythonIntefaceControl(Node):
             self.get_logger().warn(f"Could not publish to RViz: {exc}")
 
         if not success:
-            self.get_logger().warn(
-                "Speed calculation had warnings; executing anyway."
-            )
+            self.get_logger().warn("Speed calculation had warnings; executing anyway.")
 
         # pymoveit2.execute() gestiona FollowJointTrajectory internamente
         try:
             # execute() espera JointTrajectory, no RobotTrajectory
-            jt = trajectory.joint_trajectory if hasattr(trajectory, 'joint_trajectory') else trajectory
+            jt = (
+                trajectory.joint_trajectory
+                if hasattr(trajectory, "joint_trajectory")
+                else trajectory
+            )
             self._moveit2.execute(jt)
             self._moveit2.wait_until_executed()
             self.get_logger().info("Trajectory executed successfully.")
@@ -414,9 +414,15 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def get_transpose_rot(self, rot: PyKDL.Rotation) -> PyKDL.Rotation:
         return PyKDL.Rotation(
-            rot[0, 0], rot[1, 0], rot[2, 0],
-            rot[0, 1], rot[1, 1], rot[2, 1],
-            rot[0, 2], rot[1, 2], rot[2, 2],
+            rot[0, 0],
+            rot[1, 0],
+            rot[2, 0],
+            rot[0, 1],
+            rot[1, 1],
+            rot[2, 1],
+            rot[0, 2],
+            rot[1, 2],
+            rot[2, 2],
         )
 
     def get_inverse_frame(self, frame: PyKDL.Frame) -> PyKDL.Frame:
@@ -492,9 +498,18 @@ class MoveGroupPythonIntefaceControl(Node):
         for point in range(n_points):
             if point > 0:
                 frac = float(point) / float(n_points)
-                x = initial_pose.position.x + (final_pose.position.x - initial_pose.position.x) * frac
-                y = initial_pose.position.y + (final_pose.position.y - initial_pose.position.y) * frac
-                z = initial_pose.position.z + (final_pose.position.z - initial_pose.position.z) * frac
+                x = (
+                    initial_pose.position.x
+                    + (final_pose.position.x - initial_pose.position.x) * frac
+                )
+                y = (
+                    initial_pose.position.y
+                    + (final_pose.position.y - initial_pose.position.y) * frac
+                )
+                z = (
+                    initial_pose.position.z
+                    + (final_pose.position.z - initial_pose.position.z) * frac
+                )
                 rotation = self.pose_to_frame(initial_pose).M
                 rotation.DoRotX(rad_dif[0] * frac)
                 rotation.DoRotY(rad_dif[1] * frac)
@@ -851,8 +866,12 @@ class MoveGroupPythonIntefaceControl(Node):
         v_change_ang = []
 
         for i in range(len(EE_speed_aux) - 1):
-            a_lin = max_linear_accel * (-1 if EE_speed_aux[i] > EE_speed_aux[i + 1] else 1)
-            a_ang = max_ang_accel * (-1 if EE_ang_speed_aux[i] > EE_ang_speed_aux[i + 1] else 1)
+            a_lin = max_linear_accel * (
+                -1 if EE_speed_aux[i] > EE_speed_aux[i + 1] else 1
+            )
+            a_ang = max_ang_accel * (
+                -1 if EE_ang_speed_aux[i] > EE_ang_speed_aux[i + 1] else 1
+            )
             t_lin = (EE_speed_aux[i + 1] - EE_speed_aux[i]) / a_lin
             t_ang = (EE_ang_speed_aux[i + 1] - EE_ang_speed_aux[i]) / a_ang
             v_change.append(
@@ -927,9 +946,7 @@ class MoveGroupPythonIntefaceControl(Node):
                 js_msg = JointState()
                 js_msg.name = list(joint_names) if joint_names else self.JOINT_NAMES
                 js_msg.position = list(joint_state_pt.positions)
-                fk_result = self._moveit2.compute_fk(
-                    joint_state=js_msg
-                )
+                fk_result = self._moveit2.compute_fk(joint_state=js_msg)
                 if fk_result is None:
                     self.get_logger().error("FK failed at a trajectory waypoint.")
                     return None, False
@@ -962,12 +979,22 @@ class MoveGroupPythonIntefaceControl(Node):
 
         # ── 4. Ajustar velocidades (linear + angular) ──
         corrected_traj, success_lin = self.adjust_plan_speed(
-            traj_poses, EE_speed_aux, v_change, traj_mov_position,
-            max_linear_accel, all_plans, linear=True,
+            traj_poses,
+            EE_speed_aux,
+            v_change,
+            traj_mov_position,
+            max_linear_accel,
+            all_plans,
+            linear=True,
         )
         corrected_traj_ang, success_ang = self.adjust_plan_speed(
-            traj_poses, EE_ang_speed_aux, v_change_ang, traj_mov_angle,
-            max_ang_accel, all_plans, linear=False,
+            traj_poses,
+            EE_ang_speed_aux,
+            v_change_ang,
+            traj_mov_angle,
+            max_ang_accel,
+            all_plans,
+            linear=False,
         )
         if not success_lin or not success_ang:
             success = False
@@ -1007,7 +1034,7 @@ class MoveGroupPythonIntefaceControl(Node):
             if time_diff <= 0:
                 if time_diff == 0:
                     self.get_logger().warn(
-                        f"Waypoints {i+1} and {i} share timestamp — copying state."
+                        f"Waypoints {i + 1} and {i} share timestamp — copying state."
                     )
                 full_corrected_traj_with_limits[i + 1]["Jspeed"] = copy.deepcopy(
                     full_corrected_traj_with_limits[i]["Jspeed"]
@@ -1045,7 +1072,9 @@ class MoveGroupPythonIntefaceControl(Node):
                     + new_Jaccel * time_diff
                 )
 
-                j_name = joint_names[j] if (joint_names and j < len(joint_names)) else ""
+                j_name = (
+                    joint_names[j] if (joint_names and j < len(joint_names)) else ""
+                )
                 limit = vel_limit.get(j_name, float("inf"))
 
                 if abs(new_Jspeed) > limit:
@@ -1054,8 +1083,15 @@ class MoveGroupPythonIntefaceControl(Node):
                         new_Jaccel = (
                             2
                             * full_corrected_traj_with_limits[i]["Jspeed"][j]
-                            * (new_Jspeed - full_corrected_traj_with_limits[i]["Jspeed"][j])
-                            + (new_Jspeed - full_corrected_traj_with_limits[i]["Jspeed"][j]) ** 2
+                            * (
+                                new_Jspeed
+                                - full_corrected_traj_with_limits[i]["Jspeed"][j]
+                            )
+                            + (
+                                new_Jspeed
+                                - full_corrected_traj_with_limits[i]["Jspeed"][j]
+                            )
+                            ** 2
                         ) / (2 * angle_diff)
                     else:
                         new_Jaccel = 0.0
@@ -1063,8 +1099,7 @@ class MoveGroupPythonIntefaceControl(Node):
                         (angle_diff / new_Jspeed)
                         if abs(new_Jaccel) < 0.0001
                         else (
-                            new_Jspeed
-                            - full_corrected_traj_with_limits[i]["Jspeed"][j]
+                            new_Jspeed - full_corrected_traj_with_limits[i]["Jspeed"][j]
                         )
                         / new_Jaccel
                     )
@@ -1080,7 +1115,9 @@ class MoveGroupPythonIntefaceControl(Node):
             )
 
             if update_time and updated_new_times:
-                self.get_logger().warn("Joint velocity limit exceeded — rescaling time.")
+                self.get_logger().warn(
+                    "Joint velocity limit exceeded — rescaling time."
+                )
                 new_time_diff = max(updated_new_times)
                 if new_time_diff <= 0:
                     continue
@@ -1096,7 +1133,8 @@ class MoveGroupPythonIntefaceControl(Node):
                         continue
                     new_Jaccel = (
                         angle_diff
-                        - full_corrected_traj_with_limits[i]["Jspeed"][j] * new_time_diff
+                        - full_corrected_traj_with_limits[i]["Jspeed"][j]
+                        * new_time_diff
                     ) * (2 / new_time_diff**2)
                     new_Jspeed = (
                         full_corrected_traj_with_limits[i]["Jspeed"][j]
@@ -1150,6 +1188,7 @@ class MoveGroupPythonIntefaceControl(Node):
 
         # 2. Intentar servicio GetParameters de move_group
         from rcl_interfaces.srv import GetParameters
+
         for srv_name in [
             "/lbr/move_group/get_parameters",
             "/lbr/robot_state_publisher/get_parameters",
@@ -1199,13 +1238,16 @@ class MoveGroupPythonIntefaceControl(Node):
             pass
         return vel_limit
 
+
 def main(args=None):
     move_speed = ask_speed(default=50.0)
     print(f"-> Approach and retraction at {move_speed:.1f} Cartesian mm/s.\n")
 
     rclpy.init(args=args)
     control = MoveGroupPythonIntefaceControl()
-    control.get_logger().info(f"Cartesian speed (approach/retraction): {move_speed:.1f} mm/s")
+    control.get_logger().info(
+        f"Cartesian speed (approach/retraction): {move_speed:.1f} mm/s"
+    )
 
     control.get_logger().info("Waiting for first /joint_states message…")
     if not control.wait_for_joint_state(timeout_sec=10.0):
@@ -1222,12 +1264,19 @@ def main(args=None):
     try:
         offset = 0.1
 
+        # SPONGES = [
+        #     {"name": "green",  "R": -math.pi,           "P": -4.15,  "z0": 0.3651},
+        #     {"name": "yellow", "R": -math.pi - 0.2,      "P": -4.10,  "z0": 0.3644},
+        #     {"name": "orange", "R": -math.pi + 0.2,      "P": -4.25,  "z0": 0.3642},
+        #     {"name": "blue",   "R": -math.pi + 0.2,      "P": -3.95,  "z0": 0.3645},
+        #     {"name": "red",    "R": -math.pi,           "P": -4.30,  "z0": 0.3648},
+        # ]
         SPONGES = [
-            {"name": "green",  "R": -math.pi,           "P": -4.15,  "z0": 0.3651},
-            {"name": "yellow", "R": -math.pi - 0.2,      "P": -4.10,  "z0": 0.3644},
-            {"name": "orange", "R": -math.pi + 0.2,      "P": -4.25,  "z0": 0.3642},
-            {"name": "blue",   "R": -math.pi + 0.2,      "P": -3.95,  "z0": 0.3645},
-            {"name": "red",    "R": -math.pi,           "P": -4.30,  "z0": 0.3648},
+            {"name": "green", "R": -math.pi, "P": 0.00, "z0": 0.3},
+            {"name": "yellow", "R": -math.pi, "P": 0.00, "z0": 0.3},
+            {"name": "orange", "R": -math.pi, "P": 0.00, "z0": 0.3},
+            {"name": "blue", "R": -math.pi, "P": 0.00, "z0": 0.3},
+            {"name": "red", "R": -math.pi, "P": 0.00, "z0": 0.3},
         ]
         for s in SPONGES:
             s["P"] *= math.pi / 180.0
