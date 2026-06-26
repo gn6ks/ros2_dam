@@ -357,7 +357,8 @@ class MoveGroupPythonIntefaceControl(Node):
                 if hasattr(trajectory, "joint_trajectory")
                 else trajectory
             )
-            goal.trajectory = jt
+            # ExecuteTrajectory.Goal.trajectory es RobotTrajectory, no JointTrajectory
+            goal.trajectory = RobotTrajectory(joint_trajectory=jt)
 
             self.get_logger().info(
                 f"Sending trajectory to move_group for monitored execution "
