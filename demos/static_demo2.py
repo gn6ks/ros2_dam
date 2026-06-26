@@ -1348,100 +1348,51 @@ def main(args=None):
 
             abort_demo = False
 
-            # # Hysteresis test
-            # for p in penetrations:
-            #     if abort_demo:
-            #         break
-
-            #     control.get_logger().info(
-            #         f"Sponge '{sponge['name']}' | Penetration: {p} m"
-            #     )
-
-            #     for s in hysteresis_speeds:
-            #         control.get_logger().info(
-            #             f"Sponge '{sponge['name']}' | Penetration speed (test): {s} mm/s"
-            #         )
-            #         control.reset_force(settle_time=0.5)
-
-            #         target.position.x = x0
-            #         target.position.y = y0
-            #         target.position.z = z0 - p
-            #         ok = control.go_to_pose_speed(target, s, accel=2000.0)
-            #         if not ok:
-            #             control.get_logger().error(
-            #                 f"Penetration move at {s} mm/s failed "
-            #                 f"(sponge '{sponge['name']}', p={p} m). "
-            #                 "Skipping this combination."
-            #             )
-            #             continue
-
-            #         # Penetration dwell
-            #         control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
-
-            #         # Retraction
-            #         target.position.x = x0
-            #         target.position.y = y0
-            #         target.position.z = z0 + offset
-            #         ok = control.go_to_pose_speed(target, move_speed, accel=100.0)
-            #         if not ok:
-            #             control.get_logger().error(
-            #                 "Failed to retract EEF after penetration "
-            #                 f"(sponge '{sponge['name']}', p={p} m, "
-            #                 f"s={s} mm/s). Stopping demo for safety."
-            #             )
-            #             abort_demo = True
-            #             break
-
-            #         # Rest time
-            #         control.get_clock().sleep_for(rclpy.duration.Duration(seconds=2))
-             
-            # Reemplazar el bucle de penetración actual por este:
-            
-            for p in penetrations:  # p ahora es el "objetivo de penetración máxima"
+            # Hysteresis test
+            for p in penetrations:
                 if abort_demo:
                     break
-            
+
                 control.get_logger().info(
-                    f"Sponge '{sponge['name']}' | Target penetration: {p} m"
+                    f"Sponge '{sponge['name']}' | Penetration: {p} m"
                 )
-            
+
                 for s in hysteresis_speeds:
                     control.get_logger().info(
-                        f"Sponge '{sponge['name']}' | Penetration speed: {s} mm/s"
+                        f"Sponge '{sponge['name']}' | Penetration speed (test): {s} mm/s"
                     )
                     control.reset_force(settle_time=0.5)
-            
-                    # 1. Ir a posición de contacto inicial (justo encima)
-                    target.position.z = z0 + 0.001  # 1 mm encima
-                    if not control.go_to_pose_speed(target, move_speed, accel=100.0):
+
+                    target.position.x = x0
+                    target.position.y = y0
+                    target.position.z = z0 - p
+                    ok = control.go_to_pose_speed(target, s, accel=2000.0)
+                    if not ok:
+                        control.get_logger().error(
+                            f"Penetration move at {s} mm/s failed "
+                            f"(sponge '{sponge['name']}', p={p} m). "
+                            "Skipping this combination."
+                        )
                         continue
-            
-                    # 2. Bajar hasta detectar fuerza de contacto
-                    contact_detected, contact_force = control.go_to_pose_speed_with_force_limit(
-                        target=Pose(position=Point(x=x0, y=y0, z=z0 - p)),  # objetivo "seguro"
-                        speed=s,
-                        accel=2000.0,
-                        force_limit=FORCE_THRESHOLD,
-                        force_axis='z'
-                    )
-                    
-                    if not contact_detected:
-                        control.get_logger().warn("No contact detected within travel range.")
-                        continue
-            
-                    # 3. La penetración real es la diferencia entre z de contacto y z actual
-                    # (necesitarías registrar la pose de contacto)
-                    
-                    # 4. Dwell
+
+                    # Penetration dwell
                     control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
-            
-                    # 5. Retracción
+
+                    # Retraction
+                    target.position.x = x0
+                    target.position.y = y0
                     target.position.z = z0 + offset
                     ok = control.go_to_pose_speed(target, move_speed, accel=100.0)
                     if not ok:
+                        control.get_logger().error(
+                            "Failed to retract EEF after penetration "
+                            f"(sponge '{sponge['name']}', p={p} m, "
+                            f"s={s} mm/s). Stopping demo for safety."
+                        )
                         abort_demo = True
                         break
-            
+
+                    # Rest time
                     control.get_clock().sleep_for(rclpy.duration.Duration(seconds=2))
 
             if abort_demo:
