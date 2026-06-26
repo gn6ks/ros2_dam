@@ -427,28 +427,34 @@ class MoveGroupPythonIntefaceControl(Node):
         pose: Pose,
         speed: float = 10.0,
         force_threshold: float = 5.0,
-        check_interval: float = 0.05,
+        check_interval: float = 0.02,
         accel: float = 100.0,
     ) -> tuple[bool, float]:
         """
         Movimiento cartesiano con límite de fuerza.
-        
+
+        La trayectoria se ejecuta en el hilo principal (donde pymoveit2
+        hace spin internamente).  Un hilo secundario **solo lee** el
+        buffer de fuerza (protegido por lock) y, si se supera el umbral,
+        llama a self._moveit2.stop() para cancelar el movimiento.
+
         Args:
             pose: Pose objetivo
             speed: Velocidad en mm/s
             force_threshold: Fuerza máxima permitida (N) en el eje Z
-            check_interval: Intervalo de verificación de fuerza (s)
+            check_interval: Intervalo de muestreo del hilo monitor (s)
             accel: Aceleración en mm/s²
-            
+
         Returns:
-            (success, max_force_reached): Éxito del movimiento y máxima fuerza alcanzada
+            (success, max_force_reached): Éxito del movimiento y máxima
+            fuerza registrada durante el movimiento.
         """
         self.get_logger().info(
             f"Moving with force limit: threshold={force_threshold:.2f}N, "
             f"speed={speed:.1f}mm/s"
         )
-        
-        # Planificar trayectoria
+
+        # ── Planificar trayectoria ──
         try:
             current_pose = self._get_current_eef_pose()
             waypoints = [[copy.deepcopy(current_pose), copy.deepcopy(pose)]]
@@ -471,63 +477,97 @@ class MoveGroupPythonIntefaceControl(Node):
         except Exception as exc:
             self.get_logger().warn(f"Could not publish to RViz: {exc}")
 
-        # Ejecutar con monitoreo de fuerza
-        max_force = 0.0
-        force_limit_reached = False
-        
-        try:
-            jt = (
-                trajectory.joint_trajectory
-                if hasattr(trajectory, "joint_trajectory")
-                else trajectory
-            )
-            
-            # Iniciar ejecución en un hilo separado
-            exec_thread = threading.Thread(
-                target=self._execute_trajectory, args=(jt,)
-            )
-            exec_thread.start()
-            
-            # Monitorear fuerza durante la ejecución
-            while exec_thread.is_alive():
-                fz_magnitude = self.get_force_magnitude()
-                max_force = max(max_force, fz_magnitude)
-                
-                if fz_magnitude >= force_threshold:
-                    self.get_logger().warn(
-                        f"Force threshold reached! |Fz|={fz_magnitude:.2f}N >= "
-                        f"{force_threshold:.2f}N. Stopping movement."
-                    )
-                    force_limit_reached = True
-                    # Intentar detener el movimiento
-                    try:
-                        self._moveit2.stop()
-                    except Exception as e:
-                        self.get_logger().warn(f"Could not stop movement: {e}")
-                    break
-                
-                rclpy.spin_once(self, timeout_sec=check_interval)
-            
-            exec_thread.join(timeout=1.0)
-            
-        except Exception as exc:
-            self.get_logger().error(f"Force-limited execution error: {exc!r}")
-            return False, max_force
-        
-        self.get_logger().info(
-            f"Force-limited move completed. Max force: {max_force:.2f}N, "
-            f"threshold reached: {force_limit_reached}"
+        jt = (
+            trajectory.joint_trajectory
+            if hasattr(trajectory, "joint_trajectory")
+            else trajectory
         )
-        
-        return True, max_force
 
-    def _execute_trajectory(self, jt):
-        """Ejecuta una trayectoria (para usar en hilo separado)."""
+        # ── Hilo monitor de fuerza (SOLO lee el buffer, NO hace spin) ──
+        stop_event = threading.Event()
+        monitor_data = {
+            "max_force": 0.0,
+            "force_limit_reached": False,
+            "samples": [],
+        }
+
+        monitor = threading.Thread(
+            target=self._force_monitor_loop,
+            args=(force_threshold, check_interval, stop_event, monitor_data),
+            daemon=True,
+        )
+
+        # ── Ejecutar trayectoria en el hilo principal ──
+        monitor.start()
+
+        exec_ok = True
         try:
             self._moveit2.execute(jt)
             self._moveit2.wait_until_executed()
-        except Exception as e:
-            self.get_logger().error(f"Trajectory execution failed: {e}")
+        except Exception as exc:
+            self.get_logger().warn(f"Execution interrupted: {exc!r}")
+            exec_ok = False
+
+        # ── Detener hilo monitor ──
+        stop_event.set()
+        monitor.join(timeout=2.0)
+
+        max_force = monitor_data["max_force"]
+        force_limit_reached = monitor_data["force_limit_reached"]
+        samples = monitor_data["samples"]
+
+        # Log resumen de la muestra de fuerzas
+        if samples:
+            avg_f = sum(samples) / len(samples)
+            self.get_logger().info(
+                f"Force during move: samples={len(samples)}, "
+                f"avg|Fz|={avg_f:.3f}N, max|Fz|={max_force:.3f}N, "
+                f"threshold_reached={force_limit_reached}"
+            )
+        else:
+            self.get_logger().warn(
+                "No force samples captured during move "
+                "(FT callback may not have fired)."
+            )
+
+        self.get_logger().info(
+            f"Force-limited move completed (exec_ok={exec_ok}). "
+            f"Max force: {max_force:.2f}N"
+        )
+
+        return exec_ok, max_force
+
+    def _force_monitor_loop(
+        self,
+        threshold: float,
+        interval: float,
+        stop_event: threading.Event,
+        data: dict,
+    ):
+        """
+        Hilo secundario que lee el buffer de fuerza periódicamente.
+        **No** llama a rclpy.spin_once — los callbacks FT se procesan
+        dentro del execute() del hilo principal.
+        """
+        while not stop_event.is_set():
+            fz_mag = self.get_force_magnitude()
+            data["samples"].append(fz_mag)
+            data["max_force"] = max(data["max_force"], fz_mag)
+
+            if fz_mag >= threshold and not data["force_limit_reached"]:
+                data["force_limit_reached"] = True
+                self.get_logger().warn(
+                    f"[FORCE MONITOR] Threshold reached! |Fz|={fz_mag:.2f}N >= "
+                    f"{threshold:.2f}N — requesting stop."
+                )
+                try:
+                    self._moveit2.stop()
+                except Exception as e:
+                    self.get_logger().warn(
+                        f"[FORCE MONITOR] Could not call stop(): {e}"
+                    )
+
+            stop_event.wait(interval)
 
     def frame_to_pose(self, frame: PyKDL.Frame) -> Pose:
         pose = Pose()
@@ -1522,42 +1562,63 @@ def main(args=None):
                     control.get_logger().info(
                         f"\n--- Test: speed={s:.1f}mm/s, penetration={p*1000:.1f}mm ---"
                     )
-                    
+
+                    # Reset force buffers y dejar que el sensor se estabilice
                     control.reset_force(settle_time=0.5)
                     control.reset_force_log()
 
-                    # Log inicial
+                    # Log inicial (antes de mover)
                     control.log_force(f"BEFORE_PENETRATION_p{p*1000:.0f}mm_s{s:.0f}")
 
-                    # Penetración con control de fuerza
+                    # ── Penetración con control de fuerza ──
                     target.position.x = x0
                     target.position.y = y0
                     target.position.z = z0 - p
-                    
+
                     control.get_logger().info(
                         f"Moving to z={target.position.z:.4f}m with force limit "
                         f"{force_threshold:.2f}N..."
                     )
-                    
+
                     ok, max_force = control.go_to_pose_with_force_limit(
-                        target, 
-                        speed=s, 
+                        target,
+                        speed=s,
                         force_threshold=force_threshold,
-                        accel=2000.0
+                        accel=2000.0,
                     )
-                    
+
+                    # Breve pausa para que pymoveit2 libere el executor
+                    # (importante si se llamó stop() durante el movimiento)
+                    time.sleep(0.3)
+
                     if not ok:
                         control.get_logger().error(
                             f"Penetration move at {s} mm/s failed "
                             f"(sponge '{sponge['name']}', p={p} m). "
                             "Skipping this combination."
                         )
+                        # Intentar retraer a posición segura igualmente
+                        control.get_logger().info(
+                            "Attempting safe retraction after failed move..."
+                        )
+                        target.position.x = x0
+                        target.position.y = y0
+                        target.position.z = z0 + offset
+                        retract_ok = control.go_to_pose_speed(
+                            target, move_speed, accel=100.0
+                        )
+                        if not retract_ok:
+                            control.get_logger().error(
+                                "Safe retraction also failed. Aborting demo."
+                            )
+                            abort_demo = True
+                            break
                         continue
 
-                    # Log en penetración
+                    # Log en posición de penetración
                     control.log_force(f"AT_PENETRATION_p{p*1000:.0f}mm_s{s:.0f}")
 
-                    # Penetration dwell - monitorear fuerza durante el reposo
+                    # ── Dwell: monitorear fuerza durante 1s ──
                     control.get_logger().info("Dwelling for 1 second...")
                     dwell_start = time.time()
                     dwell_forces = []
@@ -1565,18 +1626,19 @@ def main(args=None):
                         fz = control.get_force_magnitude()
                         dwell_forces.append(fz)
                         rclpy.spin_once(control, timeout_sec=0.05)
-                    
+
                     if dwell_forces:
                         avg_dwell_force = sum(dwell_forces) / len(dwell_forces)
                         max_dwell_force = max(dwell_forces)
                         control.get_logger().info(
                             f"Dwell force stats: avg={avg_dwell_force:.2f}N, "
-                            f"max={max_dwell_force:.2f}N"
+                            f"max={max_dwell_force:.2f}N, "
+                            f"samples={len(dwell_forces)}"
                         )
-                    
+
                     control.log_force(f"AFTER_DWELL_p{p*1000:.0f}mm_s{s:.0f}")
 
-                    # Retraction
+                    # ── Retraction ──
                     control.get_logger().info("Retracting...")
                     target.position.x = x0
                     target.position.y = y0
@@ -1592,15 +1654,21 @@ def main(args=None):
                         break
 
                     # Log después de retracción
-                    control.log_force(f"AFTER_RETRACTION_p{p*1000:.0f}mm_s{s:.0f}")
+                    control.log_force(
+                        f"AFTER_RETRACTION_p{p*1000:.0f}mm_s{s:.0f}"
+                    )
 
                     # Dump force log para este test
-                    control.get_logger().info(f"Force log for p={p*1000:.0f}mm, s={s:.0f}mm/s:")
+                    control.get_logger().info(
+                        f"Force log for p={p*1000:.0f}mm, s={s:.0f}mm/s:"
+                    )
                     control.dump_force_log()
 
-                    # Rest time
+                    # ── Rest time ──
                     control.get_logger().info("Resting for 2 seconds...\n")
-                    control.get_clock().sleep_for(rclpy.duration.Duration(seconds=2))
+                    control.get_clock().sleep_for(
+                        rclpy.duration.Duration(seconds=2)
+                    )
 
             if abort_demo:
                 break
