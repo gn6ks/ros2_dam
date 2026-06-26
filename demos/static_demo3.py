@@ -149,6 +149,9 @@ class MoveGroupPythonIntefaceControl(Node):
         self._fy_window: deque = deque(maxlen=WINDOW_SIZE)
         self._fz_window: deque = deque(maxlen=WINDOW_SIZE)
         self._force_log: list = []  # Para debugging
+        self._baseline_fx: float = 0.0
+        self._baseline_fy: float = 0.0
+        self._baseline_fz: float = 0.0
         self._discover_ft_topic()
         if self._active_ft_topic is None:
             self.get_logger().warn("No FT sensor topic found.")
@@ -210,7 +213,8 @@ class MoveGroupPythonIntefaceControl(Node):
             self._fy_window.append(f.y)
             self._fz_window.append(f.z)
 
-    def get_force(self) -> tuple[float, float, float]:
+    def get_force_raw(self) -> tuple[float, float, float]:
+        """Retorna la fuerza RAW (sin compensar baseline)."""
         with self._wrench_lock:
             if not self._fx_window:
                 return 0.0, 0.0, 0.0
@@ -219,27 +223,61 @@ class MoveGroupPythonIntefaceControl(Node):
             fz = sum(self._fz_window) / len(self._fz_window)
         return fx, fy, fz
 
+    def get_force(self) -> tuple[float, float, float]:
+        """Retorna la fuerza compensada (delta respecto al baseline)."""
+        fx, fy, fz = self.get_force_raw()
+        return (
+            fx - self._baseline_fx,
+            fy - self._baseline_fy,
+            fz - self._baseline_fz,
+        )
+
     def get_force_magnitude(self) -> float:
-        """Retorna la magnitud de la fuerza en el eje Z (dirección de penetración)."""
-        fx, fy, fz = self.get_force()
-        return abs(fz)
+        """Retorna |delta_Fz| — la fuerza de contacto en el eje Z."""
+        _, _, dfz = self.get_force()
+        return abs(dfz)
+
+    def tare_force(self, settle_time: float = 0.5) -> bool:
+        """Captura la fuerza actual como baseline (tareo).
+
+        Debe llamarse cuando el robot está quieto en el aire (sin
+        contacto), para que el peso del tool quede como offset y la
+        fuerza de contacto se mida como delta.
+        """
+        ok = self.reset_force(settle_time=settle_time)
+        if not ok:
+            self.get_logger().warn("tare_force: reset_force failed.")
+            return False
+        fx, fy, fz = self.get_force_raw()
+        self._baseline_fx = fx
+        self._baseline_fy = fy
+        self._baseline_fz = fz
+        self.get_logger().info(
+            f"Force tareado: baseline=({fx:.3f}, {fy:.3f}, {fz:.3f}) N"
+        )
+        return True
 
     def log_force(self, label: str = ""):
-        """Registra la fuerza actual para debugging."""
-        fx, fy, fz = self.get_force()
+        """Registra la fuerza actual (raw + delta) y la posición Z del EEF."""
+        fx_r, fy_r, fz_r = self.get_force_raw()
+        fx_d, fy_d, fz_d = self.get_force()
+        # Posición actual del EEF
+        eef_pose = self._get_current_eef_pose()
+        z_mm = eef_pose.position.z * 1000.0 if eef_pose else float("nan")
         timestamp = time.time()
         entry = {
             "time": timestamp,
-            "fx": fx,
-            "fy": fy,
-            "fz": fz,
-            "magnitude": math.sqrt(fx**2 + fy**2 + fz**2),
+            "fx_raw": fx_r, "fy_raw": fy_r, "fz_raw": fz_r,
+            "fx_delta": fx_d, "fy_delta": fy_d, "fz_delta": fz_d,
+            "z_mm": z_mm,
             "label": label,
         }
         self._force_log.append(entry)
         self.get_logger().info(
-            f"[FORCE LOG {label}] Fx={fx:.3f}N, Fy={fy:.3f}N, Fz={fz:.3f}N, "
-            f"|F|={entry['magnitude']:.3f}N"
+            f"[FORCE {label}]\n"
+            f"  raw   : Fx={fx_r:+.3f}  Fy={fy_r:+.3f}  Fz={fz_r:+.3f} N\n"
+            f"  delta : Fx={fx_d:+.3f}  Fy={fy_d:+.3f}  Fz={fz_d:+.3f} N\n"
+            f"  Z_EEF : {z_mm:.2f} mm"
         )
 
     def reset_force_log(self):
@@ -248,16 +286,23 @@ class MoveGroupPythonIntefaceControl(Node):
 
     def dump_force_log(self):
         """Imprime todo el log de fuerzas."""
-        self.get_logger().info("=" * 60)
+        self.get_logger().info("=" * 70)
         self.get_logger().info("FORCE LOG SUMMARY")
-        self.get_logger().info("=" * 60)
+        self.get_logger().info(
+            f"  baseline: ({self._baseline_fx:.3f}, "
+            f"{self._baseline_fy:.3f}, {self._baseline_fz:.3f}) N"
+        )
+        self.get_logger().info("-" * 70)
         for entry in self._force_log:
             self.get_logger().info(
-                f"  [{entry['label']}] Fx={entry['fx']:.3f}N, "
-                f"Fy={entry['fy']:.3f}N, Fz={entry['fz']:.3f}N, "
-                f"|F|={entry['magnitude']:.3f}N"
+                f"  [{entry['label']}] "
+                f"raw=({entry['fx_raw']:+.3f}, {entry['fy_raw']:+.3f}, "
+                f"{entry['fz_raw']:+.3f}) "
+                f"delta=({entry['fx_delta']:+.3f}, {entry['fy_delta']:+.3f}, "
+                f"{entry['fz_delta']:+.3f}) "
+                f"Z={entry['z_mm']:.2f}mm"
             )
-        self.get_logger().info("=" * 60)
+        self.get_logger().info("=" * 70)
 
     def reset_force(self, settle_time: float = 0.3) -> bool:
         if self._active_ft_topic is None:
@@ -568,6 +613,128 @@ class MoveGroupPythonIntefaceControl(Node):
                     )
 
             stop_event.wait(interval)
+
+    def find_contact_surface(
+        self,
+        start_z: float,
+        search_speed: float = 5.0,
+        step_size: float = 0.002,
+        contact_threshold: float = 1.0,
+        max_descent: float = 0.1,
+    ) -> float | None:
+        """Búsqueda automática de la superficie de contacto.
+
+        Se mueve hacia abajo en incrementos pequeños hasta detectar
+        contacto (delta_Fz > contact_threshold).
+
+        Args:
+            start_z: Altura inicial (m) - debe estar por encima de la superficie
+            search_speed: Velocidad de búsqueda (mm/s)
+            step_size: Tamaño del paso de descenso (m)
+            contact_threshold: Umbral de fuerza para detectar contacto (N)
+            max_descent: Descenso máximo permitido (m)
+
+        Returns:
+            Z position where contact was detected (m), or None if not found
+        """
+        self.get_logger().info("=" * 60)
+        self.get_logger().info("CONTACT SURFACE SEARCH")
+        self.get_logger().info("=" * 60)
+        self.get_logger().info(
+            f"Starting from z={start_z*1000:.1f}mm, "
+            f"step={step_size*1000:.1f}mm, "
+            f"threshold={contact_threshold:.2f}N"
+        )
+
+        current_pose = self._get_current_eef_pose()
+        target = copy.deepcopy(current_pose)
+        initial_z = start_z
+        target.position.z = initial_z
+
+        # Ir a la posición inicial
+        self.get_logger().info(f"Moving to start position z={initial_z*1000:.1f}mm...")
+        if not self.go_to_pose_speed(target, speed=20.0, accel=100.0):
+            self.get_logger().error("Failed to reach start position")
+            return None
+
+        time.sleep(0.5)
+
+        # Tarear el sensor en la posición inicial
+        self.tare_force(settle_time=0.5)
+        self.log_force("SEARCH_START")
+
+        # Búsqueda incremental
+        total_descent = 0.0
+        step_num = 0
+
+        while total_descent < max_descent:
+            step_num += 1
+            current_z = initial_z - total_descent
+
+            # Mover hacia abajo un paso
+            target.position.z = current_z - step_size
+            self.get_logger().info(
+                f"Step {step_num}: moving to z={target.position.z*1000:.1f}mm..."
+            )
+
+            ok, max_force = self.go_to_pose_with_force_limit(
+                target,
+                speed=search_speed,
+                force_threshold=contact_threshold,
+                accel=500.0,
+            )
+
+            if not ok:
+                self.get_logger().error(
+                    f"Movement failed at step {step_num}, z={current_z*1000:.1f}mm"
+                )
+                return None
+
+            # Verificar si se detectó contacto
+            actual_pose = self._get_current_eef_pose()
+            actual_z = actual_pose.position.z
+            delta_fz = abs(self.get_force()[2])
+
+            self.get_logger().info(
+                f"  -> z_actual={actual_z*1000:.1f}mm, delta_Fz={delta_fz:.3f}N"
+            )
+
+            if delta_fz >= contact_threshold:
+                self.get_logger().info("=" * 60)
+                self.get_logger().info(
+                    f"✓ CONTACT DETECTED at z={actual_z:.4f}m "
+                    f"({actual_z*1000:.1f}mm)"
+                )
+                self.get_logger().info(
+                    f"  delta_Fz={delta_fz:.3f}N >= {contact_threshold:.2f}N"
+                )
+                self.get_logger().info(
+                    f"  Suggested z0 for this sponge: {actual_z:.4f}m"
+                )
+                self.get_logger().info("=" * 60)
+                self.log_force("CONTACT_FOUND")
+
+                # Retraer un poco para liberar presión
+                self.get_logger().info("Retracting 5mm to release pressure...")
+                target.position.z = actual_z + 0.005
+                self.go_to_pose_speed(target, speed=10.0, accel=100.0)
+                time.sleep(0.5)
+
+                return actual_z
+
+            total_descent += step_size
+
+        self.get_logger().warn(
+            f"✗ No contact detected after descending {max_descent*1000:.1f}mm. "
+            f"The sponge surface may be higher than expected."
+        )
+        self.log_force("SEARCH_END_NO_CONTACT")
+
+        # Retraer a posición segura
+        target.position.z = initial_z
+        self.go_to_pose_speed(target, speed=20.0, accel=100.0)
+
+        return None
 
     def frame_to_pose(self, frame: PyKDL.Frame) -> Pose:
         pose = Pose()
@@ -1506,6 +1673,11 @@ def main(args=None):
 
         print(f"-> Force threshold: {force_threshold:.2f}N\n")
 
+        # Opción para buscar superficie de contacto
+        search_contact = input(
+            "Run contact surface search before test? [y/N]: "
+        ).strip().lower()
+
         x0 = 0.0
         y0 = 0.543
 
@@ -1518,6 +1690,12 @@ def main(args=None):
             control.get_logger().info(
                 f"Selected sponge: {sponge['name']} "
                 f"(z0={z0:.4f} m, R={R:.4f} rad, P={P * 180.0 / math.pi:.2f}°)"
+            )
+            control.get_logger().info(
+                f"  -> Approach height: {z0 + offset:.4f} m ({(z0 + offset)*1000:.1f} mm)"
+            )
+            control.get_logger().info(
+                f"  -> Surface assumed at: {z0:.4f} m ({z0*1000:.1f} mm)"
             )
 
             quat = quaternion_from_euler(R, P, Y)
@@ -1541,6 +1719,52 @@ def main(args=None):
                 continue
 
             control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
+
+            # ── Búsqueda de superficie de contacto (opcional) ──
+            if search_contact == "y":
+                control.get_logger().info(
+                    f"Running contact search for sponge '{sponge['name']}'..."
+                )
+                # Empezar desde la altura de approach y buscar hacia abajo
+                search_start_z = z0 + offset
+                contact_z = control.find_contact_surface(
+                    start_z=search_start_z,
+                    search_speed=5.0,
+                    step_size=0.002,  # 2mm steps
+                    contact_threshold=1.0,  # 1N threshold
+                    max_descent=0.15,  # máximo 15cm de descenso
+                )
+
+                if contact_z is not None:
+                    control.get_logger().info(
+                        f"Contact found at z={contact_z:.4f}m. "
+                        f"Using this as z0 for subsequent tests."
+                    )
+                    z0 = contact_z
+                    sponge["z0"] = z0  # Actualizar para esta esponja
+                else:
+                    control.get_logger().warn(
+                        "Contact search failed. Using original z0 value."
+                    )
+
+                # Volver a la posición de approach
+                target.position.z = z0 + offset
+                if not control.go_to_pose_speed(target, move_speed, accel=100.0):
+                    control.get_logger().error(
+                        "Failed to return to approach position after search."
+                    )
+                    continue
+                control.get_clock().sleep_for(rclpy.duration.Duration(seconds=1))
+
+            # ── Tareo del sensor FT (captura baseline en el aire) ──
+            control.get_logger().info(
+                f"Taring FT sensor at approach position (z={z0 + offset:.3f}m)..."
+            )
+            if not control.tare_force(settle_time=0.5):
+                control.get_logger().warn(
+                    "Force tare failed. Delta forces will be inaccurate."
+                )
+            control.log_force("TARE_BASELINE")
 
             penetrations = [0.001, 0.003, 0.005, 0.007]  # m
             hysteresis_speeds = [70.0, 50.0, 30.0, 10.0]  # mm/s
@@ -1587,6 +1811,16 @@ def main(args=None):
                         accel=2000.0,
                     )
 
+                    # Log posición alcanzada
+                    actual_pose = control._get_current_eef_pose()
+                    actual_z_mm = actual_pose.position.z * 1000.0
+                    target_z_mm = (z0 - p) * 1000.0
+                    control.get_logger().info(
+                        f"Position check: target_z={target_z_mm:.2f}mm, "
+                        f"actual_z={actual_z_mm:.2f}mm, "
+                        f"error={abs(actual_z_mm - target_z_mm):.2f}mm"
+                    )
+
                     # Breve pausa para que pymoveit2 libere el executor
                     # (importante si se llamó stop() durante el movimiento)
                     time.sleep(0.3)
@@ -1618,6 +1852,15 @@ def main(args=None):
                     # Log en posición de penetración
                     control.log_force(f"AT_PENETRATION_p{p*1000:.0f}mm_s{s:.0f}")
 
+                    # ── Verificar si hubo contacto ──
+                    if max_force < 0.5:  # Menos de 0.5N de cambio
+                        control.get_logger().warn(
+                            f"⚠️  WARNING: Very low contact force detected "
+                            f"(max_delta_Fz={max_force:.2f}N). "
+                            f"Robot may not be touching the sponge. "
+                            f"Check if z0={z0:.4f}m is correct."
+                        )
+
                     # ── Dwell: monitorear fuerza durante 1s ──
                     control.get_logger().info("Dwelling for 1 second...")
                     dwell_start = time.time()
@@ -1630,10 +1873,20 @@ def main(args=None):
                     if dwell_forces:
                         avg_dwell_force = sum(dwell_forces) / len(dwell_forces)
                         max_dwell_force = max(dwell_forces)
+                        min_dwell_force = min(dwell_forces)
                         control.get_logger().info(
-                            f"Dwell force stats: avg={avg_dwell_force:.2f}N, "
-                            f"max={max_dwell_force:.2f}N, "
+                            f"Dwell force stats (delta_Fz): "
+                            f"avg={avg_dwell_force:.3f}N, "
+                            f"max={max_dwell_force:.3f}N, "
+                            f"min={min_dwell_force:.3f}N, "
                             f"samples={len(dwell_forces)}"
+                        )
+                        # Log posición durante dwell
+                        dwell_pose = control._get_current_eef_pose()
+                        dwell_z_mm = dwell_pose.position.z * 1000.0
+                        control.get_logger().info(
+                            f"Dwell position: z={dwell_z_mm:.2f}mm "
+                            f"(target was {target_z_mm:.2f}mm)"
                         )
 
                     control.log_force(f"AFTER_DWELL_p{p*1000:.0f}mm_s{s:.0f}")
