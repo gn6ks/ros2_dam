@@ -1303,6 +1303,9 @@ class MoveGroupPythonIntefaceControl(Node):
             apply_req.scene.is_diff = True
 
             future2 = apply_client.call_async(apply_req)
+            result2 = future2.result()
+            if result2 is None or not result2.success:
+                self.get_logger().error("apply_planning_scene falló o no fue aceptada.")
             rclpy.spin_until_future_complete(self, future2, timeout_sec=5.0)
 
             state = "PERMITIDA" if allow else "RESTAURADA"
@@ -1389,6 +1392,7 @@ def main(args=None):
 
         # ── Permitir colisiones esponja ↔ pantalla para test de histéresis ──
         control._set_sponge_collisions(allow=True)
+        time.sleep(0.5)
 
         for sponge in selected_sponges:
             R = sponge["R"]
