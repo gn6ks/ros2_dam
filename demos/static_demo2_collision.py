@@ -1238,75 +1238,79 @@ class MoveGroupPythonIntefaceControl(Node):
             pass
         return vel_limit
 
-def _set_sponge_collisions(self, allow: bool):
-    from moveit_msgs.msg import AllowedCollisionEntry, PlanningScene
-    from moveit_msgs.srv import GetPlanningScene, ApplyPlanningScene
+    def _set_sponge_collisions(self, allow: bool):
+        from moveit_msgs.msg import AllowedCollisionEntry, PlanningScene
+        from moveit_msgs.srv import ApplyPlanningScene, GetPlanningScene
 
-    sponge_links = ["tool", "tool_body", "brida_ft"]
-    screen_link = "lbr_base_link"
+        sponge_links = ["tool", "tool_body", "brida_ft"]
+        screen_link = "lbr_base_link"
 
-    try:
-        get_client = self.create_client(GetPlanningScene, "get_planning_scene")
-        if not get_client.wait_for_service(timeout_sec=5.0):
-            self.get_logger().error("get_planning_scene no disponible.")
-            return
+        try:
+            get_client = self.create_client(GetPlanningScene, "get_planning_scene")
+            if not get_client.wait_for_service(timeout_sec=5.0):
+                self.get_logger().error("get_planning_scene no disponible.")
+                return
 
-        req = GetPlanningScene.Request()
-        req.components.components = 0x08  # ALLOWED_COLLISION_MATRIX
-        future = get_client.call_async(req)
-        rclpy.spin_until_future_complete(self, future, timeout_sec=5.0)
-        if future.result() is None:
-            self.get_logger().error("No se pudo obtener la planning scene.")
-            return
+            req = GetPlanningScene.Request()
+            req.components.components = 0x08  # ALLOWED_COLLISION_MATRIX
+            future = get_client.call_async(req)
+            rclpy.spin_until_future_complete(self, future, timeout_sec=5.0)
+            if future.result() is None:
+                self.get_logger().error("No se pudo obtener la planning scene.")
+                return
 
-        acm = future.result().scene.allowed_collision_matrix
+            acm = future.result().scene.allowed_collision_matrix
 
-        for sponge_link in sponge_links:
-            for link_name in [sponge_link, screen_link]:
-                if link_name not in acm.entry_names:
-                    acm.entry_names.append(link_name)
-                    for entry in acm.entry_values:
-                        entry.enabled.append(False)
-                    new_row = AllowedCollisionEntry()
-                    new_row.enabled = [False] * len(acm.entry_names)
-                    acm.entry_values.append(new_row)
+            for sponge_link in sponge_links:
+                for link_name in [sponge_link, screen_link]:
+                    if link_name not in acm.entry_names:
+                        acm.entry_names.append(link_name)
+                        for entry in acm.entry_values:
+                            entry.enabled.append(False)
+                        new_row = AllowedCollisionEntry()
+                        new_row.enabled = [False] * len(acm.entry_names)
+                        acm.entry_values.append(new_row)
 
-            idx1 = acm.entry_names.index(sponge_link)
-            idx2 = acm.entry_names.index(screen_link)
-            acm.entry_values[idx1].enabled[idx2] = allow
-            acm.entry_values[idx2].enabled[idx1] = allow
+                idx1 = acm.entry_names.index(sponge_link)
+                idx2 = acm.entry_names.index(screen_link)
+                acm.entry_values[idx1].enabled[idx2] = allow
+                acm.entry_values[idx2].enabled[idx1] = allow
 
-        # ── ESCENA DIFF MÍNIMA: solo la ACM, nada de robot_state/world ──
-        apply_client = self.create_client(ApplyPlanningScene, "apply_planning_scene")
-        if not apply_client.wait_for_service(timeout_sec=5.0):
-            self.get_logger().error("apply_planning_scene no disponible.")
-            return
-
-        diff_scene = PlanningScene()
-        diff_scene.is_diff = True
-        diff_scene.robot_state.is_diff = True   # <- clave: no tocar el estado del robot
-        diff_scene.allowed_collision_matrix = acm
-
-        apply_req = ApplyPlanningScene.Request()
-        apply_req.scene = diff_scene
-
-        future2 = apply_client.call_async(apply_req)
-        rclpy.spin_until_future_complete(self, future2, timeout_sec=5.0)
-        result2 = future2.result()
-
-        if result2 is None or not result2.success:
-            self.get_logger().error("apply_planning_scene falló o no fue aceptada.")
-        else:
-            state = "PERMITIDA" if allow else "RESTAURADA"
-            self.get_logger().info(
-                f"Colisión esponja ↔ pantalla {state} para links: {sponge_links}"
+            # ── ESCENA DIFF MÍNIMA: solo la ACM, nada de robot_state/world ──
+            apply_client = self.create_client(
+                ApplyPlanningScene, "apply_planning_scene"
             )
+            if not apply_client.wait_for_service(timeout_sec=5.0):
+                self.get_logger().error("apply_planning_scene no disponible.")
+                return
 
-        self.destroy_client(get_client)
-        self.destroy_client(apply_client)
+            diff_scene = PlanningScene()
+            diff_scene.is_diff = True
+            diff_scene.robot_state.is_diff = (
+                True  # <- clave: no tocar el estado del robot
+            )
+            diff_scene.allowed_collision_matrix = acm
 
-    except Exception as exc:
-        self.get_logger().error(f"_set_sponge_collisions falló: {exc!r}")
+            apply_req = ApplyPlanningScene.Request()
+            apply_req.scene = diff_scene
+
+            future2 = apply_client.call_async(apply_req)
+            rclpy.spin_until_future_complete(self, future2, timeout_sec=5.0)
+            result2 = future2.result()
+
+            if result2 is None or not result2.success:
+                self.get_logger().error("apply_planning_scene falló o no fue aceptada.")
+            else:
+                state = "PERMITIDA" if allow else "RESTAURADA"
+                self.get_logger().info(
+                    f"Colisión esponja ↔ pantalla {state} para links: {sponge_links}"
+                )
+
+            self.destroy_client(get_client)
+            self.destroy_client(apply_client)
+
+        except Exception as exc:
+            self.get_logger().error(f"_set_sponge_collisions falló: {exc!r}")
 
 
 def main(args=None):
